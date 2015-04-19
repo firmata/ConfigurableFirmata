@@ -25,7 +25,7 @@
 #ifndef EncoderFirmata_h
 #define EncoderFirmata_h
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 
 // This optional setting causes Encoder to use more optimized code

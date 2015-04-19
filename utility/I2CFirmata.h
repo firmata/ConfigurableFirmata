@@ -17,7 +17,7 @@
 #ifndef I2CFirmata_h
 #define I2CFirmata_h
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 #include "FirmataReporting.h"
 

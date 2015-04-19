@@ -1,5 +1,5 @@
 /*
-  Firmata.cpp - Firmata library v2.6.2 - 2015-2-7
+  ConfigurableFirmata.cpp - Firmata library v2.6.2 - 2015-2-7
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -14,7 +14,7 @@
 //* Includes
 //******************************************************************************
 
-#include "Firmata.h"
+#include "ConfigurableFirmata.h"
 #include "HardwareSerial.h"
 
 extern "C" {

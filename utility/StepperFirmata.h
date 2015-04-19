@@ -34,7 +34,7 @@
 #define StepperFirmata_h
 
 #include "FirmataStepper.h"
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 
 #define MAX_STEPPERS 6 // arbitrary value... may need to adjust

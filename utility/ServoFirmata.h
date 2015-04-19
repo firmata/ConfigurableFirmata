@@ -18,7 +18,7 @@
 #define ServoFirmata_h
 
 #include <Servo.h>
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 
 void servoAnalogWrite(byte pin, int value);

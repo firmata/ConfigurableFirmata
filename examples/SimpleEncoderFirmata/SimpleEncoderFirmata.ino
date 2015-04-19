@@ -32,7 +32,7 @@
 #include <Wire.h>
 #include <Servo.h>
 //*/
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include <utility/FirmataExt.h>
 #include <utility/FirmataReporting.h>
 #include <utility/EncoderFirmata.h>

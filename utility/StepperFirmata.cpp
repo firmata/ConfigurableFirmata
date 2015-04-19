@@ -32,7 +32,7 @@
 
 #include "StepperFirmata.h"
 #include "FirmataStepper.h"
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 
 boolean StepperFirmata::handlePinMode(byte pin, int mode)
 {

@@ -9,7 +9,7 @@
 #include <Servo.h>
 //*/
 #include <ArduinoUnit.h>
-#include "Firmata.h"
+#include "ConfigurableFirmata.h"
 #include "utility/EncoderFirmata.h" 
 
 // overide interrupt macro (for unit tests only)

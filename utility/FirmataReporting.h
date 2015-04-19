@@ -17,7 +17,7 @@
 #ifndef FirmataReporting_h
 #define FirmataReporting_h
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 
 #define MINIMUM_SAMPLING_INTERVAL 10

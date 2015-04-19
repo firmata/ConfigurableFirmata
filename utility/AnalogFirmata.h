@@ -17,7 +17,7 @@
 #ifndef AnalogFirmata_h
 #define AnalogFirmata_h
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 
 boolean handleAnalogFirmataSysex(byte command, byte argc, byte* argv);
 

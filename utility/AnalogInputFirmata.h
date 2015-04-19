@@ -17,7 +17,7 @@
 #ifndef AnalogInputFirmata_h
 #define AnalogInputFirmata_h
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 #include "FirmataReporting.h"
 

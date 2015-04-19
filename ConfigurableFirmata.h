@@ -10,10 +10,10 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef Firmata_h
-#define Firmata_h
+#ifndef Configurable_Firmata_h
+#define Configurable_Firmata_h
 
-#include "Boards.h"  /* Hardware Abstraction Layer + Wiring/Arduino */
+#include "utility/Boards.h"  /* Hardware Abstraction Layer + Wiring/Arduino */
 
 /* Version numbers for the protocol.  The protocol is still changing, so these
  * version numbers are important.  This number can be queried so that host
@@ -190,4 +190,4 @@ extern FirmataClass Firmata;
  */
 #define setFirmwareVersion(x, y)   setFirmwareNameAndVersion(__FILE__, x, y)
 
-#endif /* Firmata_h */
+#endif /* Configurable_Firmata_h */

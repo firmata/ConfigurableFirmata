@@ -10,7 +10,7 @@
 #include <Servo.h>
 //*/
 #include <ArduinoUnit.h>
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 
 void setup()
 {

@@ -28,7 +28,7 @@
 */
 
 
-#include <Firmata.h>
+#include "ConfigurableFirmata.h"
 
 /*
  * by default Firmata uses the Serial-port (over USB) of Arduino.

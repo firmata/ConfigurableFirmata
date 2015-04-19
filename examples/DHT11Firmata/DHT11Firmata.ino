@@ -13,7 +13,7 @@
  * Norbert Truchsess - Original version
  */
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include <utility/FirmataExt.h>
 #include <utility/FirmataReporting.h>
 #include "dht11.h"

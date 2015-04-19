@@ -14,7 +14,7 @@
 #define OneWireFirmata_h
 
 #include "OneWire.h"
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 
 //subcommands:

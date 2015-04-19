@@ -11,7 +11,7 @@
 */
 
 #include "Encoder7Bit.h"
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 
 Encoder7BitClass::Encoder7BitClass()
 {

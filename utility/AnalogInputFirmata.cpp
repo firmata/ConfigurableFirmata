@@ -14,7 +14,7 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "AnalogFirmata.h"
 #include "AnalogInputFirmata.h"
 

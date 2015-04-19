@@ -17,7 +17,7 @@
 #ifndef FirmataExt_h
 #define FirmataExt_h
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 
 #define MAX_FEATURES TOTAL_PIN_MODES+1

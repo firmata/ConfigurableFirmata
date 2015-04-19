@@ -10,7 +10,7 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "OneWireFirmata.h"
 #include "Encoder7Bit.h"
 

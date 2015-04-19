@@ -13,7 +13,7 @@
 #ifndef FirmataScheduler_h
 #define FirmataScheduler_h
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 #include "Encoder7Bit.h"
 

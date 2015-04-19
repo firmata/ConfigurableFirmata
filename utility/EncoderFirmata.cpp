@@ -18,7 +18,7 @@
   See http://www.pjrc.com/teensy/td_libs_Encoder.html for more informations
 */
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include "EncoderFirmata.h"
 #include "Encoder.h"
 #include <string.h>
