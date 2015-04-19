@@ -16,7 +16,7 @@
 #ifndef DHT11Feature_h
 #define DHT11Feature_h
 
-#include <Firmata.h>
+#include <ConfigurableFirmata.h>
 #include <utility/FirmataFeature.h>
 #include "dht11.h"
 
