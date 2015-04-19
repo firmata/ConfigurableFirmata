@@ -1,5 +1,5 @@
 /*
-  Firmata.cpp - Firmata library v2.4.3 - 2015-4-11
+  Firmata.cpp - Firmata library v2.6.2 - 2015-2-7
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -200,6 +200,13 @@ void FirmataClass::processSysexMessage(void)
 void FirmataClass::processInput(void)
 {
   int inputData = FirmataStream->read(); // this is 'int' to handle -1 when no data
+  if (inputData != -1) {
+    parse(inputData);
+  }
+}
+
+void FirmataClass::parse(byte inputData)
+{
   int command;
 
   // TODO make sure it handles -1 properly
@@ -235,8 +242,7 @@ void FirmataClass::processInput(void)
           }
           break;
         case SET_PIN_MODE:
-          if (currentPinModeCallback)
-            (*currentPinModeCallback)(storedInputData[1], storedInputData[0]);
+          setPinMode(storedInputData[1], storedInputData[0]);
           break;
         case REPORT_ANALOG:
           if (currentReportAnalogCallback)
@@ -284,6 +290,15 @@ void FirmataClass::processInput(void)
   }
 }
 
+boolean FirmataClass::isParsingMessage(void)
+{
+  return (waitForData > 0 || parsingSysex);
+}
+
+boolean FirmataClass::isResetting(void)
+{
+  return resetting;
+}
 //------------------------------------------------------------------------------
 // Serial Send Handling
 
@@ -402,6 +417,46 @@ void FirmataClass::detach(byte command)
   }
 }
 
+void FirmataClass::attachDelayTask(delayTaskCallbackFunction newFunction)
+{
+  delayTaskCallback = newFunction;
+}
+
+void FirmataClass::delayTask(long delay)
+{
+  if (delayTaskCallback) {
+    (*delayTaskCallback)(delay);
+  }
+}
+
+/* access pin config */
+byte FirmataClass::getPinMode(byte pin)
+{
+  return pinConfig[pin];
+}
+
+void FirmataClass::setPinMode(byte pin, byte config)
+{
+  if (pinConfig[pin] == IGNORE)
+    return;
+  pinState[pin] = 0;
+  pinConfig[pin] = config;
+  if (currentPinModeCallback)
+    (*currentPinModeCallback)(pin, config);
+}
+
+/* access pin state */
+int FirmataClass::getPinState(byte pin)
+{
+  return pinState[pin];
+}
+
+void FirmataClass::setPinState(byte pin, int state)
+{
+  pinState[pin] = state;
+}
+
+
 // sysex callbacks
 /*
  * this is too complicated for analogReceive, but maybe for Sysex?
@@ -429,6 +484,7 @@ void FirmataClass::detach(byte command)
 // resets the system state upon a SYSTEM_RESET message from the host software
 void FirmataClass::systemReset(void)
 {
+  resetting = true;
   byte i;
 
   waitForData = 0; // this flag says the next serial input will be data
@@ -444,6 +500,8 @@ void FirmataClass::systemReset(void)
 
   if (currentSystemResetCallback)
     (*currentSystemResetCallback)();
+
+  resetting = false;
 }
 
 

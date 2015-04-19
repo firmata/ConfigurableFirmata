@@ -1,4 +1,4 @@
-#Firmata
+#ConfigurableFirmata
 
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/firmata/arduino?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -6,12 +6,15 @@ Firmata is a protocol for communicating with microcontrollers from software on a
 
 ##Usage
 
-There are two main models of usage of Firmata. In one model, the author of the Arduino sketch uses the various methods provided by the Firmata library to selectively send and receive data between the Arduino device and the software running on the host computer. For example, a user can send analog data to the host using ``` Firmata.sendAnalog(analogPin, analogRead(analogPin)) ``` or send data packed in a string using ``` Firmata.sendString(stringToSend) ```. See File -> Examples -> Firmata -> AnalogFirmata & EchoString respectively for examples.
+There are three primary models of usage of Firmata. In one model, the author of the Arduino sketch uses the various methods provided by the Firmata library to selectively send and receive data between the Arduino device and the software running on the host computer. For example, a user can send analog data to the host using ``` Firmata.sendAnalog(analogPin, analogRead(analogPin)) ``` or send data packed in a string using ``` Firmata.sendString(stringToSend) ```. See File -> Examples -> Firmata -> AnalogFirmata & EchoString respectively for examples.
 
 The second and more common model is to load a general purpose sketch called StandardFirmata on the Arduino board and then use the host computer exclusively to interact with the Arduino board. StandardFirmata is located in the Arduino IDE in File -> Examples -> Firmata.
 
+The third and more experimental model is **ConfigurableFirmata**. ConfigurableFirmata is a branch of Firmata that breaks features such as Digital Input, Digital Output, Analog Input, Analog Output, I2C, etc into [individual classes](https://github.com/firmata/arduino/tree/configurable/utility) making it easier to mix and match standard features with custom features. You configure your sketch by adding or removing various include statements. See the [ConfigurableFirmata.ino](https://github.com/firmata/arduino/blob/configurable/examples/ConfigurableFirmata/ConfigurableFirmata.ino) file for an example that includes all available features. You are also able to choose between a Serial connection or an Ethernet connection type.
+
 ##Firmata Client Libraries
 Most of the time you will be interacting with arduino with a client library on the host computers. Several Firmata client libraries have been implemented in a variety of popular programming languages:
+
 
 * procesing
   * [https://github.com/firmata/processing]
@@ -58,7 +61,7 @@ Most of the time you will be interacting with arduino with a client library on t
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
 ##Updating Firmata in the Arduino IDE
-The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, download the latest [release](https://github.com/firmata/arduino/releases/tag/v2.4.3) (for Arduino 1.0.x or Arduino 1.5.6 or higher) and replace the existing Firmata folder in your Arduino application. See the instructions below for your platform.
+The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, download the latest [Configurable Firmata release](https://github.com/firmata/arduino/releases/tag/v2.6.2) (for Arduino 1.0.x or Arduino 1.5.6 or higher) and replace the existing Firmata folder in your Arduino application. See the instructions below for your platform.
 
 *Note that Arduino 1.5.0 - 1.5.5 are not supported. Please use Arduino 1.5.6 or higher (or Arduino 1.0.5 or 1.0.6).*
 
@@ -69,8 +72,8 @@ The Firmata library is contained within the Arduino package.
 1. Navigate to the Arduino application
 2. Right click on the application icon and select `Show Package Contents`
 3. Navigate to: `/Contents/Resources/Java/libraries/` and replace the existing
-`Firmata` folder with latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.3) (note there is a different download
-for Arduino 1.0.x vs 1.6.x)
+`Firmata` folder with latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases/tag/v2.6.2) (note there is a different download
+for Arduino 1.0.x vs 1.5.x)
 4. Restart the Arduino application and the latest version of Firmata will be available.
 
 If you are using the Java 7 version of Arduino 1.5.7 or higher, the file path
@@ -79,8 +82,8 @@ will differ slightly: `Contents/Java/libraries/Firmata` (no Resources directory)
 ###Windows:
 
 1. Navigate to `c:/Program\ Files/arduino-1.x/libraries/` and replace the existing
-`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.3) (note there is a different download
-for Arduino 1.0.x vs 1.6.x).
+`Firmata` folder with the latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases/tag/v2.6.2) (note there is a different download
+for Arduino 1.0.x vs 1.5.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
 
 *Update the path and arduino version as necessary*
@@ -88,32 +91,32 @@ for Arduino 1.0.x vs 1.6.x).
 ###Linux:
 
 1. Navigate to `~/arduino-1.x/libraries/` and replace the existing
-`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.3) (note there is a different download
-for Arduino 1.0.x vs 1.6.x).
+`Firmata` folder with the latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases/tag/v2.6.2) (note there is a different download
+for Arduino 1.0.x vs 1.5.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
 
 *Update the path and arduino version as necessary*
 
-###Using the Source code rather than release archive
+###Using the ConfigurableFirmata Source code rather than release archive
 
 Clone this repo directly into the core Arduino libraries directory. If you are using
-Arduino 1.5.x or 1.6.x, the repo directory structure will not match the Arduino
+Arduino 1.5.x, the repo directory structure will not match the Arduino
 library format, however it should still compile as long as you are using Arduino 1.5.7
 or higher.
 
 You will first need to remove the existing Firmata library, then clone firmata/arduino
-into an empty Firmata directory:
+into an empty Firmata directory and checkout the `configurable` branch:
 
 ```bash
 $ rm -r /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
 $ git clone git@github.com:firmata/arduino.git /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
+$ git checkout configurable
 ```
 
 *Update paths if you're using Windows or Linux*
 
-To generate properly formatted versions of Firmata (for Arduino 1.0.x and Arduino 1.6.x), run the
+To generate properly formatted versions of Firmata (for Arduino 1.0.x and Arduino 1.5.x), run the
 `release.sh` script.
-
 
 <a name="contributing" />
 ##Contributing

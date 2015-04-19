@@ -40,5 +40,3 @@ void loop()
     Firmata.processInput();
   }
 }
-
-

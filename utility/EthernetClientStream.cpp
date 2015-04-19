@@ -20,9 +20,6 @@
 #include "EthernetClientStream.h"
 #include <Arduino.h>
 
-//#define SERIAL_DEBUG
-#include "firmataDebug.h"
-
 #define MILLIS_RECONNECT 5000
 
 EthernetClientStream::EthernetClientStream(Client &client, IPAddress localip, IPAddress ip, const char* host, uint16_t port)
@@ -97,12 +94,8 @@ EthernetClientStream::maintain()
   else if (millis()-time_connect >= MILLIS_RECONNECT)
     {
       connected = host ? client.connect(host,port) : client.connect(ip,port);
-      if (!connected) {
+      if (!connected)
         time_connect = millis();
-        DEBUG_PRINTLN("connection failed");
-      } else {
-        DEBUG_PRINTLN("connected");
-      }
     }
   return connected;
 }

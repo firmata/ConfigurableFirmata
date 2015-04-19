@@ -11,17 +11,16 @@ cp Boards.h temp/Firmata
 cp Firmata.cpp temp/Firmata
 cp Firmata.h temp/Firmata
 cp keywords.txt temp/Firmata
-cp readme.md temp/Firmata
+cp readme.md temp/Firmata/extras
+cp library.properties temp/Firmata
 cd temp
 find . -name "*.DS_Store" -type f -delete
 zip -r Firmata.zip ./Firmata/
 cd ..
-mv ./temp/Firmata.zip Firmata-2.4.3.zip
+mv ./temp/Firmata.zip Firmata-2.6.2.zip
 
-#package for Arduino 1.6.x
-cp library.properties temp/Firmata
+# package for Arduino 1.5.x
 cd temp/Firmata
-mv readme.md ./extras/
 mkdir src
 mv Boards.h ./src/
 mv Firmata.cpp ./src/
@@ -31,5 +30,5 @@ cd ..
 find . -name "*.DS_Store" -type f -delete
 zip -r Firmata.zip ./Firmata/
 cd ..
-mv ./temp/Firmata.zip Arduino-1.6.x-Firmata-2.4.3.zip
+mv ./temp/Firmata.zip Arduino-1.5.x-Firmata-2.6.2.zip
 rm -r ./temp
