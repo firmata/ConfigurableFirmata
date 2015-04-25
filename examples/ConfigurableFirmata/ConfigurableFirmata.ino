@@ -116,8 +116,12 @@ FirmataExt firmataExt;
 #include <utility/FirmataScheduler.h>
 FirmataScheduler scheduler;
 
-#include <utility/EncoderFirmata.h>
-EncoderFirmata encoder;
+// To add Encoder support you must first install the FirmataEncoder and Encoder libraries:
+// https://github.com/firmata/FirmataEncoder
+// https://www.pjrc.com/teensy/td_libs_Encoder.html
+// #include <Encoder.h>
+// #include <EncoderFirmata.h>
+// EncoderFirmata encoder;
 
 
 // dependencies. Do not comment out the following lines
