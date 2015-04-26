@@ -5,10 +5,6 @@
  * Download version 2.0 or greater.
  */
 
-//* Due to arduino issue, Wire and Servo libraries need to be included. Should be fixed in later versions
-#include <Wire.h>
-#include <Servo.h>
-//*/
 #include <ArduinoUnit.h>
 #include <ConfigurableFirmata.h>
 

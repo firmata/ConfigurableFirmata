@@ -13,10 +13,6 @@
  * Norbert Truchsess - Original version
  */
 
-//* Due to arduino issue, Wire and Servo libraries need to be included
-#include <Wire.h>
-#include <Servo.h>
-
 #include <ConfigurableFirmata.h>
 #include <FirmataExt.h>
 #include <FirmataReporting.h>

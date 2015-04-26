@@ -13,7 +13,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
 
