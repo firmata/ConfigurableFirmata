@@ -7,8 +7,25 @@ Firmata is a protocol for communicating with microcontrollers from software on a
 
 ConfigurableFirmata is a version of Firmata that breaks features such as Digital Input, Digital Output, Analog Input, Analog Output, I2C, etc into [individual classes](https://github.com/firmata/ConfigurableFirmata/tree/master/src/utility) making it easier to mix and match standard features with custom features. You configure your sketch by adding or removing various include statements. See the [ConfigurableFirmata.ino](https://github.com/firmata/ConfigurableFirmata/blob/master/examples/ConfigurableFirmata/ConfigurableFirmata.ino) file for an example that includes all available features. You are also able to choose between a Serial connection or an Ethernet connection type.
 
+##Firmata Wrapper Libraries
 
-##Firmata Client Libraries compatible with ConfigurableFirmata
+You can use the ConfigurableFirmata architecture to wrap 3rd party libraries to include
+functionality not included in the base ConfigurableFirmata.ino example. See [FirmataEncoder](https://github.com/firmata/FirmataEncoder) for an example of a Firmata wrapper. To include a Firmata wrapper your
+ino file, you must install both the sketch and the 3rd party library into your `/Arduino/libraries/`
+directory (where all 3rd party libraries are installed).
+
+When creating a new Firmata wrapper library, you generally should not include the 3rd party
+library it wraps. For example, the Encoder library that FirmataEncoder wraps is not included with
+the FirmataEncoder library.
+
+If you create a wrapper library, prepend the name with 'Firmata'. Hence 'FirmataEncoder' in the
+referenced example. This will keep the wrapper libraries together in the user's Arduino libraries
+directory.
+
+A Firmata wrapper template library will be published soon along with instructions for creating
+a wrapper library.
+
+##Firmata Client Libraries
 Only a few Firmata client libraries currently support ConfigurableFirmata:
 
 * javascript

@@ -1,15 +1,13 @@
 /*
- * Firmata is a generic protocol for communicating with microcontrollers
- * from software on a host computer. It is intended to work with
- * any host computer software package.
- *
- * To download a host software package, please click on the following link
- * to open the download page in your default browser.
- *
- * http://firmata.org/wiki/Download
- */
+  Firmata is a generic protocol for communicating with microcontrollers
+  from software on a host computer. It is intended to work with
+  any host computer software package.
 
-/*
+  To download a host software package, please clink on the following link
+  to open the download page in your default browser.
+
+  https://github.com/firmata/ConfigurableFirmata#firmata-client-libraries
+
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -24,7 +22,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  formatted using the GNU C formatting and indenting
+  Last updated by Jeff Hoefs: April 25, 2015
 */
 
 
@@ -119,9 +117,9 @@ FirmataScheduler scheduler;
 // To add Encoder support you must first install the FirmataEncoder and Encoder libraries:
 // https://github.com/firmata/FirmataEncoder
 // https://www.pjrc.com/teensy/td_libs_Encoder.html
-#include <Encoder.h>
-#include <FirmataEncoder.h>
-FirmataEncoder encoder;
+// #include <Encoder.h>
+// #include <FirmataEncoder.h>
+// FirmataEncoder encoder;
 
 
 // dependencies. Do not comment out the following lines

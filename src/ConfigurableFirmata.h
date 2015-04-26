@@ -1,6 +1,8 @@
 /*
-  Firmata.h - Firmata library v2.6.2 - 2015-2-7
+  ConfigurableFirmata.h - Firmata library v2.7.0-beta - 2015-4-15
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
+  Copyright (C) 2013 Norbert Truchsess. All rights reserved.
+  Copyright (C) 2013-2015 Jeff Hoefs. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,8 +22,8 @@
  * software can test whether it will be compatible with the currently
  * installed firmware. */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   6 // for backwards compatible changes
-#define FIRMATA_BUGFIX_VERSION  2 // for bugfix releases
+#define FIRMATA_MINOR_VERSION   7 // for backwards compatible changes
+#define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 

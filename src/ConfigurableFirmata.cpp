@@ -1,6 +1,8 @@
 /*
-  ConfigurableFirmata.cpp - Firmata library v2.6.2 - 2015-2-7
+  ConfigurableFirmata.cpp - Firmata library v2.7.0-beta - 2015-4-15
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
+  Copyright (C) 2013 Norbert Truchsess. All rights reserved.
+  Copyright (C) 2013-2015 Jeff Hoefs. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
