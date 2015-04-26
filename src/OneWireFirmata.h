@@ -13,8 +13,8 @@
 #ifndef OneWireFirmata_h
 #define OneWireFirmata_h
 
-#include "OneWire.h"
 #include <ConfigurableFirmata.h>
+#include "utility/OneWire.h"
 #include "FirmataFeature.h"
 
 //subcommands:

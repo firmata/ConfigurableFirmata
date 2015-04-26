@@ -84,53 +84,53 @@ const byte mac[] = {0x90, 0xA2, 0xDA, 0x0D, 0x07, 0x02};
 // or other microcontroller with less memory you will not be able to include
 // all of the following feature classes.
 
-#include <utility/DigitalInputFirmata.h>
+#include <DigitalInputFirmata.h>
 DigitalInputFirmata digitalInput;
 
-#include <utility/DigitalOutputFirmata.h>
+#include <DigitalOutputFirmata.h>
 DigitalOutputFirmata digitalOutput;
 
-#include <utility/AnalogInputFirmata.h>
+#include <AnalogInputFirmata.h>
 AnalogInputFirmata analogInput;
 
-#include <utility/AnalogOutputFirmata.h>
+#include <AnalogOutputFirmata.h>
 AnalogOutputFirmata analogOutput;
 
 #include <Servo.h> //wouldn't load from ServoFirmata.h in Arduino1.0.3
-#include <utility/ServoFirmata.h>
+#include <ServoFirmata.h>
 ServoFirmata servo;
 
 #include <Wire.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
-#include <utility/I2CFirmata.h>
+#include <I2CFirmata.h>
 I2CFirmata i2c;
 
-#include <utility/OneWireFirmata.h>
+#include <OneWireFirmata.h>
 OneWireFirmata oneWire;
 
-#include <utility/StepperFirmata.h>
+#include <StepperFirmata.h>
 StepperFirmata stepper;
 
-#include <utility/FirmataExt.h>
+#include <FirmataExt.h>
 FirmataExt firmataExt;
 
-#include <utility/FirmataScheduler.h>
+#include <FirmataScheduler.h>
 FirmataScheduler scheduler;
 
 // To add Encoder support you must first install the FirmataEncoder and Encoder libraries:
 // https://github.com/firmata/FirmataEncoder
 // https://www.pjrc.com/teensy/td_libs_Encoder.html
-// #include <Encoder.h>
-// #include <EncoderFirmata.h>
-// EncoderFirmata encoder;
+#include <Encoder.h>
+#include <FirmataEncoder.h>
+FirmataEncoder encoder;
 
 
 // dependencies. Do not comment out the following lines
 #if defined AnalogOutputFirmata_h || defined ServoFirmata_h
-#include <utility/AnalogWrite.h>
+#include <AnalogWrite.h>
 #endif
 
-#if defined AnalogInputFirmata_h || defined I2CFirmata_h || defined EncoderFirmata_h
-#include <utility/FirmataReporting.h>
+#if defined AnalogInputFirmata_h || defined I2CFirmata_h || defined FirmataEncoder_h
+#include <FirmataReporting.h>
 FirmataReporting reporting;
 #endif
 
@@ -139,7 +139,7 @@ FirmataReporting reporting;
 #if defined remote_ip && defined remote_host
 #error "cannot define both remote_ip and remote_host at the same time!"
 #endif
-#include <utility/EthernetClientStream.h>
+#include <EthernetClientStream.h>
 #ifdef _YUN_CLIENT_H_
 YunClient client;
 #else
@@ -246,7 +246,7 @@ void setup()
 #ifdef FirmataScheduler_h
   firmataExt.addFeature(scheduler);
 #endif
-#ifdef EncoderFirmata_h
+#ifdef FirmataEncoder_h
   firmataExt.addFeature(encoder);
 #endif
 #endif
@@ -319,7 +319,7 @@ runtasks: scheduler.runTasks();
     // report i2c data for all device with read continuous mode enabled
     i2c.report();
 #endif
-#ifdef EncoderFirmata_h
+#ifdef FirmataEncoder_h
     // report encoders positions if reporting enabled.
     encoder.report();
 #endif

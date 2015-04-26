@@ -18,8 +18,8 @@
 #include <Servo.h>
 
 #include <ConfigurableFirmata.h>
-#include <utility/FirmataExt.h>
-#include <utility/FirmataReporting.h>
+#include <FirmataExt.h>
+#include <FirmataReporting.h>
 #include "dht11.h"
 #include "DHT11Feature.h"
 

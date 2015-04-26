@@ -17,7 +17,7 @@
 #define DHT11Feature_h
 
 #include <ConfigurableFirmata.h>
-#include <utility/FirmataFeature.h>
+#include <FirmataFeature.h>
 #include "dht11.h"
 
 #define DHT11_PIN 0x7e
