@@ -261,76 +261,76 @@ bool FirmataStepper::update()
 
     switch (this->run_state)
     {
-    case FirmataStepper::STOP:
-      this->stepCount = 0;
-      this->rest = 0;
-      if (this->running)
-      {
-        done = true;
-      }
-      this->running = false;
-      break;
-
-    case FirmataStepper::ACCEL:
-      updateStepPosition();
-      this->stepCount++;
-      this->accel_count++;
-      newStepDelay = this->step_delay - (((2 * (long)this->step_delay) + this->rest) / (4 * this->accel_count + 1));
-      this->rest = ((2 * (long)this->step_delay) + this->rest) % (4 * this->accel_count + 1);
-
-      // check if we should start deceleration
-      if (this->stepCount >= this->decel_start)
-      {
-        this->accel_count = this->decel_val;
-        this->run_state = FirmataStepper::DECEL;
+      case FirmataStepper::STOP:
+        this->stepCount = 0;
         this->rest = 0;
-      }
-      // check if we hit max speed
-      else if (newStepDelay <= this->min_delay)
-      {
-        this->lastAccelDelay = newStepDelay;
+        if (this->running)
+        {
+          done = true;
+        }
+        this->running = false;
+        break;
+
+      case FirmataStepper::ACCEL:
+        updateStepPosition();
+        this->stepCount++;
+        this->accel_count++;
+        newStepDelay = this->step_delay - (((2 * (long)this->step_delay) + this->rest) / (4 * this->accel_count + 1));
+        this->rest = ((2 * (long)this->step_delay) + this->rest) % (4 * this->accel_count + 1);
+
+        // check if we should start deceleration
+        if (this->stepCount >= this->decel_start)
+        {
+          this->accel_count = this->decel_val;
+          this->run_state = FirmataStepper::DECEL;
+          this->rest = 0;
+        }
+        // check if we hit max speed
+        else if (newStepDelay <= this->min_delay)
+        {
+          this->lastAccelDelay = newStepDelay;
+          newStepDelay = this->min_delay;
+          this->rest = 0;
+          this->run_state = FirmataStepper::RUN;
+        }
+        break;
+
+      case FirmataStepper::RUN:
+        updateStepPosition();
+        this->stepCount++;
         newStepDelay = this->min_delay;
-        this->rest = 0;
-        this->run_state = FirmataStepper::RUN;
-      }
-      break;
 
-    case FirmataStepper::RUN:
-      updateStepPosition();
-      this->stepCount++;
-      newStepDelay = this->min_delay;
+        // if no accel or decel was specified, go directly to STOP state
+        if (stepCount >= this->steps_to_move)
+        {
+          this->run_state = FirmataStepper::STOP;
+        }
+        // check if we should start deceleration
+        else if (this->stepCount >= this->decel_start)
+        {
+          this->accel_count = this->decel_val;
+          // start deceleration with same delay that accel ended with
+          newStepDelay = this->lastAccelDelay;
+          this->run_state = FirmataStepper::DECEL;
+        }
+        break;
 
-      // if no accel or decel was specified, go directly to STOP state
-      if (stepCount >= this->steps_to_move)
-      {
-        this->run_state = FirmataStepper::STOP;
-      }
-      // check if we should start deceleration
-      else if (this->stepCount >= this->decel_start)
-      {
-        this->accel_count = this->decel_val;
-        // start deceleration with same delay that accel ended with
-        newStepDelay = this->lastAccelDelay;
-        this->run_state = FirmataStepper::DECEL;
-      }
-      break;
+      case FirmataStepper::DECEL:
+        updateStepPosition();
+        this->stepCount++;
+        this->accel_count++;
 
-    case FirmataStepper::DECEL:
-      updateStepPosition();
-      this->stepCount++;
-      this->accel_count++;
+        newStepDelay = this->step_delay - (((2 * (long)this->step_delay) + this->rest) / (4 * this->accel_count + 1));
+        this->rest = ((2 * (long)this->step_delay) + this->rest) % (4 * this->accel_count + 1);
 
-      newStepDelay = this->step_delay - (((2 * (long)this->step_delay) + this->rest) / (4 * this->accel_count + 1));
-      this->rest = ((2 * (long)this->step_delay) + this->rest) % (4 * this->accel_count + 1);
+        if (newStepDelay < 0) newStepDelay = -newStepDelay;
+        // check if we ar at the last step
+        if (this->accel_count >= 0)
+        {
+          this->run_state = FirmataStepper::STOP;
+        }
 
-      if (newStepDelay < 0) newStepDelay = -newStepDelay;
-      // check if we ar at the last step
-      if (this->accel_count >= 0)
-      {
-        this->run_state = FirmataStepper::STOP;
-      }
-
-      break;
+        break;
     }
 
     this->step_delay = newStepDelay;
@@ -390,52 +390,52 @@ void FirmataStepper::stepMotor(byte step_num, byte direction)
   {
     switch (step_num)
     {
-    case 0: /* 01 */
-      digitalWrite(motor_pin_1, LOW);
-      digitalWrite(motor_pin_2, HIGH);
-      break;
-    case 1: /* 11 */
-      digitalWrite(motor_pin_1, HIGH);
-      digitalWrite(motor_pin_2, HIGH);
-      break;
-    case 2: /* 10 */
-      digitalWrite(motor_pin_1, HIGH);
-      digitalWrite(motor_pin_2, LOW);
-      break;
-    case 3: /* 00 */
-      digitalWrite(motor_pin_1, LOW);
-      digitalWrite(motor_pin_2, LOW);
-      break;
+      case 0: /* 01 */
+        digitalWrite(motor_pin_1, LOW);
+        digitalWrite(motor_pin_2, HIGH);
+        break;
+      case 1: /* 11 */
+        digitalWrite(motor_pin_1, HIGH);
+        digitalWrite(motor_pin_2, HIGH);
+        break;
+      case 2: /* 10 */
+        digitalWrite(motor_pin_1, HIGH);
+        digitalWrite(motor_pin_2, LOW);
+        break;
+      case 3: /* 00 */
+        digitalWrite(motor_pin_1, LOW);
+        digitalWrite(motor_pin_2, LOW);
+        break;
     }
   }
   else if (this->interface == FirmataStepper::FOUR_WIRE)
   {
     switch (step_num)
     {
-    case 0:    // 1010
-      digitalWrite(motor_pin_1, HIGH);
-      digitalWrite(motor_pin_2, LOW);
-      digitalWrite(motor_pin_3, HIGH);
-      digitalWrite(motor_pin_4, LOW);
-      break;
-    case 1:    // 0110
-      digitalWrite(motor_pin_1, LOW);
-      digitalWrite(motor_pin_2, HIGH);
-      digitalWrite(motor_pin_3, HIGH);
-      digitalWrite(motor_pin_4, LOW);
-      break;
-    case 2:    //0101
-      digitalWrite(motor_pin_1, LOW);
-      digitalWrite(motor_pin_2, HIGH);
-      digitalWrite(motor_pin_3, LOW);
-      digitalWrite(motor_pin_4, HIGH);
-      break;
-    case 3:    //1001
-      digitalWrite(motor_pin_1, HIGH);
-      digitalWrite(motor_pin_2, LOW);
-      digitalWrite(motor_pin_3, LOW);
-      digitalWrite(motor_pin_4, HIGH);
-      break;
+      case 0:    // 1010
+        digitalWrite(motor_pin_1, HIGH);
+        digitalWrite(motor_pin_2, LOW);
+        digitalWrite(motor_pin_3, HIGH);
+        digitalWrite(motor_pin_4, LOW);
+        break;
+      case 1:    // 0110
+        digitalWrite(motor_pin_1, LOW);
+        digitalWrite(motor_pin_2, HIGH);
+        digitalWrite(motor_pin_3, HIGH);
+        digitalWrite(motor_pin_4, LOW);
+        break;
+      case 2:    //0101
+        digitalWrite(motor_pin_1, LOW);
+        digitalWrite(motor_pin_2, HIGH);
+        digitalWrite(motor_pin_3, LOW);
+        digitalWrite(motor_pin_4, HIGH);
+        break;
+      case 3:    //1001
+        digitalWrite(motor_pin_1, HIGH);
+        digitalWrite(motor_pin_2, LOW);
+        digitalWrite(motor_pin_3, LOW);
+        digitalWrite(motor_pin_4, HIGH);
+        break;
     }
   }
 }

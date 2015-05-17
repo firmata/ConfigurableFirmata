@@ -24,22 +24,22 @@
 void analogWriteCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS) {
-    switch(Firmata.getPinMode(pin)) {
+    switch (Firmata.getPinMode(pin)) {
 #ifdef ServoFirmata_h
-    case SERVO:
-      if (IS_PIN_SERVO(pin)) {
-        servoAnalogWrite(pin,value);
-        Firmata.setPinState(pin,value);
-      }
-      break;
+      case SERVO:
+        if (IS_PIN_SERVO(pin)) {
+          servoAnalogWrite(pin, value);
+          Firmata.setPinState(pin, value);
+        }
+        break;
 #endif
 #ifdef AnalogOutputFirmata_h
-    case PWM:
-      if (IS_PIN_PWM(pin)) {
-        analogWrite(PIN_TO_PWM(pin), value);
-        Firmata.setPinState(pin,value);
-      }
-      break;
+      case PWM:
+        if (IS_PIN_PWM(pin)) {
+          analogWrite(PIN_TO_PWM(pin), value);
+          Firmata.setPinState(pin, value);
+        }
+        break;
 #endif
     }
   }

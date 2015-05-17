@@ -22,7 +22,7 @@ AnalogInputFirmata *AnalogInputFirmataInstance;
 
 void reportAnalogInputCallback(byte analogPin, int value)
 {
-  AnalogInputFirmataInstance->reportAnalog(analogPin,value);
+  AnalogInputFirmataInstance->reportAnalog(analogPin, value);
 }
 
 AnalogInputFirmata::AnalogInputFirmata()
@@ -40,8 +40,8 @@ AnalogInputFirmata::AnalogInputFirmata()
 void AnalogInputFirmata::reportAnalog(byte analogPin, int value)
 {
   if (analogPin < TOTAL_ANALOG_PINS) {
-    if(value == 0) {
-      analogInputsToReport = analogInputsToReport &~ (1 << analogPin);
+    if (value == 0) {
+      analogInputsToReport = analogInputsToReport & ~ (1 << analogPin);
     } else {
       analogInputsToReport = analogInputsToReport | (1 << analogPin);
       // prevent during system reset or all analog pin values will be reported
@@ -61,14 +61,14 @@ boolean AnalogInputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_ANALOG(pin)) {
     if (mode == ANALOG) {
-      reportAnalog(PIN_TO_ANALOG(pin),1); // turn on reporting
+      reportAnalog(PIN_TO_ANALOG(pin), 1); // turn on reporting
       if (IS_PIN_DIGITAL(pin)) {
         pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
         digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
       }
       return true;
     } else {
-      reportAnalog(PIN_TO_ANALOG(pin),0); // turn off reporting
+      reportAnalog(PIN_TO_ANALOG(pin), 0); // turn off reporting
     }
   }
   return false;
@@ -105,9 +105,9 @@ void AnalogInputFirmata::reset()
 
 void AnalogInputFirmata::report()
 {
-  byte pin,analogPin;
+  byte pin, analogPin;
   /* ANALOGREAD - do all analogReads() at the configured sampling interval */
-  for(pin=0; pin<TOTAL_PINS; pin++) {
+  for (pin = 0; pin < TOTAL_PINS; pin++) {
     if (IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == ANALOG) {
       analogPin = PIN_TO_ANALOG(pin);
       if (analogInputsToReport & (1 << analogPin)) {

@@ -18,20 +18,18 @@
 
 class Encoder7BitClass
 {
-public:
-  Encoder7BitClass();
-  void startBinaryWrite();
-  void endBinaryWrite();
-  void writeBinary(byte data);
-  void readBinary(int outBytes,byte *inData, byte *outData);
+  public:
+    Encoder7BitClass();
+    void startBinaryWrite();
+    void endBinaryWrite();
+    void writeBinary(byte data);
+    void readBinary(int outBytes, byte *inData, byte *outData);
 
-private:
-  byte previous;
-  int shift;
+  private:
+    byte previous;
+    int shift;
 };
 
 extern Encoder7BitClass Encoder7Bit;
 
 #endif
-
-

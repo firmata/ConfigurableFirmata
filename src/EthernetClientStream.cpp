@@ -23,12 +23,12 @@
 #define MILLIS_RECONNECT 5000
 
 EthernetClientStream::EthernetClientStream(Client &client, IPAddress localip, IPAddress ip, const char* host, uint16_t port)
-: ip(ip),
-  host(host),
-  port(port),
-  connected(false),
-  client(client),
-  localip(localip)
+  : ip(ip),
+    host(host),
+    port(port),
+    connected(false),
+    client(client),
+    localip(localip)
 {
 }
 
@@ -65,12 +65,12 @@ EthernetClientStream::write(uint8_t c)
 void
 EthernetClientStream::maintain(IPAddress localip)
 {
-  if (this->localip!=localip)
-    {
-      this->localip = localip;
-      if (connected)
-        stop();
-    }
+  if (this->localip != localip)
+  {
+    this->localip = localip;
+    if (connected)
+      stop();
+  }
 }
 
 void
@@ -88,14 +88,14 @@ EthernetClientStream::maintain()
     return true;
 
   if (connected)
-    {
-      stop();
-    }
-  else if (millis()-time_connect >= MILLIS_RECONNECT)
-    {
-      connected = host ? client.connect(host,port) : client.connect(ip,port);
-      if (!connected)
-        time_connect = millis();
-    }
+  {
+    stop();
+  }
+  else if (millis() - time_connect >= MILLIS_RECONNECT)
+  {
+    connected = host ? client.connect(host, port) : client.connect(ip, port);
+    if (!connected)
+      time_connect = millis();
+  }
   return connected;
 }

@@ -43,30 +43,30 @@ struct i2c_device_info {
   byte bytes;
 };
 
-class I2CFirmata:public FirmataFeature
+class I2CFirmata: public FirmataFeature
 {
-public:
-  I2CFirmata();
-  boolean handlePinMode(byte pin, int mode);
-  void handleCapability(byte pin);
-  boolean handleSysex(byte command, byte argc, byte* argv);
-  void reset();
-  void report();
+  public:
+    I2CFirmata();
+    boolean handlePinMode(byte pin, int mode);
+    void handleCapability(byte pin);
+    boolean handleSysex(byte command, byte argc, byte* argv);
+    void reset();
+    void report();
 
-private:
-  /* for i2c read continuous more */
-  i2c_device_info query[MAX_QUERIES];
+  private:
+    /* for i2c read continuous more */
+    i2c_device_info query[MAX_QUERIES];
 
-  byte i2cRxData[32];
-  boolean isI2CEnabled;
-  signed char queryIndex;
-  unsigned int i2cReadDelayTime;  // default delay time between i2c read request and Wire.requestFrom()
+    byte i2cRxData[32];
+    boolean isI2CEnabled;
+    signed char queryIndex;
+    unsigned int i2cReadDelayTime;  // default delay time between i2c read request and Wire.requestFrom()
 
-  void readAndReportData(byte address, int theRegister, byte numBytes);
-  void handleI2CRequest(byte argc, byte *argv);
-  boolean handleI2CConfig(byte argc, byte *argv);
-  boolean enableI2CPins();
-  void disableI2CPins();
+    void readAndReportData(byte address, int theRegister, byte numBytes);
+    void handleI2CRequest(byte argc, byte *argv);
+    boolean handleI2CConfig(byte argc, byte *argv);
+    boolean enableI2CPins();
+    void disableI2CPins();
 };
 
 
@@ -89,11 +89,11 @@ void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes)
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
   if (theRegister != REGISTER_NOT_SPECIFIED) {
     Wire.beginTransmission(address);
-    #if ARDUINO >= 100
+#if ARDUINO >= 100
     Wire.write((byte)theRegister);
-    #else
+#else
     Wire.send((byte)theRegister);
-    #endif
+#endif
     Wire.endTransmission();
     // do not set a value of 0
     if (i2cReadDelayTime > 0) {
@@ -107,21 +107,21 @@ void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes)
   Wire.requestFrom(address, numBytes);  // all bytes are returned in requestFrom
 
   // check to be sure correct number of bytes were returned by slave
-  if(numBytes < Wire.available()) {
-      Firmata.sendString("I2C: Too many bytes received");
-  } else if(numBytes > Wire.available()) {
-      Firmata.sendString("I2C: Too few bytes received"); 
+  if (numBytes < Wire.available()) {
+    Firmata.sendString("I2C: Too many bytes received");
+  } else if (numBytes > Wire.available()) {
+    Firmata.sendString("I2C: Too few bytes received");
   }
 
   i2cRxData[0] = address;
   i2cRxData[1] = theRegister;
 
   for (int i = 0; i < numBytes && Wire.available(); i++) {
-    #if ARDUINO >= 100
+#if ARDUINO >= 100
     i2cRxData[2 + i] = Wire.read();
-    #else
+#else
     i2cRxData[2 + i] = Wire.receive();
-    #endif
+#endif
   }
 
   // send slave address, register and received bytes
@@ -155,14 +155,14 @@ void I2CFirmata::handleCapability(byte pin)
 
 boolean I2CFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
-  switch(command) {
-  case I2C_REQUEST:
-    if (isI2CEnabled) {
-      handleI2CRequest(argc,argv);
-      return true;
-    }
-  case I2C_CONFIG:
-    return handleI2CConfig(argc,argv);
+  switch (command) {
+    case I2C_REQUEST:
+      if (isI2CEnabled) {
+        handleI2CRequest(argc, argv);
+        return true;
+      }
+    case I2C_CONFIG:
+      return handleI2CConfig(argc, argv);
   }
   return false;
 }
@@ -182,83 +182,83 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
     slaveAddress = argv[0];
   }
 
-  switch(mode) {
-  case I2C_WRITE:
-    Wire.beginTransmission(slaveAddress);
-    for (byte i = 2; i < argc; i += 2) {
-      data = argv[i] + (argv[i + 1] << 7);
-      #if ARDUINO >= 100
-      Wire.write(data);
-      #else
-      Wire.send(data);
-      #endif
-    }
-    Wire.endTransmission();
-    delayMicroseconds(70);
-    break;
-  case I2C_READ:
-    if (argc == 6) {
-      // a slave register is specified
-      slaveRegister = argv[2] + (argv[3] << 7);
-      data = argv[4] + (argv[5] << 7);  // bytes to read
-      readAndReportData(slaveAddress, (int)slaveRegister, data);
-    }
-    else {
-      // a slave register is NOT specified
-      data = argv[2] + (argv[3] << 7);  // bytes to read
-      readAndReportData(slaveAddress, (int)REGISTER_NOT_SPECIFIED, data);
-    }
-    break;
-  case I2C_READ_CONTINUOUSLY:
-    if ((queryIndex + 1) >= MAX_QUERIES) {
-      // too many queries, just ignore
-      Firmata.sendString("too many queries");
+  switch (mode) {
+    case I2C_WRITE:
+      Wire.beginTransmission(slaveAddress);
+      for (byte i = 2; i < argc; i += 2) {
+        data = argv[i] + (argv[i + 1] << 7);
+#if ARDUINO >= 100
+        Wire.write(data);
+#else
+        Wire.send(data);
+#endif
+      }
+      Wire.endTransmission();
+      delayMicroseconds(70);
       break;
-    }
-    if (argc == 6) {
-      // a slave register is specified
-      slaveRegister = argv[2] + (argv[3] << 7);
-      data = argv[4] + (argv[5] << 7);  // bytes to read
-    }
-    else {
-      // a slave register is NOT specified
-      slaveRegister = (int)REGISTER_NOT_SPECIFIED;
-      data = argv[2] + (argv[3] << 7);  // bytes to read
-    }
-    queryIndex++;
-    query[queryIndex].addr = slaveAddress;
-    query[queryIndex].reg = slaveRegister;
-    query[queryIndex].bytes = data;
-    break;
-  case I2C_STOP_READING:
-    byte queryIndexToSkip;
-    // if read continuous mode is enabled for only 1 i2c device, disable
-    // read continuous reporting for that device
-    if (queryIndex <= 0) {
-      queryIndex = -1;
-    } else {
-      // if read continuous mode is enabled for multiple devices,
-      // determine which device to stop reading and remove it's data from
-      // the array, shifiting other array data to fill the space
-      for (byte i = 0; i < queryIndex + 1; i++) {
-        if (query[i].addr == slaveAddress) {
-          queryIndexToSkip = i;
-          break;
-        }
+    case I2C_READ:
+      if (argc == 6) {
+        // a slave register is specified
+        slaveRegister = argv[2] + (argv[3] << 7);
+        data = argv[4] + (argv[5] << 7);  // bytes to read
+        readAndReportData(slaveAddress, (int)slaveRegister, data);
       }
+      else {
+        // a slave register is NOT specified
+        data = argv[2] + (argv[3] << 7);  // bytes to read
+        readAndReportData(slaveAddress, (int)REGISTER_NOT_SPECIFIED, data);
+      }
+      break;
+    case I2C_READ_CONTINUOUSLY:
+      if ((queryIndex + 1) >= MAX_QUERIES) {
+        // too many queries, just ignore
+        Firmata.sendString("too many queries");
+        break;
+      }
+      if (argc == 6) {
+        // a slave register is specified
+        slaveRegister = argv[2] + (argv[3] << 7);
+        data = argv[4] + (argv[5] << 7);  // bytes to read
+      }
+      else {
+        // a slave register is NOT specified
+        slaveRegister = (int)REGISTER_NOT_SPECIFIED;
+        data = argv[2] + (argv[3] << 7);  // bytes to read
+      }
+      queryIndex++;
+      query[queryIndex].addr = slaveAddress;
+      query[queryIndex].reg = slaveRegister;
+      query[queryIndex].bytes = data;
+      break;
+    case I2C_STOP_READING:
+      byte queryIndexToSkip;
+      // if read continuous mode is enabled for only 1 i2c device, disable
+      // read continuous reporting for that device
+      if (queryIndex <= 0) {
+        queryIndex = -1;
+      } else {
+        // if read continuous mode is enabled for multiple devices,
+        // determine which device to stop reading and remove it's data from
+        // the array, shifiting other array data to fill the space
+        for (byte i = 0; i < queryIndex + 1; i++) {
+          if (query[i].addr == slaveAddress) {
+            queryIndexToSkip = i;
+            break;
+          }
+        }
 
-      for (byte i = queryIndexToSkip; i<queryIndex + 1; i++) {
-        if (i < MAX_QUERIES) {
-          query[i].addr = query[i+1].addr;
-          query[i].reg = query[i+1].reg;
-          query[i].bytes = query[i+1].bytes;
+        for (byte i = queryIndexToSkip; i < queryIndex + 1; i++) {
+          if (i < MAX_QUERIES) {
+            query[i].addr = query[i + 1].addr;
+            query[i].reg = query[i + 1].reg;
+            query[i].bytes = query[i + 1].bytes;
+          }
         }
+        queryIndex--;
       }
-      queryIndex--;
-    }
-    break;
-  default:
-    break;
+      break;
+    default:
+      break;
   }
 }
 
@@ -266,7 +266,7 @@ boolean I2CFirmata::handleI2CConfig(byte argc, byte *argv)
 {
   unsigned int delayTime = (argv[0] + (argv[1] << 7));
 
-  if(delayTime > 0) {
+  if (delayTime > 0) {
     i2cReadDelayTime = delayTime;
   }
 
@@ -281,10 +281,10 @@ boolean I2CFirmata::enableI2CPins()
   byte i;
   // is there a faster way to do this? would probaby require importing
   // Arduino.h to get SCL and SDA pins
-  for (i=0; i < TOTAL_PINS; i++) {
-    if(IS_PIN_I2C(i)) {
-      if (Firmata.getPinMode(i)==IGNORE) {
-          return false;
+  for (i = 0; i < TOTAL_PINS; i++) {
+    if (IS_PIN_I2C(i)) {
+      if (Firmata.getPinMode(i) == IGNORE) {
+        return false;
       }
       // mark pins as i2c so they are ignore in non i2c data requests
       Firmata.setPinMode(i, I2C);

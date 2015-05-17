@@ -22,7 +22,7 @@ boolean handleAnalogFirmataSysex(byte command, byte argc, byte* argv)
   if (command == ANALOG_MAPPING_QUERY) {
     Firmata.write(START_SYSEX);
     Firmata.write(ANALOG_MAPPING_RESPONSE);
-    for (byte pin=0; pin < TOTAL_PINS; pin++) {
+    for (byte pin = 0; pin < TOTAL_PINS; pin++) {
       Firmata.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
     }
     Firmata.write(END_SYSEX);

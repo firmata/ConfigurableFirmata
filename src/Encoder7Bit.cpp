@@ -37,13 +37,13 @@ void Encoder7BitClass::writeBinary(byte data)
     Firmata.write(data & 0x7f);
     shift++;
     previous = data >> 7;
-  } 
+  }
   else {
     Firmata.write(((data << shift) & 0x7f) | previous);
     if (shift == 6) {
       Firmata.write(data >> 1);
       shift = 0;
-    } 
+    }
     else {
       shift++;
       previous = data >> (8 - shift);
@@ -51,15 +51,14 @@ void Encoder7BitClass::writeBinary(byte data)
   }
 }
 
-void Encoder7BitClass::readBinary(int outBytes,byte *inData, byte *outData)
+void Encoder7BitClass::readBinary(int outBytes, byte *inData, byte *outData)
 {
-  for (int i=0;i<outBytes;i++) {
-    int j=i<<3;
-    int pos=j/7;
-    byte shift=j%7;
-    outData[i]=(inData[pos]>>shift)|((inData[pos+1]<<(7-shift))&0xFF);
+  for (int i = 0; i < outBytes; i++) {
+    int j = i << 3;
+    int pos = j / 7;
+    byte shift = j % 7;
+    outData[i] = (inData[pos] >> shift) | ((inData[pos + 1] << (7 - shift)) & 0xFF);
   }
 }
 
 Encoder7BitClass Encoder7Bit;
-

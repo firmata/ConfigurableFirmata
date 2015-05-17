@@ -1,8 +1,8 @@
 /*
   ConfigurableFirmata.cpp - Firmata library v2.7.0-beta - 2015-4-15
-  Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
-  Copyright (C) 2013 Norbert Truchsess. All rights reserved.
-  Copyright (C) 2013-2015 Jeff Hoefs. All rights reserved.
+  Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
+  Copyright (c) 2013 Norbert Truchsess. All rights reserved.
+  Copyright (c) 2013-2015 Jeff Hoefs. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -481,8 +481,6 @@ void FirmataClass::setPinState(byte pin, int state)
 //* Private Methods
 //******************************************************************************
 
-
-
 // resets the system state upon a SYSTEM_RESET message from the host software
 void FirmataClass::systemReset(void)
 {
@@ -506,8 +504,6 @@ void FirmataClass::systemReset(void)
   resetting = false;
 }
 
-
-
 // =============================================================================
 // used for flashing the pin for the version number
 void FirmataClass::strobeBlinkPin(int count, int onInterval, int offInterval)
@@ -521,7 +517,6 @@ void FirmataClass::strobeBlinkPin(int count, int onInterval, int offInterval)
     digitalWrite(VERSION_BLINK_PIN, LOW);
   }
 }
-
 
 // make one instance for the user to use
 FirmataClass Firmata;

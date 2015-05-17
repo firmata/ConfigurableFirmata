@@ -28,7 +28,7 @@
 #define RESET_FIRMATA_TASKS     7
 #define ERROR_TASK_REPLY        8
 #define QUERY_ALL_TASKS_REPLY   9
-#define QUERY_TASK_REPLY	   10
+#define QUERY_TASK_REPLY     10
 
 #define firmata_task_len(a)(sizeof(firmata_task)+(a)->len)
 
@@ -44,30 +44,30 @@ struct firmata_task
   byte messages[];
 };
 
-class FirmataScheduler:public FirmataFeature
+class FirmataScheduler: public FirmataFeature
 {
-public:
-  FirmataScheduler();
-  void handleCapability(byte pin); //empty method
-  boolean handlePinMode(byte pin, int mode); //empty method
-  boolean handleSysex(byte command, byte argc, byte* argv);
-  void runTasks();
-  void reset();
-  void createTask(byte id,int len);
-  void deleteTask(byte id);
-  void addToTask(byte id, int len, byte *message);
-  void schedule(byte id,long time_ms);
-  void delayTask(long time_ms);
-  void queryAllTasks();
-  void queryTask(byte id);
+  public:
+    FirmataScheduler();
+    void handleCapability(byte pin); //empty method
+    boolean handlePinMode(byte pin, int mode); //empty method
+    boolean handleSysex(byte command, byte argc, byte* argv);
+    void runTasks();
+    void reset();
+    void createTask(byte id, int len);
+    void deleteTask(byte id);
+    void addToTask(byte id, int len, byte *message);
+    void schedule(byte id, long time_ms);
+    void delayTask(long time_ms);
+    void queryAllTasks();
+    void queryTask(byte id);
 
-private:
-  firmata_task *tasks;
-  firmata_task *running;
-  
-  boolean execute(firmata_task *task);
-  firmata_task *findTask(byte id);
-  void reportTask(byte id, firmata_task *task, boolean error);
+  private:
+    firmata_task *tasks;
+    firmata_task *running;
+
+    boolean execute(firmata_task *task);
+    firmata_task *findTask(byte id);
+    void reportTask(byte id, firmata_task *task, boolean error);
 };
 
 #endif

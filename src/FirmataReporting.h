@@ -22,20 +22,20 @@
 
 #define MINIMUM_SAMPLING_INTERVAL 10
 
-class FirmataReporting:public FirmataFeature
+class FirmataReporting: public FirmataFeature
 {
-public:
-  void setSamplingInterval(int interval);
-  void handleCapability(byte pin); //empty method
-  boolean handlePinMode(byte pin, int mode); //empty method
-  boolean handleSysex(byte command, byte argc, byte* argv);
-  boolean elapsed();
-  void reset();
-private:
-  /* timer variables */
-  unsigned long currentMillis;        // store the current value from millis()
-  unsigned long previousMillis;       // for comparison with currentMillis
-  int samplingInterval;          // how often to run the main loop (in ms)
+  public:
+    void setSamplingInterval(int interval);
+    void handleCapability(byte pin); //empty method
+    boolean handlePinMode(byte pin, int mode); //empty method
+    boolean handleSysex(byte command, byte argc, byte* argv);
+    boolean elapsed();
+    void reset();
+  private:
+    /* timer variables */
+    unsigned long currentMillis;        // store the current value from millis()
+    unsigned long previousMillis;       // for comparison with currentMillis
+    int samplingInterval;          // how often to run the main loop (in ms)
 };
 
 #endif

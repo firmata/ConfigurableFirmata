@@ -20,14 +20,14 @@
 #include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 
-class AnalogOutputFirmata:public FirmataFeature
+class AnalogOutputFirmata: public FirmataFeature
 {
-public:
-  void handleCapability(byte pin);
-  boolean handlePinMode(byte pin, int mode);
-  boolean handleSysex(byte command, byte argc, byte* argv);
-  void reset();
-private:
+  public:
+    void handleCapability(byte pin);
+    boolean handlePinMode(byte pin, int mode);
+    boolean handleSysex(byte command, byte argc, byte* argv);
+    void reset();
+  private:
 };
 
 #endif

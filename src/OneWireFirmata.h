@@ -46,19 +46,17 @@ struct ow_device_info
   boolean power;
 };
 
-class OneWireFirmata:public FirmataFeature
+class OneWireFirmata: public FirmataFeature
 {
-public:
-  boolean handlePinMode(byte pin, int mode);
-  void handleCapability(byte pin);
-  boolean handleSysex(byte command, byte argc, byte* argv);
-  void reset();
-  
-private:
-  ow_device_info pinOneWire[TOTAL_PINS];
-  void oneWireConfig(byte pin, boolean power);
+  public:
+    boolean handlePinMode(byte pin, int mode);
+    void handleCapability(byte pin);
+    boolean handleSysex(byte command, byte argc, byte* argv);
+    void reset();
+
+  private:
+    ow_device_info pinOneWire[TOTAL_PINS];
+    void oneWireConfig(byte pin, boolean power);
 };
 
 #endif
-
-

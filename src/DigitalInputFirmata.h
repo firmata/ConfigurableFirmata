@@ -22,25 +22,25 @@
 
 void reportDigitalInputCallback(byte port, int value);
 
-class DigitalInputFirmata:public FirmataFeature
+class DigitalInputFirmata: public FirmataFeature
 {
-public:
-  DigitalInputFirmata();
-  void reportDigital(byte port, int value);
-  void report(void);
-  void handleCapability(byte pin);
-  boolean handleSysex(byte command, byte argc, byte* argv);
-  boolean handlePinMode(byte pin, int mode);
-  void reset();
+  public:
+    DigitalInputFirmata();
+    void reportDigital(byte port, int value);
+    void report(void);
+    void handleCapability(byte pin);
+    boolean handleSysex(byte command, byte argc, byte* argv);
+    boolean handlePinMode(byte pin, int mode);
+    void reset();
 
-private:
-  /* digital input ports */
-  byte reportPINs[TOTAL_PORTS];       // 1 = report this port, 0 = silence
-  byte previousPINs[TOTAL_PORTS];     // previous 8 bits sent
+  private:
+    /* digital input ports */
+    byte reportPINs[TOTAL_PORTS];       // 1 = report this port, 0 = silence
+    byte previousPINs[TOTAL_PORTS];     // previous 8 bits sent
 
-  /* pins configuration */
-  byte portConfigInputs[TOTAL_PORTS]; // each bit: 1 = pin in INPUT, 0 = anything else
-  void outputPort(byte portNumber, byte portValue, byte forceSend);
+    /* pins configuration */
+    byte portConfigInputs[TOTAL_PORTS]; // each bit: 1 = pin in INPUT, 0 = anything else
+    void outputPort(byte portNumber, byte portValue, byte forceSend);
 };
 
 #endif

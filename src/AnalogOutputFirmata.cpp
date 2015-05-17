@@ -50,4 +50,3 @@ boolean AnalogOutputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   return handleAnalogFirmataSysex(command, argc, argv);
 }
-

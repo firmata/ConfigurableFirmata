@@ -56,6 +56,7 @@ Use [Artistic Style](http://astyle.sourceforge.net/) (astyle) to format your cod
 
 ```
 style = ""
+indent = "spaces"
 indent-spaces = 2
 indent-classes = true
 indent-switches = true

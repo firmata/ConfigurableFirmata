@@ -53,7 +53,7 @@ boolean FirmataReporting::elapsed()
   if (currentMillis - previousMillis > samplingInterval) {
     previousMillis += samplingInterval;
     if (currentMillis - previousMillis > samplingInterval)
-      previousMillis = currentMillis-samplingInterval;
+      previousMillis = currentMillis - samplingInterval;
     return true;
   }
   return false;

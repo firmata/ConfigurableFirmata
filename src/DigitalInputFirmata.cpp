@@ -21,7 +21,7 @@ DigitalInputFirmata *DigitalInputFirmataInstance;
 
 void reportDigitalInputCallback(byte port, int value)
 {
-  DigitalInputFirmataInstance->reportDigital(port,value);
+  DigitalInputFirmataInstance->reportDigital(port, value);
 }
 
 DigitalInputFirmata::DigitalInputFirmata()
@@ -40,7 +40,7 @@ void DigitalInputFirmata::outputPort(byte portNumber, byte portValue, byte force
   // pins not configured as INPUT are cleared to zeros
   portValue = portValue & portConfigInputs[portNumber];
   // only send if the value is different than previously sent
-  if(forceSend || previousPINs[portNumber] != portValue) {
+  if (forceSend || previousPINs[portNumber] != portValue) {
     Firmata.sendDigitalPort(portNumber, portValue);
     previousPINs[portNumber] = portValue;
   }
@@ -90,12 +90,12 @@ boolean DigitalInputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin)) {
     if (mode == INPUT) {
-      portConfigInputs[pin/8] |= (1 << (pin & 7));
+      portConfigInputs[pin / 8] |= (1 << (pin & 7));
       pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
       digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
       return true;
     } else {
-      portConfigInputs[pin/8] &= ~(1 << (pin & 7));
+      portConfigInputs[pin / 8] &= ~(1 << (pin & 7));
     }
   }
   return false;
@@ -111,10 +111,9 @@ void DigitalInputFirmata::handleCapability(byte pin)
 
 void DigitalInputFirmata::reset()
 {
-  for (byte i=0; i < TOTAL_PORTS; i++) {
+  for (byte i = 0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;      // by default, reporting off
     portConfigInputs[i] = 0;    // until activated
     previousPINs[i] = 0;
   }
 }
-

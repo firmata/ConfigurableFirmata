@@ -1,8 +1,8 @@
 /*
   ConfigurableFirmata.h - Firmata library v2.7.0-beta - 2015-4-15
-  Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
-  Copyright (C) 2013 Norbert Truchsess. All rights reserved.
-  Copyright (C) 2013-2015 Jeff Hoefs. All rights reserved.
+  Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
+  Copyright (c) 2013 Norbert Truchsess. All rights reserved.
+  Copyright (c) 2013-2015 Jeff Hoefs. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -141,7 +141,7 @@ class FirmataClass
     void setPinState(byte pin, int state);
 
 
-private:
+  private:
     Stream *FirmataStream;
     /* firmware name and version */
     byte firmwareVersionCount;

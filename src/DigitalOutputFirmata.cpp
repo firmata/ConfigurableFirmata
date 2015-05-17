@@ -21,7 +21,7 @@ DigitalOutputFirmata *DigitalOutputFirmataInstance;
 
 void digitalOutputWriteCallback(byte port, int value)
 {
-  DigitalOutputFirmataInstance->digitalWrite(port,value);
+  DigitalOutputFirmataInstance->digitalWrite(port, value);
 }
 
 DigitalOutputFirmata::DigitalOutputFirmata()
@@ -42,13 +42,13 @@ void DigitalOutputFirmata::reset()
 
 void DigitalOutputFirmata::digitalWrite(byte port, int value)
 {
-  byte pin, lastPin, mask=1, pinWriteMask=0;
+  byte pin, lastPin, mask = 1, pinWriteMask = 0;
 
   if (port < TOTAL_PORTS) {
     // create a mask of the pins on this port that are writable.
-    lastPin = port*8+8;
+    lastPin = port * 8 + 8;
     if (lastPin > TOTAL_PINS) lastPin = TOTAL_PINS;
-    for (pin=port*8; pin < lastPin; pin++) {
+    for (pin = port * 8; pin < lastPin; pin++) {
       // do not disturb non-digital pins (eg, Rx & Tx)
       if (IS_PIN_DIGITAL(pin)) {
         // only write to OUTPUT and INPUT (enables pullup)
@@ -56,7 +56,7 @@ void DigitalOutputFirmata::digitalWrite(byte port, int value)
         byte pinMode = Firmata.getPinMode(pin);
         if (pinMode == OUTPUT || pinMode == INPUT) {
           pinWriteMask |= mask;
-          Firmata.setPinState(pin,((byte)value & mask) ? 1 : 0);
+          Firmata.setPinState(pin, ((byte)value & mask) ? 1 : 0);
         }
       }
       mask = mask << 1;

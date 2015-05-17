@@ -72,14 +72,14 @@ boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
     stepCommand = argv[0];
     deviceNum = argv[1];
 
-    if (deviceNum<MAX_STEPPERS) {
+    if (deviceNum < MAX_STEPPERS) {
       if (stepCommand == STEPPER_CONFIG) {
         interface = argv[2];
         stepsPerRev = (argv[3] + (argv[4] << 7));
 
         directionPin = argv[5]; // or motorPin1 for TWO_WIRE or FOUR_WIRE interface
         stepPin = argv[6]; // // or motorPin2 for TWO_WIRE or FOUR_WIRE interface
-        if (Firmata.getPinMode(directionPin)==IGNORE || Firmata.getPinMode(stepPin)==IGNORE)
+        if (Firmata.getPinMode(directionPin) == IGNORE || Firmata.getPinMode(stepPin) == IGNORE)
           return false;
         Firmata.setPinMode(directionPin, STEPPER);
         Firmata.setPinMode(stepPin, STEPPER);
@@ -91,7 +91,7 @@ boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
         } else if (interface == FirmataStepper::FOUR_WIRE) {
           motorPin3 = argv[7];
           motorPin4 = argv[8];
-          if (Firmata.getPinMode(motorPin3)==IGNORE || Firmata.getPinMode(motorPin4)==IGNORE)
+          if (Firmata.getPinMode(motorPin3) == IGNORE || Firmata.getPinMode(motorPin4) == IGNORE)
             return false;
           Firmata.setPinMode(motorPin3, STEPPER);
           Firmata.setPinMode(motorPin4, STEPPER);
@@ -128,13 +128,13 @@ boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
 
 void StepperFirmata::reset()
 {
-  for (byte i=0;i<MAX_STEPPERS;i++) {
+  for (byte i = 0; i < MAX_STEPPERS; i++) {
     if (stepper[i]) {
       free(stepper[i]);
       stepper[i] = 0;
     }
   }
-  numSteppers=0;
+  numSteppers = 0;
 }
 
 /*==============================================================================
@@ -142,9 +142,9 @@ void StepperFirmata::reset()
  *============================================================================*/
 void StepperFirmata::update()
 {
-  if (numSteppers>0) {
+  if (numSteppers > 0) {
     // if one or more stepper motors are used, update their position
-    for (byte i=0; i<MAX_STEPPERS; i++) {
+    for (byte i = 0; i < MAX_STEPPERS; i++) {
       if (stepper[i]) {
         bool done = stepper[i]->update();
         // send command to client application when stepping is complete

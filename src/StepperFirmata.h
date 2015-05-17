@@ -41,17 +41,17 @@
 #define STEPPER_CONFIG 0
 #define STEPPER_STEP 1
 
-class StepperFirmata:public FirmataFeature
+class StepperFirmata: public FirmataFeature
 {
-public:
-  boolean handlePinMode(byte pin, int mode);
-  void handleCapability(byte pin);
-  boolean handleSysex(byte command, byte argc, byte *argv);
-  void update();
-  void reset();
-private:
-  FirmataStepper *stepper[MAX_STEPPERS];
-  byte numSteppers;
+  public:
+    boolean handlePinMode(byte pin, int mode);
+    void handleCapability(byte pin);
+    boolean handleSysex(byte command, byte argc, byte *argv);
+    void update();
+    void reset();
+  private:
+    FirmataStepper *stepper[MAX_STEPPERS];
+    byte numSteppers;
 };
 
 #endif

@@ -26,19 +26,19 @@
 
 void servoAnalogWrite(byte pin, int value);
 
-class ServoFirmata:public FirmataFeature
+class ServoFirmata: public FirmataFeature
 {
-public:
-  ServoFirmata();
-  boolean analogWrite(byte pin, int value);
-  boolean handlePinMode(byte pin, int mode);
-  void handleCapability(byte pin);
-  boolean handleSysex(byte command, byte argc, byte* argv);
-  void reset();
-private:
-  Servo *servos[MAX_SERVOS];
-  void attach(byte pin, int minPulse, int maxPulse);
-  void detach(byte pin);
+  public:
+    ServoFirmata();
+    boolean analogWrite(byte pin, int value);
+    boolean handlePinMode(byte pin, int mode);
+    void handleCapability(byte pin);
+    boolean handleSysex(byte command, byte argc, byte* argv);
+    void reset();
+  private:
+    Servo *servos[MAX_SERVOS];
+    void attach(byte pin, int minPulse, int maxPulse);
+    void detach(byte pin);
 };
 
 
@@ -52,7 +52,7 @@ ServoFirmata *ServoInstance;
 
 void servoAnalogWrite(byte pin, int value)
 {
-  ServoInstance->analogWrite(pin,value);
+  ServoInstance->analogWrite(pin, value);
 }
 
 ServoFirmata::ServoFirmata()
@@ -72,8 +72,8 @@ boolean ServoFirmata::analogWrite(byte pin, int value)
 boolean ServoFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_SERVO(pin)) {
-    if (mode==SERVO) {
-      attach(pin,-1,-1);
+    if (mode == SERVO) {
+      attach(pin, -1, -1);
       return true;
     } else {
       detach(pin);
@@ -92,11 +92,11 @@ void ServoFirmata::handleCapability(byte pin)
 
 boolean ServoFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
-  if(command == SERVO_CONFIG) {
+  if (command == SERVO_CONFIG) {
     if (argc > 4) {
       // these vars are here for clarity, they'll optimized away by the compiler
       byte pin = argv[0];
-      if (IS_PIN_SERVO(pin) && Firmata.getPinMode(pin)!=IGNORE) {
+      if (IS_PIN_SERVO(pin) && Firmata.getPinMode(pin) != IGNORE) {
         int minPulse = argv[1] + (argv[2] << 7);
         int maxPulse = argv[3] + (argv[4] << 7);
         Firmata.setPinMode(pin, SERVO);
@@ -117,8 +117,8 @@ void ServoFirmata::attach(byte pin, int minPulse, int maxPulse)
   }
   if (servo->attached())
     servo->detach();
-  if (minPulse>=0 || maxPulse>=0)
-    servo->attach(PIN_TO_DIGITAL(pin),minPulse,maxPulse);
+  if (minPulse >= 0 || maxPulse >= 0)
+    servo->attach(PIN_TO_DIGITAL(pin), minPulse, maxPulse);
   else
     servo->attach(PIN_TO_DIGITAL(pin));
 }
@@ -130,13 +130,13 @@ void ServoFirmata::detach(byte pin)
     if (servo->attached())
       servo->detach();
     free(servo);
-    servos[PIN_TO_SERVO(pin)]=NULL;
+    servos[PIN_TO_SERVO(pin)] = NULL;
   }
 }
 
 void ServoFirmata::reset()
 {
-  for (byte pin=0;pin<TOTAL_PINS;pin++) {
+  for (byte pin = 0; pin < TOTAL_PINS; pin++) {
     if (IS_PIN_SERVO(pin)) {
       detach(pin);
     }
