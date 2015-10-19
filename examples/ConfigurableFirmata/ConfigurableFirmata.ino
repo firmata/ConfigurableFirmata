@@ -22,7 +22,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: April 25, 2015
+  Last updated by Jeff Hoefs: October 18, 2015
 */
 
 
@@ -107,6 +107,9 @@ OneWireFirmata oneWire;
 
 #include <StepperFirmata.h>
 StepperFirmata stepper;
+
+#include <ToneFirmata.h>
+ToneFirmata toneFirmata;
 
 #include <FirmataExt.h>
 FirmataExt firmataExt;
@@ -237,6 +240,9 @@ void setup()
 #endif
 #ifdef StepperFirmata_h
   firmataExt.addFeature(stepper);
+#endif
+#ifdef ToneFirmata_h
+  firmataExt.addFeature(toneFirmata);
 #endif
 #ifdef FirmataReporting_h
   firmataExt.addFeature(reporting);
