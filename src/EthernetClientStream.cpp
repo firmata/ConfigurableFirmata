@@ -13,8 +13,6 @@
   version 2.1 of the License, or (at your option) any later version.
 
   See file LICENSE.txt for further informations on licensing terms.
-
-  formatted using the GNU C formatting and indenting
  */
 
 #include "EthernetClientStream.h"
@@ -65,12 +63,16 @@ EthernetClientStream::write(uint8_t c)
 void
 EthernetClientStream::maintain(IPAddress localip)
 {
-  if (this->localip != localip)
-  {
-    this->localip = localip;
-    if (connected)
-      stop();
-  }
+// temporary hack to Firmata to compile for Intel Galileo
+// the issue is documented here: https://github.com/firmata/arduino/issues/218
+#if !defined(ARDUINO_LINUX)
+  if (this->localip!=localip)
+    {
+      this->localip = localip;
+      if (connected)
+        stop();
+    }
+#endif
 }
 
 void

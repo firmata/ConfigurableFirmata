@@ -11,9 +11,9 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
+  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: April 25, 2015
+  Last updated by Jeff Hoefs: November 15th, 2015
 */
 
 
@@ -62,13 +62,13 @@
  *============================================================================*/
 #define NETWORK_FIRMATA
 //replace with ip of server you want to connect to, comment out if using 'remote_host'
-#define remote_ip IPAddress(192,168,0,1)
+#define remote_ip IPAddress(192, 168, 0, 1)
 //replace with hostname of server you want to connect to, comment out if using 'remote_ip'
 #define remote_host "server.local"
 //replace with the port that your server is listening on
 #define remote_port 3030
 //replace with arduinos ip-address. Comment out if Ethernet-startup should use dhcp. Is ignored on Yun
-#define local_ip IPAddress(192,168,0,6)
+#define local_ip IPAddress(192, 168, 0, 6)
 //replace with ethernet shield mac. It's mandatory every device is assigned a unique mac. Is ignored on Yun
 const byte mac[] = {0x90, 0xA2, 0xDA, 0x0D, 0x07, 0x02};
 #endif
@@ -94,11 +94,11 @@ AnalogInputFirmata analogInput;
 #include <AnalogOutputFirmata.h>
 AnalogOutputFirmata analogOutput;
 
-#include <Servo.h> //wouldn't load from ServoFirmata.h in Arduino1.0.3
+#include <Servo.h>
 #include <ServoFirmata.h>
 ServoFirmata servo;
 
-#include <Wire.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
+#include <Wire.h>
 #include <I2CFirmata.h>
 I2CFirmata i2c;
 
@@ -173,7 +173,7 @@ void systemResetCallback()
     if (IS_PIN_ANALOG(i)) {
 #ifdef AnalogInputFirmata_h
       // turns off pullup, configures everything
-      Firmata.setPinMode(i, ANALOG);
+      Firmata.setPinMode(i, PIN_MODE_ANALOG);
 #endif
     } else if (IS_PIN_DIGITAL(i)) {
 #ifdef DigitalOutputFirmata_h
@@ -252,22 +252,26 @@ void setup()
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
   // Network Firmata communicates with Ethernet-shields over SPI. Therefor all
-  // SPI-pins must be set to IGNORE. Otherwise Firmata would break SPI-communication.
+  // SPI-pins must be set to PIN_MODE_IGNORE. Otherwise Firmata would break SPI-communication.
   // add Pin 10 and configure pin 53 as output if using a MEGA with Ethernetshield.
   // No need to ignore pin 10 on MEGA with ENC28J60, as here pin 53 should be connected to SS:
 #ifdef NETWORK_FIRMATA
   // ignore SPI and pin 4 that is SS for SD-Card on Ethernet-shield
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_SPI(i)
-        || 4 == i
-        // || 10==i //explicitly ignore pin 10 on MEGA as 53 is hardware-SS but Ethernet-shield uses pin 10 for SS
+        || 4 == i  // SD-Card on Ethernet-shiedl uses pin 4 for SS
+        || 10 == i // Ethernet-shield uses pin 10 for SS
        ) {
-      Firmata.setPinMode(i, IGNORE);
+      Firmata.setPinMode(i, PIN_MODE_IGNORE);
     }
   }
   //  pinMode(PIN_TO_DIGITAL(53), OUTPUT); configure hardware-SS as output on MEGA
   pinMode(PIN_TO_DIGITAL(4), OUTPUT); // switch off SD-card bypassing Firmata
   digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
+
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
+#endif
 
   // start up Network Firmata:
   Firmata.begin(stream);

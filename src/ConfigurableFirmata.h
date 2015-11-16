@@ -34,6 +34,7 @@
 #define REPORT_DIGITAL          0xD0 // enable digital input by port pair
 //
 #define SET_PIN_MODE            0xF4 // set a pin to INPUT/OUTPUT/PWM/etc
+#define SET_DIGITAL_PIN_VALUE   0xF5 // set value of an individual digital pin
 //
 #define REPORT_VERSION          0xF9 // report protocol version
 #define SYSTEM_RESET            0xFF // reset from MIDI
@@ -43,6 +44,7 @@
 
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
+#define SERIAL_MESSAGE          0x60 // communicate with serial devices, including other boards
 #define ENCODER_DATA            0x61 // reply with encoders current positions
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
@@ -72,18 +74,30 @@
 #define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
 
 // pin modes
-//#define INPUT                 0x00 // defined in wiring.h
-//#define OUTPUT                0x01 // defined in wiring.h
-#define ANALOG                  0x02 // analog pin in analogInput mode
-#define PWM                     0x03 // digital pin in PWM output mode
-#define SERVO                   0x04 // digital pin in Servo output mode
-#define SHIFT                   0x05 // shiftIn/shiftOut mode
-#define I2C                     0x06 // pin included in I2C setup
-#define ONEWIRE                 0x07 // pin configured for 1-wire
-#define STEPPER                 0x08 // pin configured for stepper motor
-#define ENCODER                 0x09 // pin configured for encoders
-#define IGNORE                  0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
-#define TOTAL_PIN_MODES         11
+//#define INPUT                 0x00 // defined in Arduino.h
+//#define OUTPUT                0x01 // defined in Arduino.h
+#define PIN_MODE_ANALOG         0x02 // analog pin in analogInput mode
+#define PIN_MODE_PWM            0x03 // digital pin in PWM output mode
+#define PIN_MODE_SERVO          0x04 // digital pin in Servo output mode
+#define PIN_MODE_SHIFT          0x05 // shiftIn/shiftOut mode
+#define PIN_MODE_I2C            0x06 // pin included in I2C setup
+#define PIN_MODE_ONEWIRE        0x07 // pin configured for 1-wire
+#define PIN_MODE_STEPPER        0x08 // pin configured for stepper motor
+#define PIN_MODE_ENCODER        0x09 // pin configured for rotary encoders
+#define PIN_MODE_SERIAL         0x0A // pin configured for serial communication
+#define PIN_MODE_PULLUP         0x0B // enable internal pull-up resistor for pin
+#define PIN_MODE_IGNORE         0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
+#define TOTAL_PIN_MODES         13
+// DEPRECATED as of Firmata v2.5
+#define ANALOG                  0x02 // same as PIN_MODE_ANALOG
+#define PWM                     0x03 // same as PIN_MODE_PWM
+#define SERVO                   0x04 // same as PIN_MODE_SERVO
+#define SHIFT                   0x05 // same as PIN_MODE_SHIFT
+#define I2C                     0x06 // same as PIN_MODE_I2C
+#define ONEWIRE                 0x07 // same as PIN_MODE_ONEWIRE
+#define STEPPER                 0x08 // same as PIN_MODE_STEPPER
+#define ENCODER                 0x09 // same as PIN_MODE_ENCODER
+#define IGNORE                  0x7F // same as PIN_MODE_IGNORE
 
 extern "C" {
   // callback function types
@@ -140,6 +154,10 @@ class FirmataClass
     int getPinState(byte pin);
     void setPinState(byte pin, int state);
 
+    /* utility methods */
+    void sendValueAsTwo7bitBytes(int value);
+    void startSysex(void);
+    void endSysex(void);
 
   private:
     Stream *FirmataStream;
@@ -166,6 +184,7 @@ class FirmataClass
     callbackFunction currentReportAnalogCallback;
     callbackFunction currentReportDigitalCallback;
     callbackFunction currentPinModeCallback;
+    callbackFunction currentPinValueCallback;
     systemResetCallbackFunction currentSystemResetCallback;
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
@@ -175,9 +194,6 @@ class FirmataClass
     void processSysexMessage(void);
     void systemReset(void);
     void strobeBlinkPin(int count, int onInterval, int offInterval);
-    void sendValueAsTwo7bitBytes(int value);
-    void startSysex(void);
-    void endSysex(void);
 };
 
 extern FirmataClass Firmata;

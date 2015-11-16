@@ -3,8 +3,8 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
+  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -12,6 +12,8 @@
   version 2.1 of the License, or (at your option) any later version.
 
   See file LICENSE.txt for further informations on licensing terms.
+
+  Last updated by Jeff Hoefs: November 15th, 2015
 */
 
 #include <ConfigurableFirmata.h>
@@ -60,11 +62,10 @@ void AnalogInputFirmata::reportAnalog(byte analogPin, int value)
 boolean AnalogInputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_ANALOG(pin)) {
-    if (mode == ANALOG) {
+    if (mode == PIN_MODE_ANALOG) {
       reportAnalog(PIN_TO_ANALOG(pin), 1); // turn on reporting
       if (IS_PIN_DIGITAL(pin)) {
         pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
-        digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
       }
       return true;
     } else {
@@ -77,8 +78,8 @@ boolean AnalogInputFirmata::handlePinMode(byte pin, int mode)
 void AnalogInputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_ANALOG(pin)) {
-    Firmata.write(ANALOG);
-    Firmata.write(10);
+    Firmata.write(PIN_MODE_ANALOG);
+    Firmata.write(10); // 10 = 10-bit resolution
   }
 }
 
@@ -108,7 +109,7 @@ void AnalogInputFirmata::report()
   byte pin, analogPin;
   /* ANALOGREAD - do all analogReads() at the configured sampling interval */
   for (pin = 0; pin < TOTAL_PINS; pin++) {
-    if (IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == ANALOG) {
+    if (IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == PIN_MODE_ANALOG) {
       analogPin = PIN_TO_ANALOG(pin);
       if (analogInputsToReport & (1 << analogPin)) {
         Firmata.sendAnalog(analogPin, analogRead(analogPin));

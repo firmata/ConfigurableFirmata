@@ -3,8 +3,8 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
+  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -15,6 +15,8 @@
 
   ServoFirmata.cpp has been merged into this header file as a hack to avoid having to
   include Servo.h for every arduino sketch that includes ConfigurableFirmata.
+
+  Last updated by Jeff Hoefs: November 15th, 2015
 */
 
 #ifndef I2CFirmata_h
@@ -89,11 +91,7 @@ void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes)
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
   if (theRegister != REGISTER_NOT_SPECIFIED) {
     Wire.beginTransmission(address);
-#if ARDUINO >= 100
     Wire.write((byte)theRegister);
-#else
-    Wire.send((byte)theRegister);
-#endif
     Wire.endTransmission();
     // do not set a value of 0
     if (i2cReadDelayTime > 0) {
@@ -117,11 +115,7 @@ void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes)
   i2cRxData[1] = theRegister;
 
   for (int i = 0; i < numBytes && Wire.available(); i++) {
-#if ARDUINO >= 100
     i2cRxData[2 + i] = Wire.read();
-#else
-    i2cRxData[2 + i] = Wire.receive();
-#endif
   }
 
   // send slave address, register and received bytes
@@ -131,13 +125,13 @@ void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes)
 boolean I2CFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_I2C(pin)) {
-    if (mode == I2C) {
+    if (mode == PIN_MODE_I2C) {
       // the user must call I2C_CONFIG to enable I2C for a device
       return true;
     } else if (isI2CEnabled) {
       // disable i2c so pins can be used for other functions
       // the following if statements should reconfigure the pins properly
-      if (Firmata.getPinMode(pin) == I2C) {
+      if (Firmata.getPinMode(pin) == PIN_MODE_I2C) {
         disableI2CPins();
       }
     }
@@ -148,8 +142,8 @@ boolean I2CFirmata::handlePinMode(byte pin, int mode)
 void I2CFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_I2C(pin)) {
-    Firmata.write(I2C);
-    Firmata.write(1);  // to do: determine appropriate value
+    Firmata.write(PIN_MODE_I2C);
+    Firmata.write(1); // TODO: could assign a number to map to SCL or SDA
   }
 }
 
@@ -187,11 +181,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
       Wire.beginTransmission(slaveAddress);
       for (byte i = 2; i < argc; i += 2) {
         data = argv[i] + (argv[i + 1] << 7);
-#if ARDUINO >= 100
         Wire.write(data);
-#else
-        Wire.send(data);
-#endif
       }
       Wire.endTransmission();
       delayMicroseconds(70);
@@ -201,13 +191,14 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
         // a slave register is specified
         slaveRegister = argv[2] + (argv[3] << 7);
         data = argv[4] + (argv[5] << 7);  // bytes to read
-        readAndReportData(slaveAddress, (int)slaveRegister, data);
       }
       else {
         // a slave register is NOT specified
+        slaveRegister = REGISTER_NOT_SPECIFIED;
         data = argv[2] + (argv[3] << 7);  // bytes to read
         readAndReportData(slaveAddress, (int)REGISTER_NOT_SPECIFIED, data);
       }
+      readAndReportData(slaveAddress, (int)slaveRegister, data);
       break;
     case I2C_READ_CONTINUOUSLY:
       if ((queryIndex + 1) >= MAX_QUERIES) {
@@ -283,18 +274,17 @@ boolean I2CFirmata::enableI2CPins()
   // Arduino.h to get SCL and SDA pins
   for (i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_I2C(i)) {
-      if (Firmata.getPinMode(i) == IGNORE) {
+      if (Firmata.getPinMode(i) == PIN_MODE_IGNORE) {
         return false;
       }
       // mark pins as i2c so they are ignore in non i2c data requests
-      Firmata.setPinMode(i, I2C);
-      pinMode(i, I2C);
+      Firmata.setPinMode(i, PIN_MODE_I2C);
+      pinMode(i, PIN_MODE_I2C);
     }
   }
 
   isI2CEnabled = true;
 
-  // is there enough time before the first I2C request to call this here?
   Wire.begin();
 }
 

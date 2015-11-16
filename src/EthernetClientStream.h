@@ -13,8 +13,6 @@
   version 2.1 of the License, or (at your option) any later version.
 
   See file LICENSE.txt for further informations on licensing terms.
-
-  formatted using the GNU C formatting and indenting
  */
 
 #ifndef ETHERNETCLIENTSTREAM_H
