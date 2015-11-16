@@ -23,7 +23,7 @@ DigitalOutputFirmata *DigitalOutputFirmataInstance;
 
 void digitalOutputWriteCallback(byte port, int value)
 {
-  DigitalOutputFirmataInstance->digitalWrite(port, value);
+  DigitalOutputFirmataInstance->digitalWritePort(port, value);
 }
 
 /*
@@ -36,8 +36,8 @@ void handleSetPinValueCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS && IS_PIN_DIGITAL(pin)) {
     if (Firmata.getPinMode(pin) == OUTPUT) {
+      digitalWrite(pin, value);
       Firmata.setPinState(pin, value);
-      DigitalOutputFirmataInstance->digitalWrite(PIN_TO_DIGITAL(pin), value);
     }
   }
 }
@@ -59,7 +59,7 @@ void DigitalOutputFirmata::reset()
 
 }
 
-void DigitalOutputFirmata::digitalWrite(byte port, int value)
+void DigitalOutputFirmata::digitalWritePort(byte port, int value)
 {
   byte pin, lastPin, pinValue, pinMode, mask = 1, pinWriteMask = 0;
 
