@@ -10,6 +10,8 @@
   version 2.1 of the License, or (at your option) any later version.
 
   See file LICENSE.txt for further informations on licensing terms.
+
+  Last updated November 15th, 2015
 */
 
 #ifndef Firmata_Boards_h
@@ -141,7 +143,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #endif
 
 // Arduino Duemilanove, Diecimila, and NG
-#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__)
 #if defined(NUM_ANALOG_INPUTS) && NUM_ANALOG_INPUTS == 6
 #define TOTAL_ANALOG_PINS       6
 #define TOTAL_PINS              20 // 14 digital + 6 analog
@@ -203,6 +205,12 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define TOTAL_ANALOG_PINS       16
 #define TOTAL_PINS              70 // 54 digital + 16 analog
 #define VERSION_BLINK_PIN       13
+#define PIN_SERIAL1_RX          19
+#define PIN_SERIAL1_TX          18
+#define PIN_SERIAL2_RX          17
+#define PIN_SERIAL2_TX          16
+#define PIN_SERIAL3_RX          15
+#define PIN_SERIAL3_TX          14
 #define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) < TOTAL_PINS)
 #define IS_PIN_ANALOG(p)        ((p) >= 54 && (p) < TOTAL_PINS)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
@@ -210,6 +218,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21)
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
 #define IS_PIN_INTERRUPT(p)     ((p)==2 || (p)==3 || (p)==18 || (p)==19 || (p)==20 || (p)==21)
+#define IS_PIN_SERIAL(p)        ((p) > 13 && (p) < 20)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 54)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
@@ -221,16 +230,46 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define TOTAL_ANALOG_PINS       12
 #define TOTAL_PINS              66 // 54 digital + 12 analog
 #define VERSION_BLINK_PIN       13
+#define PIN_SERIAL1_RX          19
+#define PIN_SERIAL1_TX          18
+#define PIN_SERIAL2_RX          17
+#define PIN_SERIAL2_TX          16
+#define PIN_SERIAL3_RX          15
+#define PIN_SERIAL3_TX          14
 #define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) < TOTAL_PINS)
 #define IS_PIN_ANALOG(p)        ((p) >= 54 && (p) < TOTAL_PINS)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         ((p) >= 2 && (p) - 2 < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21) // 70 71
 #define IS_PIN_INTERRUPT(p)     IS_PIN_DIGITAL(p)
+#define IS_PIN_SERIAL(p)        ((p) > 13 && (p) < 20)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 54)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
+
+
+// Arduino Zero
+// Note this will work with an Arduino Zero Pro, but not with an Arduino M0 Pro
+// Arduino M0 Pro does not properly map pins to the board labeled pin numbers
+#elif defined(_VARIANT_ARDUINO_ZERO_)
+#define TOTAL_ANALOG_PINS       6
+#define TOTAL_PINS              25 // 14 digital + 6 analog + 2 i2c + 3 spi
+#define TOTAL_PORTS             3  // set when TOTAL_PINS > num digitial I/O pins
+#define VERSION_BLINK_PIN       LED_BUILTIN
+//#define PIN_SERIAL1_RX          0 // already defined in zero core variant.h
+//#define PIN_SERIAL1_TX          1 // already defined in zero core variant.h
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 19)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 14 + TOTAL_ANALOG_PINS)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
+#define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21) // SDA = 20, SCL = 21
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK) // SS = A2
+#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
 
 
 // Teensy 1.0
@@ -238,6 +277,8 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define TOTAL_ANALOG_PINS       0
 #define TOTAL_PINS              21 // 21 digital + no analog
 #define VERSION_BLINK_PIN       6
+#define PIN_SERIAL1_RX          2
+#define PIN_SERIAL1_TX          3
 #define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < TOTAL_PINS)
 #define IS_PIN_ANALOG(p)        (0)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
@@ -245,6 +286,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_I2C(p)           (0)
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
 #define IS_PIN_INTERRUPT(p)     digitalPinToInterrupt(p)
+#define IS_PIN_SERIAL(p)        ((p) == 2 || (p) == 3)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        (0)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
@@ -256,6 +298,8 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define TOTAL_ANALOG_PINS       12
 #define TOTAL_PINS              25 // 11 digital + 12 analog
 #define VERSION_BLINK_PIN       11
+#define PIN_SERIAL1_RX          7
+#define PIN_SERIAL1_TX          8
 #define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < TOTAL_PINS)
 #define IS_PIN_ANALOG(p)        ((p) >= 11 && (p) <= 22)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
@@ -263,6 +307,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_I2C(p)           ((p) == 5 || (p) == 6)
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
 #define IS_PIN_INTERRUPT(p)     digitalPinToInterrupt(p)
+#define IS_PIN_SERIAL(p)        ((p) == 7 || (p) == 8)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        (((p) < 22) ? 21 - (p) : 11)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
@@ -274,12 +319,19 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define TOTAL_ANALOG_PINS       14
 #define TOTAL_PINS              38 // 24 digital + 10 analog-digital + 4 analog
 #define VERSION_BLINK_PIN       13
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
+#define PIN_SERIAL2_RX          9
+#define PIN_SERIAL2_TX          10
+#define PIN_SERIAL3_RX          7
+#define PIN_SERIAL3_TX          8
 #define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 33)
 #define IS_PIN_ANALOG(p)        (((p) >= 14 && (p) <= 23) || ((p) >= 34 && (p) <= 38))
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 18 || (p) == 19)
 #define IS_PIN_INTERRUPT(p)     digitalPinToInterrupt(p)
+#define IS_PIN_SERIAL(p)        (((p) > 6 && (p) < 11) || ((p) == 0 || (p) == 1))
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        (((p) <= 23) ? (p) - 14 : (p) - 24)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
@@ -291,29 +343,38 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define TOTAL_ANALOG_PINS       13
 #define TOTAL_PINS              27 // 27 digital + 13 analog-digital
 #define VERSION_BLINK_PIN       13
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
+#define PIN_SERIAL2_RX          9
+#define PIN_SERIAL2_TX          10
+#define PIN_SERIAL3_RX          7
+#define PIN_SERIAL3_TX          8
 #define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 26)
 #define IS_PIN_ANALOG(p)        ((p) >= 14)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 18 || (p) == 19)
-#define IS_PIN_INTERRUPT(p)     digitalPinToInterrupt(p)
+#define IS_PIN_SERIAL(p)        (((p) > 6 && (p) < 11) || ((p) == 0 || (p) == 1))
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 14)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
+
 
 // Teensy++ 1.0 and 2.0
 #elif defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__)
 #define TOTAL_ANALOG_PINS       8
 #define TOTAL_PINS              46 // 38 digital + 8 analog
 #define VERSION_BLINK_PIN       6
+#define PIN_SERIAL1_RX          2
+#define PIN_SERIAL1_TX          3
 #define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < TOTAL_PINS)
 #define IS_PIN_ANALOG(p)        ((p) >= 38 && (p) < TOTAL_PINS)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 0 || (p) == 1)
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
-#define IS_PIN_INTERRUPT(p)     digitalPinToInterrupt(p)
+#define IS_PIN_SERIAL(p)        ((p) == 2 || (p) == 3)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 38)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
@@ -325,32 +386,59 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define TOTAL_ANALOG_PINS       12
 #define TOTAL_PINS              30 // 14 digital + 12 analog + 4 SPI (D14-D17 on ISP header)
 #define VERSION_BLINK_PIN       13
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
 #define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < TOTAL_PINS)
 #define IS_PIN_ANALOG(p)        ((p) >= 18 && (p) < TOTAL_PINS)
 #define IS_PIN_PWM(p)           ((p) == 3 || (p) == 5 || (p) == 6 || (p) == 9 || (p) == 10 || (p) == 11 || (p) == 13)
 #define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 2 || (p) == 3)
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
-#define IS_PIN_INTERRUPT(p)     ((p)==0 || (p)==1 || (p)==2 || (p)==3 || (p)==7)
+#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        (p) - 18
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
 
 
-// Intel Galileo Board
+// Intel Galileo Board (gen 1 and 2) and Intel Edison
 #elif defined(ARDUINO_LINUX)
 #define TOTAL_ANALOG_PINS       6
 #define TOTAL_PINS              20 // 14 digital + 6 analog
 #define VERSION_BLINK_PIN       13
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
 #define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) <= 19)
 #define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) <= 19)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) - 2 < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 14)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         ((p) - 2)
+
+
+// Pinoccio Scout
+// Note: digital pins 9-16 are usable but not labeled on the board numerically.
+// SS=9, MOSI=10, MISO=11, SCK=12, RX1=13, TX1=14, SCL=15, SDA=16
+#elif defined(ARDUINO_PINOCCIO)
+#define TOTAL_ANALOG_PINS       8
+#define TOTAL_PINS              NUM_DIGITAL_PINS // 32
+#define VERSION_BLINK_PIN       23
+#define PIN_SERIAL1_RX          13
+#define PIN_SERIAL1_TX          14
+#define IS_PIN_DIGITAL(p)       (((p) >= 2) && ((p) <= 16)) || (((p) >= 24) && ((p) <= 31))
+#define IS_PIN_ANALOG(p)        ((p) >= 24 && (p) <= 31)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         IS_PIN_DIGITAL(p)
+#define IS_PIN_I2C(p)           ((p) == SCL || (p) == SDA)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_SERIAL(p)        ((p) == 13 || (p) == 14)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 24)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
@@ -397,6 +485,10 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 // as long this is not defined for all boards:
 #ifndef IS_PIN_SPI
 #define IS_PIN_SPI(p)           (0)
+#endif
+
+#ifndef IS_PIN_SERIAL
+#define IS_PIN_SERIAL(p)        0
 #endif
 
 /*==============================================================================
