@@ -13,17 +13,17 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: November 15th, 2015
+  Last updated by Jeff Hoefs: November 22nd, 2015
 */
 
 #include <ConfigurableFirmata.h>
 #include "AnalogFirmata.h"
 #include "AnalogOutputFirmata.h"
 
-//AnalogOutputFirmata::AnalogOutputFirmata()
-//{
-//  Firmata.attach(REPORT_ANALOG, analogWriteCallback); //TODO: analogWriteCallback is the same for PWM and SERVO
-//}
+AnalogOutputFirmata::AnalogOutputFirmata()
+{
+  Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
+}
 
 void AnalogOutputFirmata::reset()
 {
@@ -50,5 +50,15 @@ void AnalogOutputFirmata::handleCapability(byte pin)
 
 boolean AnalogOutputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
-  return handleAnalogFirmataSysex(command, argc, argv);
+  if (command == EXTENDED_ANALOG) {
+    if (argc > 1) {
+      int val = argv[1];
+      if (argc > 2) val |= (argv[2] << 7);
+      if (argc > 3) val |= (argv[3] << 14);
+      analogWriteCallback(argv[0], val);
+      return true;
+    }
+  } else {
+    return handleAnalogFirmataSysex(command, argc, argv);
+  }
 }

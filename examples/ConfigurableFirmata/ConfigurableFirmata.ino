@@ -94,6 +94,10 @@ AnalogOutputFirmata analogOutput;
 #include <Servo.h>
 #include <ServoFirmata.h>
 ServoFirmata servo;
+// ServoFirmata depends on AnalogOutputFirmata
+#if defined ServoFirmata_h && ! defined AnalogOutputFirmata_h
+#error AnalogOutputFirmata must be included to use ServoFirmata
+#endif
 
 #include <Wire.h>
 #include <I2CFirmata.h>
@@ -207,11 +211,6 @@ void setup()
   delay(1000);
 #endif
   Firmata.setFirmwareVersion(FIRMWARE_MAJOR_VERSION, FIRMWARE_MINOR_VERSION);
-
-#if defined AnalogOutputFirmata_h || defined ServoFirmata_h
-  /* analogWriteCallback is declared in AnalogWrite.h */
-  Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
-#endif
 
 #ifdef FirmataExt_h
 #ifdef DigitalInputFirmata_h

@@ -13,7 +13,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: November 15th, 2015
+  Last updated by Jeff Hoefs: November 22nd, 2015
 */
 
 #include <ConfigurableFirmata.h>
@@ -85,17 +85,7 @@ void AnalogInputFirmata::handleCapability(byte pin)
 
 boolean AnalogInputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
-  if (command == EXTENDED_ANALOG) {
-    if (argc > 1) {
-      int val = argv[1];
-      if (argc > 2) val |= (argv[2] << 7);
-      if (argc > 3) val |= (argv[3] << 14);
-      analogWrite(argv[0], val);
-      return true;
-    }
-  } else {
-    return handleAnalogFirmataSysex(command, argc, argv);
-  }
+  return handleAnalogFirmataSysex(command, argc, argv);
 }
 
 void AnalogInputFirmata::reset()

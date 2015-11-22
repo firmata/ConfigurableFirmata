@@ -20,9 +20,14 @@
 #include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 
+// analogWriteCallback is defined in AnalogWrite.h but must also be declared here in order
+// for AnalogOutputFirmata to compile
+void analogWriteCallback(byte pin, int value);
+
 class AnalogOutputFirmata: public FirmataFeature
 {
   public:
+    AnalogOutputFirmata();
     void handleCapability(byte pin);
     boolean handlePinMode(byte pin, int mode);
     boolean handleSysex(byte command, byte argc, byte* argv);
