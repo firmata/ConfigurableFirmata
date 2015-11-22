@@ -3,8 +3,8 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
+  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -12,6 +12,8 @@
   version 2.1 of the License, or (at your option) any later version.
 
   See file LICENSE.txt for further informations on licensing terms.
+
+  Last updated by Jeff Hoefs: November 15th, 2015
 */
 
 #include <ConfigurableFirmata.h>
@@ -21,7 +23,7 @@ FirmataExt *FirmataExtInstance;
 
 void handleSetPinModeCallback(byte pin, int mode)
 {
-  if (!FirmataExtInstance->handlePinMode(pin, mode) && mode != IGNORE) {
+  if (!FirmataExtInstance->handlePinMode(pin, mode) && mode != PIN_MODE_IGNORE) {
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
   }
 }
@@ -80,7 +82,7 @@ boolean FirmataExt::handleSysex(byte command, byte argc, byte* argv)
       Firmata.write(START_SYSEX);
       Firmata.write(CAPABILITY_RESPONSE);
       for (byte pin = 0; pin < TOTAL_PINS; pin++) {
-        if (Firmata.getPinMode(pin) != IGNORE) {
+        if (Firmata.getPinMode(pin) != PIN_MODE_IGNORE) {
           for (byte i = 0; i < numFeatures; i++) {
             features[i]->handleCapability(pin);
           }

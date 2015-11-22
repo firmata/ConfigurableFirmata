@@ -8,6 +8,8 @@
   version 2.1 of the License, or (at your option) any later version.
 
   See file LICENSE.txt for further informations on licensing terms.
+
+  Last updated by Jeff Hoefs: November 15th, 2015
 */
 
 #include <ConfigurableFirmata.h>
@@ -16,7 +18,7 @@
 
 boolean OneWireFirmata::handlePinMode(byte pin, int mode)
 {
-  if (IS_PIN_DIGITAL(pin) && mode == ONEWIRE) {
+  if (IS_PIN_DIGITAL(pin) && mode == PIN_MODE_ONEWIRE) {
     oneWireConfig(pin, ONEWIRE_POWER);
     return true;
   }
@@ -26,7 +28,7 @@ boolean OneWireFirmata::handlePinMode(byte pin, int mode)
 void OneWireFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
-    Firmata.write(ONEWIRE);
+    Firmata.write(PIN_MODE_ONEWIRE);
     Firmata.write(1);
   }
 }
@@ -75,8 +77,8 @@ boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
             }
           case ONEWIRE_CONFIG_REQUEST:
             {
-              if (argc == 3 && Firmata.getPinMode(pin) != IGNORE) {
-                Firmata.setPinMode(pin, ONEWIRE);
+              if (argc == 3 && Firmata.getPinMode(pin) != PIN_MODE_IGNORE) {
+                Firmata.setPinMode(pin, PIN_MODE_ONEWIRE);
                 oneWireConfig(pin, argv[2]); // this calls oneWireConfig again, this time setting the correct config (which doesn't cause harm though)
               } else {
                 return false;

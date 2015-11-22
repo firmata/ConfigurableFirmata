@@ -3,8 +3,8 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
+  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -15,6 +15,8 @@
 
   ServoFirmata.cpp has been merged into this header file as a hack to avoid having to
   include Servo.h for every arduino sketch that includes ConfigurableFirmata.
+
+  Last updated by Jeff Hoefs: November 15th, 2015
 */
 
 #ifndef ServoFirmata_h
@@ -72,7 +74,7 @@ boolean ServoFirmata::analogWrite(byte pin, int value)
 boolean ServoFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_SERVO(pin)) {
-    if (mode == SERVO) {
+    if (mode == PIN_MODE_SERVO) {
       attach(pin, -1, -1);
       return true;
     } else {
@@ -85,7 +87,7 @@ boolean ServoFirmata::handlePinMode(byte pin, int mode)
 void ServoFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_SERVO(pin)) {
-    Firmata.write(SERVO);
+    Firmata.write(PIN_MODE_SERVO);
     Firmata.write(14); //14 bit resolution (Servo takes int as argument)
   }
 }
@@ -96,10 +98,10 @@ boolean ServoFirmata::handleSysex(byte command, byte argc, byte* argv)
     if (argc > 4) {
       // these vars are here for clarity, they'll optimized away by the compiler
       byte pin = argv[0];
-      if (IS_PIN_SERVO(pin) && Firmata.getPinMode(pin) != IGNORE) {
+      if (IS_PIN_SERVO(pin) && Firmata.getPinMode(pin) != PIN_MODE_IGNORE) {
         int minPulse = argv[1] + (argv[2] << 7);
         int maxPulse = argv[3] + (argv[4] << 7);
-        Firmata.setPinMode(pin, SERVO);
+        Firmata.setPinMode(pin, PIN_MODE_SERVO);
         attach(pin, minPulse, maxPulse);
         return true;
       }

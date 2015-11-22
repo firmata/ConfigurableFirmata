@@ -32,8 +32,8 @@ Only a few Firmata client libraries currently support ConfigurableFirmata:
 
 * javascript
   * [https://github.com/jgautier/firmata]
-  * [http://breakoutjs.com]
   * [https://github.com/rwldrn/johnny-five]
+  * [http://breakoutjs.com]
 * perl
   * [https://github.com/ntruchsess/perl-firmata]
 

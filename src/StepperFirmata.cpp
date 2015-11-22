@@ -1,20 +1,9 @@
 /*
- * Firmata is a generic protocol for communicating with microcontrollers
- * from software on a host computer. It is intended to work with
- * any host computer software package.
- *
- * To download a host software package, please clink on the following link
- * to open the download page in your default browser.
- *
- * http://firmata.org/wiki/Download
- */
-
-/*
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
+  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,12 +12,8 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  formatted using the GNU C formatting and indenting
+  Last updated by Jeff Hoefs: November 15th, 2015
 */
-
-/*
- * TODO: use Program Control to load stored profiles from EEPROM
- */
 
 #include <ConfigurableFirmata.h>
 #include "StepperFirmata.h"
@@ -36,7 +21,7 @@
 
 boolean StepperFirmata::handlePinMode(byte pin, int mode)
 {
-  if (mode == STEPPER) {
+  if (mode == PIN_MODE_STEPPER) {
     if (IS_PIN_DIGITAL(pin)) {
       digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
       pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
@@ -49,7 +34,7 @@ boolean StepperFirmata::handlePinMode(byte pin, int mode)
 void StepperFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
-    Firmata.write(STEPPER);
+    Firmata.write(PIN_MODE_STEPPER);
     Firmata.write(21); //21 bits used for number of steps
   }
 }
@@ -79,10 +64,10 @@ boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
 
         directionPin = argv[5]; // or motorPin1 for TWO_WIRE or FOUR_WIRE interface
         stepPin = argv[6]; // // or motorPin2 for TWO_WIRE or FOUR_WIRE interface
-        if (Firmata.getPinMode(directionPin) == IGNORE || Firmata.getPinMode(stepPin) == IGNORE)
+        if (Firmata.getPinMode(directionPin) == PIN_MODE_IGNORE || Firmata.getPinMode(stepPin) == PIN_MODE_IGNORE)
           return false;
-        Firmata.setPinMode(directionPin, STEPPER);
-        Firmata.setPinMode(stepPin, STEPPER);
+        Firmata.setPinMode(directionPin, PIN_MODE_STEPPER);
+        Firmata.setPinMode(stepPin, PIN_MODE_STEPPER);
         if (!stepper[deviceNum]) {
           numSteppers++;
         }
@@ -91,10 +76,10 @@ boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
         } else if (interface == FirmataStepper::FOUR_WIRE) {
           motorPin3 = argv[7];
           motorPin4 = argv[8];
-          if (Firmata.getPinMode(motorPin3) == IGNORE || Firmata.getPinMode(motorPin4) == IGNORE)
+          if (Firmata.getPinMode(motorPin3) == PIN_MODE_IGNORE || Firmata.getPinMode(motorPin4) == PIN_MODE_IGNORE)
             return false;
-          Firmata.setPinMode(motorPin3, STEPPER);
-          Firmata.setPinMode(motorPin4, STEPPER);
+          Firmata.setPinMode(motorPin3, PIN_MODE_STEPPER);
+          Firmata.setPinMode(motorPin4, PIN_MODE_STEPPER);
           stepper[deviceNum] = new FirmataStepper(interface, stepsPerRev, directionPin, stepPin, motorPin3, motorPin4);
         }
       }

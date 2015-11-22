@@ -4,7 +4,7 @@
   as well as EasyDriver (http://schmalzhaus.com/EasyDriver/) and
   other step + direction drive circuits.
 
-  FirmataStepper (0.1) by Jeff Hoefs
+  FirmataStepper (0.2) by Jeff Hoefs
 
   EasyDriver support based on modifications by Chris Coleman
 
