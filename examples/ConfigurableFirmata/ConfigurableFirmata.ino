@@ -22,9 +22,8 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: November 15th, 2015
+  Last updated by Jeff Hoefs: November 22nd, 2015
 */
-
 
 #include "ConfigurableFirmata.h"
 
@@ -77,10 +76,8 @@ const byte mac[] = {0x90, 0xA2, 0xDA, 0x0D, 0x07, 0x02};
 // then comment out the include and declaration for any features that you do
 // not need below.
 
-// Also note that the current compile size for an Arduino Uno with all of the
-// following features enabled is about 22.4k. If you are using an older Arduino
-// or other microcontroller with less memory you will not be able to include
-// all of the following feature classes.
+// WARNING: Including all of the following features (especially if also using Ethernet) may exceed
+// the Flash and/or RAM of lower memory boards such as the Arduino Uno or Leonardo.
 
 #include <DigitalInputFirmata.h>
 DigitalInputFirmata digitalInput;
@@ -107,6 +104,9 @@ OneWireFirmata oneWire;
 
 #include <StepperFirmata.h>
 StepperFirmata stepper;
+
+#include <SerialFirmata.h>
+SerialFirmata serial;
 
 #include <FirmataExt.h>
 FirmataExt firmataExt;
@@ -238,6 +238,9 @@ void setup()
 #ifdef StepperFirmata_h
   firmataExt.addFeature(stepper);
 #endif
+#ifdef SerialFirmata_h
+  firmataExt.addFeature(serial);
+#endif
 #ifdef FirmataReporting_h
   firmataExt.addFeature(reporting);
 #endif
@@ -329,6 +332,9 @@ runtasks: scheduler.runTasks();
 #endif
 #ifdef StepperFirmata_h
   stepper.update();
+#endif
+#ifdef SerialFirmata_h
+  serial.update();
 #endif
 #if defined NETWORK_FIRMATA && !defined local_ip &&!defined _YUN_CLIENT_H_
   if (Ethernet.maintain())
