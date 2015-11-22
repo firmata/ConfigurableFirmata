@@ -1,5 +1,5 @@
 /*
-  ConfigurableFirmata.cpp - Firmata library v2.7.0-beta - 2015-4-15
+  ConfigurableFirmata.pp - ConfigurableFirmata library v2.7.0 - 2015-11-22
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (c) 2013 Norbert Truchsess. All rights reserved.
   Copyright (c) 2013-2015 Jeff Hoefs. All rights reserved.
@@ -85,7 +85,7 @@ void FirmataClass::begin(Stream &s)
   printFirmwareVersion();
 }
 
-// output the protocol version message to the serial port
+// output the Firmata protocol version message to the serial port
 void FirmataClass::printVersion(void)
 {
   FirmataStream->write(REPORT_VERSION);
@@ -93,6 +93,8 @@ void FirmataClass::printVersion(void)
   FirmataStream->write(FIRMATA_MINOR_VERSION);
 }
 
+// blink the Firmata protocol version on the onboard LED
+// First blink the major verson, then the minor version
 void FirmataClass::blinkVersion(void)
 {
   // flash the pin with the protocol version
