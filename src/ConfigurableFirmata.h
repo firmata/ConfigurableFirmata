@@ -1,5 +1,5 @@
 /*
-  ConfigurableFirmata.h - Firmata library v2.7.0-beta - 2015-4-15
+  ConfigurableFirmata.h - ConfigurableFirmata library v2.7.0 - 2015-11-22
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (c) 2013 Norbert Truchsess. All rights reserved.
   Copyright (c) 2013-2015 Jeff Hoefs. All rights reserved.
@@ -22,8 +22,14 @@
  * software can test whether it will be compatible with the currently
  * installed firmware. */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   7 // for backwards compatible changes
+#define FIRMATA_MINOR_VERSION   5 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
+
+// The version of this library, it is different than the version of the Firmata protocol.
+// In other words, ConfigurableFirmata 2.7.0 implements version 2.5.0 of the Firmata protocol.
+#define FIRMWARE_MAJOR_VERSION  2 // for non-compatible changes
+#define FIRMWARE_MINOR_VERSION  7 // for backwards compatible changes
+#define FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 

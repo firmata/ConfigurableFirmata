@@ -206,7 +206,7 @@ void setup()
 #endif
   delay(1000);
 #endif
-  Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
+  Firmata.setFirmwareVersion(FIRMWARE_MAJOR_VERSION, FIRMWARE_MINOR_VERSION);
 
 #if defined AnalogOutputFirmata_h || defined ServoFirmata_h
   /* analogWriteCallback is declared in AnalogWrite.h */
