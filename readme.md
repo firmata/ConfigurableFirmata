@@ -7,7 +7,11 @@ Firmata is a protocol for communicating with microcontrollers from software on a
 
 ##Usage
 
-ConfigurableFirmata is a version of Firmata that breaks features such as Digital Input, Digital Output, Analog Input, Analog Output, I2C, etc into [individual classes](https://github.com/firmata/ConfigurableFirmata/tree/master/src) making it easier to mix and match standard features with custom features. You configure your sketch by adding or removing various include statements. See the [ConfigurableFirmata.ino](https://github.com/firmata/ConfigurableFirmata/blob/master/examples/ConfigurableFirmata/ConfigurableFirmata.ino) file for an example that includes all available features. You are also able to choose between a Serial connection or an Ethernet connection type.
+ConfigurableFirmata is a version of Firmata that breaks features such as Digital Input, Digital Output, Analog Input, Analog Output, I2C, etc into [individual classes](https://github.com/firmata/ConfigurableFirmata/tree/master/src) making it easier to mix and match standard features with custom features.
+
+The easiest way to use ConfigurableFirmata is with [firmatabuilder](http://firmatabuilder.com) which is a simple web application that generates an Arduino sketch based on a selection of Firmata features. Download the generated sketch, compile and upload it to your board.
+
+Another way to use ConfigurableFirmata is by adding or removing various include statements in the [ConfigurableFirmata.ino](https://github.com/firmata/ConfigurableFirmata/blob/master/examples/ConfigurableFirmata/ConfigurableFirmata.ino) example file.
 
 ##Firmata Wrapper Libraries
 
@@ -36,6 +40,8 @@ Only a few Firmata client libraries currently support ConfigurableFirmata:
   * [http://breakoutjs.com]
 * perl
   * [https://github.com/ntruchsess/perl-firmata]
+
+*Additional Firmata client libraries may work as well. If you're a client library developer and have verified that you library works with ConfigurableFirmata, please [open an issue](https://github.com/firmata/ConfigurableFirmata/issues) with a request to add the link.*
 
 
 ##Installation
