@@ -6,8 +6,8 @@ Firmata is a protocol for communicating with microcontrollers from software on a
 
 ##Installation
 
-- **If you are using Arduino IDE version 1.6.4 or higher** go to `Sketch > Include Library > Manage Libraries` and then search for "ConfigurableFirmata" and click on Install after tapping on the ConfigurableFirmata item in the filtered results. You can also use this same method to update ConfigurableFirmata.
-- **If you are using an older version of the Arduino IDE**, download or clone ConfigurableFirmata to your Arduino sketchbook library. This is typically `/Documents/Arduino/libraries/` on Mac or Linux or `\My Documents\Arduino\libraries\` on Windows.
+- **If you are using Arduino IDE version 1.6.4 or higher** go to `Sketch > Include Library > Manage Libraries` and then search for "ConfigurableFirmata" and click on `Install` after tapping on the ConfigurableFirmata item in the filtered results. You can also use this same method to update ConfigurableFirmata in the future.
+- **If you are using an older version of the Arduino IDE**, download or clone ConfigurableFirmata to your Arduino sketchbook library folder. This is typically `/Documents/Arduino/libraries/` on Mac or Linux or `\My Documents\Arduino\libraries\` on Windows.
 
 ##Usage
 
