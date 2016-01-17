@@ -137,6 +137,7 @@ class SerialFirmata: public FirmataFeature
     void update();
     void reset();
     void checkSerial();
+    void dumpSerial();
 
   private:
     byte reportSerial[MAX_SERIAL_PORTS];

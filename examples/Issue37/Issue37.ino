@@ -321,6 +321,7 @@ runtasks: scheduler.runTasks();
   if (Ethernet.maintain()) {
     stream.maintain(Ethernet.localIP());
   } else {
+    serial.dumpSerial();
     return; // don't read or write any data while disconnected
   }
 #endif

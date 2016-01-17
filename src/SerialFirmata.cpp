@@ -318,3 +318,32 @@ void SerialFirmata::checkSerial()
     }
   }
 }
+
+// read incoming serial data to clear the buffer but do not forward Firmata host
+void SerialFirmata::dumpSerial()
+{
+  byte portId, serialData;
+  Stream* serialPort;
+
+  if (serialIndex > -1) {
+
+    // loop through all reporting (READ_CONTINUOUS) serial ports
+    for (byte i = 0; i < serialIndex + 1; i++) {
+      portId = reportSerial[i];
+      serialPort = getPortFromId(portId);
+      if (serialPort == NULL) {
+        continue;
+      }
+#if defined(SoftwareSerial_h)
+      // only the SoftwareSerial port that is "listening" can read data
+      if (portId > 7 && !((SoftwareSerial*)serialPort)->isListening()) {
+        continue;
+      }
+#endif
+      while (serialPort->available()) {
+        serialPort->read();
+      }
+
+    }
+  }
+}
