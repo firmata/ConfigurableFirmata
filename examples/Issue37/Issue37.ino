@@ -25,11 +25,17 @@
   Last updated by Jeff Hoefs: November 22nd, 2015
 */
 
-#include <ArduinoUnit.h>
+#include "teensyFreeMemory.h"
+// #include "MemWaster.h"
 #include "ConfigurableFirmata.h"
 
 long memCheckCounter = 0;
 char buffer[20];
+// report free memory every 10 minutes, update this variable to increase
+// or decrease the interval
+// 31579 * 19 (default sampling interval) = 600000 ms
+long memCheckInterval = 31579;
+// MemWaster * waster;
 
 /*
  * by default Firmata uses the Serial-port (over USB) of Arduino.
@@ -65,7 +71,7 @@ char buffer[20];
  *============================================================================*/
 #define NETWORK_FIRMATA
 //replace with ip of server you want to connect to, comment out if using 'remote_host'
-#define remote_ip IPAddress(192, 168, 1, 1)  
+#define remote_ip IPAddress(192, 168, 1, 1)
 //replace with hostname of server you want to connect to, comment out if using 'remote_ip'
 // #define remote_host "raspi"
 
@@ -73,7 +79,7 @@ char buffer[20];
 #define remote_port 4040
 
 //replace with arduinos ip-address. Comment out if Ethernet-startup should use dhcp. Is ignored on Yun
-#define local_ip IPAddress(192, 168, 1, 2) 
+#define local_ip IPAddress(192, 168, 1, 2)
 
 //replace with ethernet shield mac. It's mandatory every device is assigned a unique mac. Is ignored on Yun
 const byte mac[] = {0x99, 0xA2, 0xDA, 0x00, 0x53, 0xE5};
@@ -316,7 +322,7 @@ runtasks: scheduler.runTasks();
     stream.maintain(Ethernet.localIP());
   } else {
     return; // don't read or write any data while disconnected
-  }  
+  }
 #endif
 
 #ifdef DigitalInputFirmata_h
@@ -344,11 +350,12 @@ runtasks: scheduler.runTasks();
     encoder.report();
 #endif
 
+    // report free memory
+    if (memCheckCounter++ == memCheckInterval) {
+      // test that FreeRam is working on Teensy LC (it is)
+      //waster = new MemWaster();
 
-    // send memory reading approximately every 10 minutes
-    // 31579 * 19 (default sampling interval) = 600000 ms
-    if (memCheckCounter++ == 31579) {
-      sprintf(buffer, "free = %u", freeMemory());
+      sprintf(buffer, "free = %u", FreeRam());
       Firmata.sendString(buffer);
       memCheckCounter = 0;
     }
