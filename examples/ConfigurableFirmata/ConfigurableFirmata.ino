@@ -13,7 +13,7 @@
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: November 22nd, 2015
+  Last updated by Jeff Hoefs: January 23rd, 2015
 */
 
 #include "ConfigurableFirmata.h"
@@ -278,6 +278,9 @@ void setup()
   // start up Network Firmata:
   Firmata.begin(stream);
 #else
+  // Uncomment to save a couple of seconds by disabling the startup blink sequence.
+  // Firmata.disableBlinkVersion();
+
   // start up the default Firmata using Serial interface:
   Firmata.begin(57600);
 #endif
@@ -335,9 +338,10 @@ runtasks: scheduler.runTasks();
 #ifdef SerialFirmata_h
   serial.update();
 #endif
+
 #if defined NETWORK_FIRMATA && !defined local_ip &&!defined _YUN_CLIENT_H_
-  if (Ethernet.maintain())
-  {
+  // only necessary when using DHCP, ensures local IP is updated appropriately if it changes
+  if (Ethernet.maintain()) {
     stream.maintain(Ethernet.localIP());
   }
 #endif

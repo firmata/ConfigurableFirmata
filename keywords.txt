@@ -32,7 +32,7 @@ sendSysex			KEYWORD2
 attach				KEYWORD2
 detach				KEYWORD2
 write				KEYWORD2
-sendValueAsTwo7bitBytes		KEYWORD2
+sendValueAsTwo7bitBytes	KEYWORD2
 startSysex			KEYWORD2
 endSysex			KEYWORD2
 attachDelayTask			KEYWORD2
@@ -43,6 +43,7 @@ getPinState			KEYWORD2
 setPinState			KEYWORD2
 writePort			KEYWORD2
 readPort			KEYWORD2
+disableBlinkVersion		KEYWORD2
 
 
 #######################################
