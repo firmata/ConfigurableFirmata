@@ -2,7 +2,7 @@
   ConfigurableFirmata.pp - ConfigurableFirmata library v2.8.0 - 2015-11-28
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (c) 2013 Norbert Truchsess. All rights reserved.
-  Copyright (c) 2013-2015 Jeff Hoefs. All rights reserved.
+  Copyright (c) 2013-2016 Jeff Hoefs. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -71,8 +71,8 @@ void FirmataClass::begin(long speed)
   Serial.begin(speed);
   FirmataStream = &Serial;
   blinkVersion();
-  printVersion();
-  printFirmwareVersion();
+  printVersion();         // send the protocol version
+  printFirmwareVersion(); // send the firmware name and version
 }
 
 /* begin method for overriding default stream */
@@ -97,12 +97,25 @@ void FirmataClass::printVersion(void)
 // First blink the major verson, then the minor version
 void FirmataClass::blinkVersion(void)
 {
+#if defined(VERSION_BLINK_PIN)
+  if (blinkVersionDisabled) return;
   // flash the pin with the protocol version
   pinMode(VERSION_BLINK_PIN, OUTPUT);
-  strobeBlinkPin(FIRMATA_MAJOR_VERSION, 40, 210);
+  strobeBlinkPin(VERSION_BLINK_PIN, FIRMATA_MAJOR_VERSION, 40, 210);
   delay(250);
-  strobeBlinkPin(FIRMATA_MINOR_VERSION, 40, 210);
+  strobeBlinkPin(VERSION_BLINK_PIN, FIRMATA_MINOR_VERSION, 40, 210);
   delay(125);
+#endif
+}
+
+/**
+ * Provides a means to disable the version blink sequence on the onboard LED, trimming startup
+ * time by a couple of seconds.
+ * Call this before Firmata.begin(). It only applies when using the default Serial transport.
+ */
+void FirmataClass::disableBlinkVersion()
+{
+  blinkVersionDisabled = true;
 }
 
 void FirmataClass::printFirmwareVersion(void)
@@ -514,15 +527,14 @@ void FirmataClass::systemReset(void)
 
 // =============================================================================
 // used for flashing the pin for the version number
-void FirmataClass::strobeBlinkPin(int count, int onInterval, int offInterval)
+void FirmataClass::strobeBlinkPin(byte pin, int count, int onInterval, int offInterval)
 {
   byte i;
-  pinMode(VERSION_BLINK_PIN, OUTPUT);
   for (i = 0; i < count; i++) {
     delay(offInterval);
-    digitalWrite(VERSION_BLINK_PIN, HIGH);
+    digitalWrite(pin, HIGH);
     delay(onInterval);
-    digitalWrite(VERSION_BLINK_PIN, LOW);
+    digitalWrite(pin, LOW);
   }
 }
 

@@ -2,7 +2,7 @@
   ConfigurableFirmata.h - ConfigurableFirmata library v2.8.0 - 2015-11-28
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (c) 2013 Norbert Truchsess. All rights reserved.
-  Copyright (c) 2013-2015 Jeff Hoefs. All rights reserved.
+  Copyright (c) 2013-2016 Jeff Hoefs. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -130,6 +130,7 @@ class FirmataClass
     void printFirmwareVersion(void);
     //void setFirmwareVersion(byte major, byte minor);  // see macro below
     void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
+    void disableBlinkVersion();
     /* serial receive handling */
     int available(void);
     void processInput(void);
@@ -196,10 +197,12 @@ class FirmataClass
     sysexCallbackFunction currentSysexCallback;
     delayTaskCallbackFunction delayTaskCallback;
 
+    boolean blinkVersionDisabled = false;
+
     /* private methods ------------------------------ */
     void processSysexMessage(void);
     void systemReset(void);
-    void strobeBlinkPin(int count, int onInterval, int offInterval);
+    void strobeBlinkPin(byte pin, int count, int onInterval, int offInterval);
 };
 
 extern FirmataClass Firmata;
