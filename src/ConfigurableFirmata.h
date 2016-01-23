@@ -18,20 +18,47 @@
 #include "utility/Boards.h"  /* Hardware Abstraction Layer + Wiring/Arduino */
 
 /* Version numbers for the protocol.  The protocol is still changing, so these
- * version numbers are important.  This number can be queried so that host
- * software can test whether it will be compatible with the currently
- * installed firmware. */
+ * version numbers are important.
+ * Query using the REPORT_VERSION message.
+ */
+#define FIRMATA_PROTOCOL_MAJOR_VERSION  2 // for non-compatible changes
+#define FIRMATA_PROTOCOL_MINOR_VERSION  5 // for backwards compatible changes
+#define FIRMATA_PROTOCOL_BUGFIX_VERSION 0 // for bugfix releases
+
+/*
+ * Version numbers for the Firmata library.
+ * ConfigurableFirmata 2.8.0 implements version 2.5.0 of the Firmata protocol.
+ * The firmware version will not always equal the protocol version going forward.
+ * Query using the REPORT_FIRMWARE message.
+ */
+#define FIRMATA_FIRMWARE_MAJOR_VERSION  2 // for non-compatible changes
+#define FIRMATA_FIRMWARE_MINOR_VERSION  8 // for backwards compatible changes
+#define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
+
+/*
+ * DEPRECATED as of ConfigurableFirmata v2.8.1.
+ * Use FIRMATA_PROTOCOL_MAJOR_VERSION, etc instead.
+ */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
 #define FIRMATA_MINOR_VERSION   5 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
-// The version of this library, it is different than the version of the Firmata protocol.
-// In other words, ConfigurableFirmata 2.8.0 implements version 2.5.0 of the Firmata protocol.
+/*
+ * DEPRECATED as of ConfigurableFirmata v2.8.1.
+ * Use FIRMATA_FIRMWARE_MAJOR_VERSION, etc instead.
+ */
 #define FIRMWARE_MAJOR_VERSION  2 // for non-compatible changes
 #define FIRMWARE_MINOR_VERSION  8 // for backwards compatible changes
 #define FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
+
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
+
+
+// Arduino 101 also defines SET_PIN_MODE as a macro in scss_registers.h
+#ifdef SET_PIN_MODE
+#undef SET_PIN_MODE
+#endif
 
 // message command bytes (128-255/0x80-0xFF)
 #define DIGITAL_MESSAGE         0x90 // send data for a digital pin

@@ -89,8 +89,8 @@ void FirmataClass::begin(Stream &s)
 void FirmataClass::printVersion(void)
 {
   FirmataStream->write(REPORT_VERSION);
-  FirmataStream->write(FIRMATA_MAJOR_VERSION);
-  FirmataStream->write(FIRMATA_MINOR_VERSION);
+  FirmataStream->write(FIRMATA_PROTOCOL_MAJOR_VERSION);
+  FirmataStream->write(FIRMATA_PROTOCOL_MINOR_VERSION);
 }
 
 // blink the Firmata protocol version on the onboard LED
@@ -101,9 +101,9 @@ void FirmataClass::blinkVersion(void)
   if (blinkVersionDisabled) return;
   // flash the pin with the protocol version
   pinMode(VERSION_BLINK_PIN, OUTPUT);
-  strobeBlinkPin(VERSION_BLINK_PIN, FIRMATA_MAJOR_VERSION, 40, 210);
+  strobeBlinkPin(VERSION_BLINK_PIN, FIRMATA_FIRMWARE_MAJOR_VERSION, 40, 210);
   delay(250);
-  strobeBlinkPin(VERSION_BLINK_PIN, FIRMATA_MINOR_VERSION, 40, 210);
+  strobeBlinkPin(VERSION_BLINK_PIN, FIRMATA_FIRMWARE_MINOR_VERSION, 40, 210);
   delay(125);
 #endif
 }

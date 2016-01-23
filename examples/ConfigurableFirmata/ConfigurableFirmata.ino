@@ -210,7 +210,7 @@ void setup()
 #endif
   delay(1000);
 #endif
-  Firmata.setFirmwareVersion(FIRMWARE_MAJOR_VERSION, FIRMWARE_MINOR_VERSION);
+  Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
 
 #ifdef FirmataExt_h
 #ifdef DigitalInputFirmata_h
