@@ -27,22 +27,24 @@
 #include "FirmataFeature.h"
 #include "FirmataReporting.h"
 
-#define I2C_WRITE B00000000
-#define I2C_READ B00001000
-#define I2C_READ_CONTINUOUSLY B00010000
-#define I2C_STOP_READING B00011000
-#define I2C_READ_WRITE_MODE_MASK B00011000
+#define I2C_WRITE                   B00000000
+#define I2C_READ                    B00001000
+#define I2C_READ_CONTINUOUSLY       B00010000
+#define I2C_STOP_READING            B00011000
+#define I2C_READ_WRITE_MODE_MASK    B00011000
 #define I2C_10BIT_ADDRESS_MODE_MASK B00100000
-
-#define MAX_QUERIES 8
-
-#define REGISTER_NOT_SPECIFIED -1
+#define I2C_END_TX_MASK             B01000000
+#define I2C_STOP_TX                 1
+#define I2C_RESTART_TX              0
+#define I2C_MAX_QUERIES             8
+#define I2C_REGISTER_NOT_SPECIFIED  -1
 
 /* i2c data */
 struct i2c_device_info {
   byte addr;
   int reg;
   byte bytes;
+  byte stopTX;
 };
 
 class I2CFirmata: public FirmataFeature
@@ -57,14 +59,14 @@ class I2CFirmata: public FirmataFeature
 
   private:
     /* for i2c read continuous more */
-    i2c_device_info query[MAX_QUERIES];
+    i2c_device_info query[I2C_MAX_QUERIES];
 
     byte i2cRxData[32];
     boolean isI2CEnabled;
     signed char queryIndex;
     unsigned int i2cReadDelayTime;  // default delay time between i2c read request and Wire.requestFrom()
 
-    void readAndReportData(byte address, int theRegister, byte numBytes);
+    void readAndReportData(byte address, int theRegister, byte numBytes, byte stopTX);
     void handleI2CRequest(byte argc, byte *argv);
     boolean handleI2CConfig(byte argc, byte *argv);
     boolean enableI2CPins();
@@ -85,14 +87,14 @@ I2CFirmata::I2CFirmata()
   i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 }
 
-void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes) {
+void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes, byte stopTX) {
   // allow I2C requests that don't require a register read
   // for example, some devices using an interrupt pin to signify new data available
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
-  if (theRegister != REGISTER_NOT_SPECIFIED) {
+  if (theRegister != I2C_REGISTER_NOT_SPECIFIED) {
     Wire.beginTransmission(address);
     Wire.write((byte)theRegister);
-    Wire.endTransmission();
+    Wire.endTransmission(stopTX); // default = true
     // do not set a value of 0
     if (i2cReadDelayTime > 0) {
       // delay is necessary for some devices such as WiiNunchuck
@@ -164,6 +166,7 @@ boolean I2CFirmata::handleSysex(byte command, byte argc, byte *argv)
 void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
 {
   byte mode;
+  byte stopTX;
   byte slaveAddress;
   byte data;
   int slaveRegister;
@@ -174,6 +177,15 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
   }
   else {
     slaveAddress = argv[0];
+  }
+
+  // need to invert the logic here since 0 will be default for client
+  // libraries that have not updated to add support for restart tx
+  if (argv[1] & I2C_END_TX_MASK) {
+    stopTX = I2C_RESTART_TX;
+  }
+  else {
+    stopTX = I2C_STOP_TX; // default
   }
 
   switch (mode) {
@@ -194,14 +206,13 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
       }
       else {
         // a slave register is NOT specified
-        slaveRegister = REGISTER_NOT_SPECIFIED;
+        slaveRegister = I2C_REGISTER_NOT_SPECIFIED;
         data = argv[2] + (argv[3] << 7);  // bytes to read
-        readAndReportData(slaveAddress, (int)REGISTER_NOT_SPECIFIED, data);
       }
-      readAndReportData(slaveAddress, (int)slaveRegister, data);
+      readAndReportData(slaveAddress, (int)slaveRegister, data, stopTX);
       break;
     case I2C_READ_CONTINUOUSLY:
-      if ((queryIndex + 1) >= MAX_QUERIES) {
+      if ((queryIndex + 1) >= I2C_MAX_QUERIES) {
         // too many queries, just ignore
         Firmata.sendString("too many queries");
         break;
@@ -213,13 +224,14 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
       }
       else {
         // a slave register is NOT specified
-        slaveRegister = (int)REGISTER_NOT_SPECIFIED;
+        slaveRegister = (int)I2C_REGISTER_NOT_SPECIFIED;
         data = argv[2] + (argv[3] << 7);  // bytes to read
       }
       queryIndex++;
       query[queryIndex].addr = slaveAddress;
       query[queryIndex].reg = slaveRegister;
       query[queryIndex].bytes = data;
+      query[queryIndex].stopTX = stopTX;
       break;
     case I2C_STOP_READING:
       byte queryIndexToSkip;
@@ -240,10 +252,11 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
         }
 
         for (byte i = queryIndexToSkip; i < queryIndex + 1; i++) {
-          if (i < MAX_QUERIES) {
+          if (i < I2C_MAX_QUERIES) {
             query[i].addr = query[i + 1].addr;
             query[i].reg = query[i + 1].reg;
             query[i].bytes = query[i + 1].bytes;
+            query[i].stopTX = query[i + 1].stopTX;
           }
         }
         queryIndex--;
@@ -311,7 +324,7 @@ void I2CFirmata::report()
   // report i2c data for all device with read continuous mode enabled
   if (queryIndex > -1) {
     for (byte i = 0; i < queryIndex + 1; i++) {
-      readAndReportData(query[i].addr, query[i].reg, query[i].bytes);
+      readAndReportData(query[i].addr, query[i].reg, query[i].bytes, query[i].stopTX);
     }
   }
 }
