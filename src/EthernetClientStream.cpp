@@ -21,12 +21,12 @@
 #define MILLIS_RECONNECT 5000
 
 EthernetClientStream::EthernetClientStream(Client &client, IPAddress localip, IPAddress ip, const char* host, uint16_t port)
-  : ip(ip),
-    host(host),
-    port(port),
-    connected(false),
-    client(client),
-    localip(localip)
+: client(client),
+  localip(localip),
+  ip(ip),
+  host(host),
+  port(port),
+  connected(false)
 {
 }
 

@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: November 22nd, 2015
+  Last updated by Jeff Hoefs: January 23rd, 2015
 */
 
 #include "SerialFirmata.h"
@@ -53,13 +53,7 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
       case SERIAL_CONFIG:
         {
           long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
-          byte txPin, rxPin;
           serial_pins pins;
-
-          if (portId > 7 && argc > 4) {
-            rxPin = argv[4];
-            txPin = argv[5];
-          }
 
           if (portId < 8) {
             serialPort = getPortFromId(portId);
@@ -76,32 +70,41 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
             }
           } else {
 #if defined(SoftwareSerial_h)
+            byte swTxPin, swRxPin;
+            if (argc > 4) {
+              swRxPin = argv[4];
+              swTxPin = argv[5];
+            } else {
+              // RX and TX pins must be specified when using software serial
+              Firmata.sendString("Specify serial RX and TX pins");
+              return false;
+            }
             switch (portId) {
               case SW_SERIAL0:
                 if (swSerial0 == NULL) {
-                  swSerial0 = new SoftwareSerial(rxPin, txPin);
+                  swSerial0 = new SoftwareSerial(swRxPin, swTxPin);
                 }
                 break;
               case SW_SERIAL1:
                 if (swSerial1 == NULL) {
-                  swSerial1 = new SoftwareSerial(rxPin, txPin);
+                  swSerial1 = new SoftwareSerial(swRxPin, swTxPin);
                 }
                 break;
               case SW_SERIAL2:
                 if (swSerial2 == NULL) {
-                  swSerial2 = new SoftwareSerial(rxPin, txPin);
+                  swSerial2 = new SoftwareSerial(swRxPin, swTxPin);
                 }
                 break;
               case SW_SERIAL3:
                 if (swSerial3 == NULL) {
-                  swSerial3 = new SoftwareSerial(rxPin, txPin);
+                  swSerial3 = new SoftwareSerial(swRxPin, swTxPin);
                 }
                 break;
             }
             serialPort = getPortFromId(portId);
             if (serialPort != NULL) {
-              Firmata.setPinMode(rxPin, PIN_MODE_SERIAL);
-              Firmata.setPinMode(txPin, PIN_MODE_SERIAL);
+              Firmata.setPinMode(swRxPin, PIN_MODE_SERIAL);
+              Firmata.setPinMode(swTxPin, PIN_MODE_SERIAL);
               ((SoftwareSerial*)serialPort)->begin(baud);
             }
 #endif
@@ -137,7 +140,7 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
           serialIndex++;
           reportSerial[serialIndex] = portId;
         } else if (argv[1] == SERIAL_STOP_READING) {
-          byte serialIndexToSkip;
+          byte serialIndexToSkip = 0;
           if (serialIndex <= 0) {
             serialIndex = -1;
           } else {
@@ -203,9 +206,8 @@ void SerialFirmata::update()
 
 void SerialFirmata::reset()
 {
-  Stream *serialPort;
-
 #if defined(SoftwareSerial_h)
+  Stream *serialPort;
   // free memory allocated for SoftwareSerial ports
   for (byte i = SW_SERIAL0; i < SW_SERIAL3 + 1; i++) {
     serialPort = getPortFromId(i);

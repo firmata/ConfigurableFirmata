@@ -4,7 +4,7 @@
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -16,7 +16,7 @@
   ServoFirmata.cpp has been merged into this header file as a hack to avoid having to
   include Servo.h for every arduino sketch that includes ConfigurableFirmata.
 
-  Last updated by Jeff Hoefs: November 15th, 2015
+  Last updated by Jeff Hoefs: January 23rd, 2015
 */
 
 #ifndef I2CFirmata_h
@@ -228,6 +228,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
       if (queryIndex <= 0) {
         queryIndex = -1;
       } else {
+        queryIndexToSkip = 0;
         // if read continuous mode is enabled for multiple devices,
         // determine which device to stop reading and remove it's data from
         // the array, shifiting other array data to fill the space

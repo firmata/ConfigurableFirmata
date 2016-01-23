@@ -26,25 +26,25 @@
 
 class EthernetClientStream : public Stream
 {
-  public:
-    EthernetClientStream(Client &client, IPAddress localip, IPAddress ip, const char* host, uint16_t port);
-    int available();
-    int read();
-    int peek();
-    void flush();
-    size_t write(uint8_t);
-    void maintain(IPAddress localip);
+public:
+  EthernetClientStream(Client &client, IPAddress localip, IPAddress ip, const char* host, uint16_t port);
+  int available();
+  int read();
+  int peek();
+  void flush();
+  size_t write(uint8_t);
+  void maintain(IPAddress localip);
 
-  private:
-    IPAddress localip;
-    IPAddress ip;
-    const char* host;
-    uint16_t port;
-    Client &client;
-    bool connected;
-    uint32_t time_connect;
-    bool maintain();
-    void stop();
+private:
+  Client &client;
+  IPAddress localip;
+  IPAddress ip;
+  const char* host;
+  uint16_t port;
+  bool connected;
+  uint32_t time_connect;
+  bool maintain();
+  void stop();
 };
 
 #endif
