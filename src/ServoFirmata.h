@@ -66,9 +66,12 @@ boolean ServoFirmata::analogWrite(byte pin, int value)
 {
   if (IS_PIN_SERVO(pin)) {
     Servo *servo = servos[PIN_TO_SERVO(pin)];
-    if (servo)
+    if (servo) {
       servo->write(value);
+      return true;
+    }
   }
+  return false;
 }
 
 boolean ServoFirmata::handlePinMode(byte pin, int mode)

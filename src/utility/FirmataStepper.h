@@ -118,12 +118,12 @@ class FirmataStepper
 
     byte run_state;
     int accel_count;
-    long min_delay;
+    unsigned long min_delay;
     long decel_start;
     int decel_val;
 
     long lastAccelDelay;
-    unsigned long stepCount;
+    long stepCount;
     unsigned int rest;
 
     float alpha;  // PI * 2 / steps_per_rev

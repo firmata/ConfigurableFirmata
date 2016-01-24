@@ -4,7 +4,7 @@
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -13,7 +13,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: November 15th, 2015
+  Last updated by Jeff Hoefs: January 23rd, 2016
 */
 
 #ifndef FirmataReporting_h
@@ -37,7 +37,7 @@ class FirmataReporting: public FirmataFeature
     /* timer variables */
     unsigned long currentMillis;        // store the current value from millis()
     unsigned long previousMillis;       // for comparison with currentMillis
-    int samplingInterval;          // how often to run the main loop (in ms)
+    unsigned int samplingInterval;          // how often to run the main loop (in ms)
 };
 
 #endif

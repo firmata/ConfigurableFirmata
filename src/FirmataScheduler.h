@@ -28,7 +28,7 @@
 #define RESET_FIRMATA_TASKS     7
 #define ERROR_TASK_REPLY        8
 #define QUERY_ALL_TASKS_REPLY   9
-#define QUERY_TASK_REPLY     10
+#define QUERY_TASK_REPLY        10
 
 #define firmata_task_len(a)(sizeof(firmata_task)+(a)->len)
 

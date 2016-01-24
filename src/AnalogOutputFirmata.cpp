@@ -58,6 +58,7 @@ boolean AnalogOutputFirmata::handleSysex(byte command, byte argc, byte* argv)
       analogWriteCallback(argv[0], val);
       return true;
     }
+    return false;
   } else {
     return handleAnalogFirmataSysex(command, argc, argv);
   }

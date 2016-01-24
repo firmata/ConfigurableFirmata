@@ -228,7 +228,7 @@ void FirmataStepper::setStepsToMove(long steps_to_move, int speed, int accel, in
     // find step to start deceleration
     this->decel_start = steps_to_move + this->decel_val;
 
-    // if the max spped is so low that we don't need to go via acceleration state.
+    // if the max speed is so low that we don't need to go via acceleration state.
     if (this->step_delay <= this->min_delay)
     {
       this->step_delay = this->min_delay;
@@ -249,10 +249,10 @@ void FirmataStepper::setStepsToMove(long steps_to_move, int speed, int accel, in
 bool FirmataStepper::update()
 {
   bool done = false;
-  long newStepDelay;
+  unsigned long newStepDelay = this->min_delay;
 
   unsigned long curTimeVal = micros();
-  long timeDiff = curTimeVal - this->last_step_time;
+  unsigned long timeDiff = curTimeVal - this->last_step_time;
 
   if (this->running == true && timeDiff >= this->step_delay)
   {
@@ -298,7 +298,6 @@ bool FirmataStepper::update()
       case FirmataStepper::RUN:
         updateStepPosition();
         this->stepCount++;
-        newStepDelay = this->min_delay;
 
         // if no accel or decel was specified, go directly to STOP state
         if (stepCount >= this->steps_to_move)

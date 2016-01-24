@@ -300,6 +300,7 @@ boolean I2CFirmata::enableI2CPins()
   isI2CEnabled = true;
 
   Wire.begin();
+  return true;
 }
 
 /* disable the i2c pins so they can be used for other functions */
