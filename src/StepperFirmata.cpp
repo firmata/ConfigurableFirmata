@@ -3,7 +3,7 @@
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -12,7 +12,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: November 15th, 2015
+  Last updated by Jeff Hoefs: January 23rd, 2015
 */
 
 #include <ConfigurableFirmata.h>
@@ -46,7 +46,8 @@ void StepperFirmata::handleCapability(byte pin)
 boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
   if (command == STEPPER_DATA) {
-    byte stepCommand, deviceNum, directionPin, stepPin, stepDirection, interface;
+    byte stepCommand, deviceNum, directionPin, stepPin, stepDirection;
+    byte interface, interfaceType;
     byte motorPin3, motorPin4;
     unsigned int stepsPerRev;
     long numSteps;
@@ -59,7 +60,9 @@ boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
 
     if (deviceNum < MAX_STEPPERS) {
       if (stepCommand == STEPPER_CONFIG) {
-        interface = argv[2];
+
+        interface = argv[2]; // upper 4 bits are the stepDelay, lower 4 bits are the interface type
+        interfaceType = interface & 0x0F; // the interface type is specified by the lower 4 bits
         stepsPerRev = (argv[3] + (argv[4] << 7));
 
         directionPin = argv[5]; // or motorPin1 for TWO_WIRE or FOUR_WIRE interface
@@ -68,12 +71,13 @@ boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
           return false;
         Firmata.setPinMode(directionPin, PIN_MODE_STEPPER);
         Firmata.setPinMode(stepPin, PIN_MODE_STEPPER);
+
         if (!stepper[deviceNum]) {
           numSteppers++;
         }
-        if (interface == FirmataStepper::DRIVER || interface == FirmataStepper::TWO_WIRE) {
+        if (interfaceType == FirmataStepper::DRIVER || interfaceType == FirmataStepper::TWO_WIRE) {
           stepper[deviceNum] = new FirmataStepper(interface, stepsPerRev, directionPin, stepPin);
-        } else if (interface == FirmataStepper::FOUR_WIRE) {
+        } else if (interfaceType == FirmataStepper::FOUR_WIRE) {
           motorPin3 = argv[7];
           motorPin4 = argv[8];
           if (Firmata.getPinMode(motorPin3) == PIN_MODE_IGNORE || Firmata.getPinMode(motorPin4) == PIN_MODE_IGNORE)
@@ -88,7 +92,9 @@ boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
         numSteps = (long)argv[3] | ((long)argv[4] << 7) | ((long)argv[5] << 14);
         stepSpeed = (argv[6] + (argv[7] << 7));
 
-        if (stepDirection == 0) { numSteps *= -1; }
+        if (stepDirection == 0) {
+          numSteps *= -1;
+        }
         if (stepper[deviceNum]) {
           if (argc >= 8 && argc < 12) {
             // num steps, speed (0.01*rad/sec)
