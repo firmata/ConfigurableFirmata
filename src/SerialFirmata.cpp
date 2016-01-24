@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: January 23rd, 2015
+  Last updated by Jeff Hoefs: January 23rd, 2016
 */
 
 #include "SerialFirmata.h"

@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: November 15th, 2015
+  Last updated by Jeff Hoefs: January 23rd, 2016
 */
 
 #include <ConfigurableFirmata.h>
@@ -66,7 +66,7 @@ boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
               Firmata.write(pin);
               Encoder7Bit.startBinaryWrite();
               byte addrArray[8];
-              while (isAlarmSearch ? device->search_alarms(addrArray) : device->search(addrArray)) {
+              while (isAlarmSearch ? device->search(addrArray, false) : device->search(addrArray)) {
                 for (int i = 0; i < 8; i++) {
                   Encoder7Bit.writeBinary(addrArray[i]);
                 }

@@ -1,6 +1,6 @@
 /*
   SerialFirmata.h - Firmata library
-  Copyright (C) 2015 Jeff Hoefs. All rights reserved.
+  Copyright (C) 2015-2016 Jeff Hoefs. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: January 23rd, 2015
+  Last updated by Jeff Hoefs: January 23rd, 2016
 */
 
 #ifndef SerialFirmata_h
