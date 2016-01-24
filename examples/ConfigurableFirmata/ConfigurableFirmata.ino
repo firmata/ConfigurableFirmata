@@ -25,59 +25,128 @@
   Last updated by Jeff Hoefs: January 23rd, 2016
 */
 
+/*
+ README
+
+ This is an example use of ConfigurableFirmata. The easiest way to create a configuration is to
+ use http://firmatabuilder.com and select the communication transport and the firmata features
+ to include and an Arduino sketch (.ino) file will be generated and downloaded automatically.
+
+ To manually configure a sketch, copy this file and follow the instructions in the
+ ETHERNET CONFIGURATION OPTION (if you want to use Ethernet instead of Serial/USB) and
+ FIRMATA FEATURE CONFIGURATION sections in this file.
+*/
+
 #include "ConfigurableFirmata.h"
 
-/*
- * by default Firmata uses the Serial-port (over USB) of Arduino.
- * ConfigurableFirmata may also comunicate over ethernet using tcp/ip.
- * To configure this 'Network Firmata' to use the original WIZ5100-based
- * ethernet-shield or Arduino Ethernet uncomment the includes of 'SPI.h' and 'Ethernet.h':
- */
+/*==============================================================================
+ * ETHERNET CONFIGURATION OPTION
+ *
+ * By default Firmata uses the Serial-port (over USB) of the Arduino. ConfigurableFirmata may also
+ * comunicate over ethernet using tcp/ip. To configure this sketch to use Ethernet instead of
+ * Serial, uncomment the approprate includes for your particular hardware. See STEPS 1 - 5 below.
+ * If you want to use Serial (over USB) then skip ahead to the FIRMATA FEATURE CONFIGURATION
+ * section further down in this file.
+ *
+ * If you enable Ethernet, you will need a Firmata client library with a network transport that can
+ * act as a server in order to establish a connection between ConfigurableFirmataEthernet and the
+ * Firmata host application (your application).
+ *
+ * To use ConfigurableFirmata with Ethernet you will need to have one of the following
+ * boards or shields:
+ *
+ *  - Arduino Ethernet shield (or clone)
+ *  - Arduino Ethernet board (or clone)
+ *  - Arduino Yun
+ *
+ *  If you are using an Arduino Ethernet shield you cannot use the following pins on
+ *  the following boards. Firmata will ignore any requests to use these pins:
+ *
+ *  - Arduino Uno or other ATMega328 boards: (D4, D10, D11, D12, D13)
+ *  - Arduino Mega: (D4, D10, D50, D51, D52, D53)
+ *  - Arduino Leonardo: (D4, D10)
+ *  - Arduino Due: (D4, D10)
+ *  - Arduino Zero: (D4, D10)
+ *
+ *  If you are using an ArduinoEthernet board, the following pins cannot be used (same as Uno):
+ *  - D4, D10, D11, D12, D13
+ *============================================================================*/
 
+// STEP 1 [REQUIRED]
+// Uncomment / comment the appropriate set of includes for your hardware (OPTION A, B or C)
+
+/*
+ * OPTION A: Configure for Arduino Ethernet board or Arduino Ethernet shield (or clone)
+ *
+ * To configure ConfigurableFirmata to use the an Arduino Ethernet Shield or Arduino Ethernet
+ * Board (both use the same WIZ5100-based ethernet controller), uncomment the SPI and Ethernet
+ * includes below.
+ */
 //#include <SPI.h>
 //#include <Ethernet.h>
 
+
 /*
- * To configure 'Network Firmata' to use an ENC28J60 based board include
- * 'UIPEthernet.h' (no SPI.h required). The UIPEthernet-library can be downloaded
+ * OPTION B: Configure for a board or shield using an ENC28J60-based ethernet controller,
+ * uncomment out the UIPEthernet include below.
+ *
+ * The UIPEthernet-library can be downloaded
  * from: https://github.com/ntruchsess/arduino_uip
  */
-
 //#include <UIPEthernet.h>
 
-/*
- * To execute Network Firmata on Yun uncomment Bridge.h and YunClient.h.
- * Do not include Ethernet.h or SPI.h in this case.
- * On Yun there's no need to configure local_ip and mac in the sketch
- * as this is configured on the linux-side of Yun.
- */
 
+/*
+ * OPTION C: Configure for Arduin Yun
+ *
+ * The Ethernet port on the Arduino Yun board can be used with Firmata in this configuration.
+ * To execute StandardFirmataEthernet on Yun uncomment the Bridge and YunClient includes below.
+ *
+ * NOTE: in order to compile for the Yun you will also need to comment out some of the includes
+ * and declarations in the FIRMATA FEATURE CONFIGURATION section later in this file. Including all
+ * features exceeds the RAM and Flash memory of the Yun. Comment out anything you don't need.
+ *
+ * On Yun there's no need to configure local_ip and mac address as this is automatically
+ * configured on the linux-side of Yun.
+ *
+ * Establishing a connection with the Yun may take several seconds.
+ */
 //#include <Bridge.h>
 //#include <YunClient.h>
 
 #if defined ethernet_h || defined UIPETHERNET_H || defined _YUN_CLIENT_H_
-/*==============================================================================
- * Network configuration for Network Firmata
- *============================================================================*/
 #define NETWORK_FIRMATA
-//replace with ip of server you want to connect to, comment out if using 'remote_host'
+
+// STEP 2 [REQUIRED for all boards and shields]
+// replace with IP of the server you want to connect to, comment out if using 'remote_host'
 #define remote_ip IPAddress(192, 168, 0, 1)
-//replace with hostname of server you want to connect to, comment out if using 'remote_ip'
-#define remote_host "server.local"
-//replace with the port that your server is listening on
+// OR replace with hostname of server you want to connect to, comment out if using 'remote_ip'
+// #define remote_host "server.local"
+
+// STEP 3 [REQUIRED unless using Arduin Yun]
+// Replace with the port that your server is listening on
 #define remote_port 3030
-//replace with arduinos ip-address. Comment out if Ethernet-startup should use dhcp. Is ignored on Yun
+
+// STEP 4 [REQUIRED unless using Arduino Yun OR if not using DHCP]
+// Replace with your board or ethernet shield's IP address
+// Comment out if you want to use DHCP
 #define local_ip IPAddress(192, 168, 0, 6)
-//replace with ethernet shield mac. It's mandatory every device is assigned a unique mac. Is ignored on Yun
+
+// STEP 5 [REQUIRED unless using Arduino Yun]
+// replace with ethernet shield mac. Must be unique for your network
 const byte mac[] = {0x90, 0xA2, 0xDA, 0x0D, 0x07, 0x02};
 #endif
 
-// To configure, save this file to your working directory so you can edit it
-// then comment out the include and declaration for any features that you do
-// not need below.
-
-// WARNING: Including all of the following features (especially if also using Ethernet) may exceed
-// the Flash and/or RAM of lower memory boards such as the Arduino Uno or Leonardo.
+/*==============================================================================
+ * FIRMATA FEATURE CONFIGURATION
+ *
+ * Comment out the include and declaration for any features that you do not need
+ * below.
+ *
+ * WARNING: Including all of the following features (especially if also using
+ * Ethernet) may exceed the Flash and/or RAM of lower memory boards such as the
+ * Arduino Uno or Leonardo.
+ *============================================================================*/
 
 #include <DigitalInputFirmata.h>
 DigitalInputFirmata digitalInput;
@@ -125,6 +194,9 @@ FirmataScheduler scheduler;
 // #include <FirmataEncoder.h>
 // FirmataEncoder encoder;
 
+/*===================================================================================
+ * END FEATURE CONFIGURATION - you should not need to change anything below this line
+ *==================================================================================*/
 
 // dependencies. Do not comment out the following lines
 #if defined AnalogOutputFirmata_h || defined ServoFirmata_h
@@ -198,6 +270,9 @@ void systemResetCallback()
 
 void setup()
 {
+  /*
+   * ETHERNET SETUP
+   */
 #ifdef NETWORK_FIRMATA
 #ifdef _YUN_CLIENT_H_
   Bridge.begin();
@@ -210,6 +285,10 @@ void setup()
 #endif
   delay(1000);
 #endif
+
+  /*
+   * FIRMATA SETUP
+   */
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
 
 #ifdef FirmataExt_h
@@ -258,6 +337,8 @@ void setup()
   // add Pin 10 and configure pin 53 as output if using a MEGA with Ethernetshield.
   // No need to ignore pin 10 on MEGA with ENC28J60, as here pin 53 should be connected to SS:
 #ifdef NETWORK_FIRMATA
+
+  #ifndef _YUN_CLIENT_H_
   // ignore SPI and pin 4 that is SS for SD-Card on Ethernet-shield
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_SPI(i)
@@ -270,10 +351,11 @@ void setup()
   //  pinMode(PIN_TO_DIGITAL(53), OUTPUT); configure hardware-SS as output on MEGA
   pinMode(PIN_TO_DIGITAL(4), OUTPUT); // switch off SD-card bypassing Firmata
   digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
+  #endif
 
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
-#endif
+  #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+    pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
+  #endif
 
   // start up Network Firmata:
   Firmata.begin(stream);
