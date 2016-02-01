@@ -79,7 +79,7 @@
  * OPTION A: Configure for Arduino Ethernet board or Arduino Ethernet shield (or clone)
  *
  * To configure ConfigurableFirmata to use the an Arduino Ethernet Shield or Arduino Ethernet
- * Board (both use the same WIZ5100-based ethernet controller), uncomment the SPI and Ethernet
+ * Board (both use the same WIZ5100-based Ethernet controller), uncomment the SPI and Ethernet
  * includes below.
  */
 //#include <SPI.h>
@@ -87,7 +87,7 @@
 
 
 /*
- * OPTION B: Configure for a board or shield using an ENC28J60-based ethernet controller,
+ * OPTION B: Configure for a board or shield using an ENC28J60-based Ethernet controller,
  * uncomment out the UIPEthernet include below.
  *
  * The UIPEthernet-library can be downloaded
@@ -97,7 +97,7 @@
 
 
 /*
- * OPTION C: Configure for Arduin Yun
+ * OPTION C: Configure for Arduino Yun
  *
  * The Ethernet port on the Arduino Yun board can be used with Firmata in this configuration.
  * To execute StandardFirmataEthernet on Yun uncomment the Bridge and YunClient includes below.
@@ -123,17 +123,17 @@
 // OR replace with hostname of server you want to connect to, comment out if using 'remote_ip'
 // #define remote_host "server.local"
 
-// STEP 3 [REQUIRED unless using Arduin Yun]
+// STEP 3 [REQUIRED unless using Arduino Yun]
 // Replace with the port that your server is listening on
 #define remote_port 3030
 
 // STEP 4 [REQUIRED unless using Arduino Yun OR if not using DHCP]
-// Replace with your board or ethernet shield's IP address
+// Replace with your board or Ethernet shield's IP address
 // Comment out if you want to use DHCP
 #define local_ip IPAddress(192, 168, 0, 6)
 
 // STEP 5 [REQUIRED unless using Arduino Yun]
-// replace with ethernet shield mac. Must be unique for your network
+// replace with Ethernet shield mac. Must be unique for your network
 const byte mac[] = {0x90, 0xA2, 0xDA, 0x0D, 0x07, 0x02};
 #endif
 
@@ -241,14 +241,14 @@ EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), IPAddress(0, 0, 0, 0)
 
 void systemResetCallback()
 {
-  // initialize a defalt state
+  // initialize a default state
 
   // pins with analog capability default to analog input
   // otherwise, pins default to digital output
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_ANALOG(i)) {
 #ifdef AnalogInputFirmata_h
-      // turns off pullup, configures everything
+      // turns off pull-up, configures everything
       Firmata.setPinMode(i, PIN_MODE_ANALOG);
 #endif
     } else if (IS_PIN_DIGITAL(i)) {
@@ -278,9 +278,9 @@ void setup()
   Bridge.begin();
 #else
 #ifdef local_ip
-  Ethernet.begin((uint8_t *)mac, local_ip); //start ethernet
+  Ethernet.begin((uint8_t *)mac, local_ip); //start Ethernet
 #else
-  Ethernet.begin((uint8_t *)mac); //start ethernet using dhcp
+  Ethernet.begin((uint8_t *)mac); //start Ethernet using dhcp
 #endif
 #endif
   delay(1000);
@@ -342,7 +342,7 @@ void setup()
   // ignore SPI and pin 4 that is SS for SD-Card on Ethernet-shield
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_SPI(i)
-        || 4 == i  // SD-Card on Ethernet-shiedl uses pin 4 for SS
+        || 4 == i  // SD Card on Ethernet shield uses pin 4 for SS
         || 10 == i // Ethernet-shield uses pin 10 for SS
        ) {
       Firmata.setPinMode(i, PIN_MODE_IGNORE);
@@ -380,7 +380,7 @@ void loop()
   digitalInput.report();
 #endif
 
-  /* STREAMREAD - processing incoming messagse as soon as possible, while still
+  /* STREAMREAD - processing incoming message as soon as possible, while still
    * checking digital inputs.  */
   while (Firmata.available()) {
     Firmata.processInput();

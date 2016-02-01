@@ -13,8 +13,8 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  ServoFirmata.cpp has been merged into this header file as a hack to avoid having to
-  include Servo.h for every arduino sketch that includes ConfigurableFirmata.
+  I2CFirmata.cpp has been merged into this header file as a hack to avoid having to
+  include Wire.h for every arduino sketch that includes ConfigurableFirmata.
 
   Last updated by Jeff Hoefs: January 23rd, 2015
 */

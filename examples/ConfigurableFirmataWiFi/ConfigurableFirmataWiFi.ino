@@ -107,9 +107,9 @@
 /*
  * OPTION A: Configure for Arduino WiFi shield
  *
- * This will configure ConfigurableFirmataWiFi to use the original WiFi library (deprecated) provided
- * with the Arduino IDE. It is supported by the Arduino WiFi shield (a discontinued product) and
- * is compatible with 802.11 B/G networks.
+ * This will configure ConfigurableFirmataWiFi to use the original WiFi library (deprecated)
+ * provided with the Arduino IDE. It is supported by the Arduino WiFi shield (a discontinued
+ * product) and is compatible with 802.11 B/G networks.
  *
  * To configure ConfigurableFirmataWiFi to use the Arduino WiFi shield
  * leave the #define below uncommented.
@@ -125,15 +125,16 @@ WiFiStream stream;
 /*
  * OPTION B: Configure for WiFi 101
  *
- * This will configure ConfigurableFirmataWiFi to use the WiFi101 library, which works with the Arduino WiFi101
- * shield and devices that have the WiFi101 chip built in (such as the MKR1000). It is compatible
- * with 802.11 B/G/N networks.
+ * This will configure ConfigurableFirmataWiFi to use the WiFi101 library, which works with the
+ * Arduino WiFi101 shield and devices that have the WiFi101 chip built in (such as the MKR1000). It
+ * is compatible with 802.11 B/G/N networks.
  *
  * To enable, uncomment the #define WIFI_101 below and verify the #define values under
  * options A and C are commented out.
  *
- * IMPORTANT: You must have the WiFI 101 library installed. To easily install this library, opent the library manager via:
- * Arduino IDE Menus: Sketch > Include Library > Manage Libraries > filter search for "WiFi101" > Select the result and click 'install'
+ * IMPORTANT: You must have the WiFI 101 library installed. To easily install this library, open
+ * the library manager via: Arduino IDE Menus: Sketch > Include Library > Manage Libraries >
+ * filter search for "WiFi101" > Select the result and click 'install'
  */
 //#define WIFI_101
 
@@ -160,8 +161,8 @@ WiFi101Stream stream;
 char ssid[] = "your_network_name";
 
 // STEP 3 [OPTIONAL for all boards and shields]
-// if you want to use a static IP (v4) address, uncomment the line below. You can also change the IP.
-// if this line is commented out, the WiFi shield will attempt to get an IP from the DHCP server
+// If you want to use a static IP (v4) address, uncomment the line below. You can also change the IP.
+// If this line is commented out, the WiFi shield will attempt to get an IP from the DHCP server
 // #define STATIC_IP_ADDRESS 192,168,1,113
 
 // STEP 4 [REQUIRED for all boards and shields]
@@ -177,8 +178,8 @@ char ssid[] = "your_network_name";
  *
  * WPA is the most common network security type. A passphrase is required to connect to this type.
  *
- * To enable, leave #define WIFI_WPA_SECURITY uncommented below, set your wpa_passphrase value appropriately,
- * and do not uncomment the #define values under options B and C
+ * To enable, leave #define WIFI_WPA_SECURITY uncommented below, set your wpa_passphrase value
+ * appropriately, and do not uncomment the #define values under options B and C
  */
 #define WIFI_WPA_SECURITY
 
@@ -189,11 +190,11 @@ char wpa_passphrase[] = "your_wpa_passphrase";
 /*
  * OPTION B: WEP
  *
- * WEP is a less common (and regarded as less safe) security type. A WEP key and its associated index are required
- * to connect to this type.
+ * WEP is a less common (and regarded as less safe) security type. A WEP key and its associated
+ * index are required to connect to this type.
  *
- * To enable, Uncomment the #define below, set your wep_index and wep_key values appropriately, and verify
- * the #define values under options A and C are commented out.
+ * To enable, Uncomment the #define below, set your wep_index and wep_key values appropriately, and
+ * verify the #define values under options A and C are commented out.
  */
 //#define WIFI_WEP_SECURITY
 
@@ -208,7 +209,8 @@ char wep_key[] = "your_wep_key";
 /*
  * OPTION C: Open network (no security)
  *
- * Open networks have no security, can be connected to by any device that knows the ssid, and are unsafe.
+ * Open networks have no security, can be connected to by any device that knows the ssid, and are
+ * unsafe.
  *
  * To enable, uncomment #define WIFI_NO_SECURITY below and verify the #define values
  * under options A and B are commented out.
@@ -333,14 +335,14 @@ int wifiStatus = WL_IDLE_STATUS;
 
 void systemResetCallback()
 {
-  // initialize a defalt state
+  // initialize a default state
 
   // pins with analog capability default to analog input
   // otherwise, pins default to digital output
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_ANALOG(i)) {
 #ifdef AnalogInputFirmata_h
-      // turns off pullup, configures everything
+      // turns off pull-up, configures everything
       Firmata.setPinMode(i, PIN_MODE_ANALOG);
 #endif
     } else if (IS_PIN_DIGITAL(i)) {
@@ -563,7 +565,7 @@ void loop()
   digitalInput.report();
 #endif
 
-  /* STREAMREAD - processing incoming messagse as soon as possible, while still
+  /* STREAMREAD - processing incoming message as soon as possible, while still
    * checking digital inputs.  */
   while (Firmata.available()) {
     Firmata.processInput();
@@ -602,6 +604,6 @@ runtasks: scheduler.runTasks();
   serial.update();
 #endif
 
-  // keep the WiFi connection live. Attemtps to reconnect automatically if disconnected.
+  // keep the WiFi connection live. Attempts to reconnect automatically if disconnected.
   stream.maintain();
 }

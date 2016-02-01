@@ -1,6 +1,7 @@
 /*
   OneWireFirmata.cpp - Firmata library
   Copyright (C) 2012-2013 Norbert Truchsess. All rights reserved.
+  Copyright (C) 2016 Jeff Hoefs. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
