@@ -22,7 +22,8 @@
  * Query using the REPORT_VERSION message.
  */
 #define FIRMATA_PROTOCOL_MAJOR_VERSION  2 // for non-compatible changes
-#define FIRMATA_PROTOCOL_MINOR_VERSION  5 // for backwards compatible changes
+// #define FIRMATA_PROTOCOL_MINOR_VERSION  5 // for backwards compatible changes
+#define FIRMATA_PROTOCOL_MINOR_VERSION  6 // DeviceFirmata pull request source
 #define FIRMATA_PROTOCOL_BUGFIX_VERSION 1 // for bugfix releases
 
 /*
@@ -32,7 +33,8 @@
  * Query using the REPORT_FIRMWARE message.
  */
 #define FIRMATA_FIRMWARE_MAJOR_VERSION  2 // for non-compatible changes
-#define FIRMATA_FIRMWARE_MINOR_VERSION  8 // for backwards compatible changes
+// #define FIRMATA_FIRMWARE_MINOR_VERSION  8 // for backwards compatible changes
+#define FIRMATA_FIRMWARE_MINOR_VERSION  9 // DeviceFirmata pull request source
 #define FIRMATA_FIRMWARE_BUGFIX_VERSION 1 // for bugfix releases
 
 // DEPRECATED as of ConfigurableFirmata v2.8.1.
