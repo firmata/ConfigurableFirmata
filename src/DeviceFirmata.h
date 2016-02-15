@@ -3,6 +3,7 @@
 #define DeviceFirmata_h
 
 #include <FirmataFeature.h>
+#include <LuniLib.h>
 #include <Device/DeviceDriver.h>
 #include <Device/DeviceTable.h>
 

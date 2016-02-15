@@ -97,6 +97,11 @@
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
 
+// DeviceFirmata commands
+
+#define DEVICE_QUERY            0x30 // message requesting action from a device driver (DeviceFirmata)
+#define DEVICE_RESPONSE         0x31 // message providing the device driver response (DeviceFirmata)
+
 // these are DEPRECATED to make the naming more consistent
 #define FIRMATA_STRING          0x71 // same as STRING_DATA
 #define SYSEX_I2C_REQUEST       0x76 // same as I2C_REQUEST
