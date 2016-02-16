@@ -23,12 +23,8 @@ boolean DeviceFirmata::handlePinMode(byte pin, int mode) {
   return false;
 }
 
-void DeviceFirmata::update(unsigned long deltaMicros) {
-  dt->update(deltaMicros);
-}
-
-void DeviceFirmata::report(unsigned long deltaMillis) {
-  dt->report(deltaMillis);
+void DeviceFirmata::update() {
+  dt->dispatchTimers();
 }
 
 // The first six bytes of argv for DEVICE_QUERY messages are: action, reserved,

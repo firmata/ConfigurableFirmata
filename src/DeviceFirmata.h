@@ -27,8 +27,7 @@ public:
     boolean handlePinMode(byte pin, int mode);
     boolean handleSysex(byte command, byte argc, byte* argv);
 
-    void update(unsigned long deltaMicros);
-    void report(unsigned long deltaMillis);
+    void update();
 
 private:
     DeviceTable *dt;
