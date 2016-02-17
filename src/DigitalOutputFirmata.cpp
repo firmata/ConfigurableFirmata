@@ -4,7 +4,7 @@
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -13,7 +13,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: November 15th, 2015
+  Last updated by Jeff Hoefs: February 16th, 2016
 */
 
 #include <ConfigurableFirmata.h>
@@ -61,7 +61,7 @@ void DigitalOutputFirmata::reset()
 
 void DigitalOutputFirmata::digitalWritePort(byte port, int value)
 {
-  byte pin, lastPin, pinValue, pinMode, mask = 1, pinWriteMask = 0;
+  byte pin, lastPin, pinValue, mask = 1, pinWriteMask = 0;
 
   if (port < TOTAL_PORTS) {
     // create a mask of the pins on this port that are writable.
@@ -70,14 +70,13 @@ void DigitalOutputFirmata::digitalWritePort(byte port, int value)
     for (pin = port * 8; pin < lastPin; pin++) {
       // do not disturb non-digital pins (eg, Rx & Tx)
       if (IS_PIN_DIGITAL(pin)) {
-        pinMode = Firmata.getPinMode(pin);
         // do not touch pins in PWM, ANALOG, SERVO or other modes
-        if (pinMode == OUTPUT || pinMode == INPUT) {
+        if (Firmata.getPinMode(pin) == OUTPUT || Firmata.getPinMode(pin) == INPUT) {
           pinValue = ((byte)value & mask) ? 1 : 0;
-          if (pinMode == OUTPUT) {
+          if (Firmata.getPinMode(pin) == OUTPUT) {
             pinWriteMask |= mask;
-          } else if (pinMode == INPUT && pinValue == 1 && Firmata.getPinState(pin) != 1) {
-            Firmata.setPinMode(pin, INPUT_PULLUP);
+          } else if (Firmata.getPinMode(pin) == INPUT && pinValue == 1 && Firmata.getPinState(pin) != 1) {
+            pinMode(pin, INPUT_PULLUP);
           }
           Firmata.setPinState(pin, pinValue);
         }
