@@ -1,5 +1,5 @@
 /*
-  ConfigurableFirmata.h - ConfigurableFirmata library v2.8.1 - 2016-1-23
+  ConfigurableFirmata.h - ConfigurableFirmata library v2.8.2 - 2016-2-16
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (c) 2013 Norbert Truchsess. All rights reserved.
   Copyright (c) 2013-2016 Jeff Hoefs. All rights reserved.
@@ -33,7 +33,7 @@
  */
 #define FIRMATA_FIRMWARE_MAJOR_VERSION  2 // for non-compatible changes
 #define FIRMATA_FIRMWARE_MINOR_VERSION  8 // for backwards compatible changes
-#define FIRMATA_FIRMWARE_BUGFIX_VERSION 1 // for bugfix releases
+#define FIRMATA_FIRMWARE_BUGFIX_VERSION 2 // for bugfix releases
 
 // DEPRECATED as of ConfigurableFirmata v2.8.1.
 // Use FIRMATA_PROTOCOL_[MAJOR|MINOR|BUGFIX]_VERSION instead.
@@ -44,7 +44,7 @@
 //Use FIRMATA_FIRMWARE_[MAJOR|MINOR|BUGFIX]_VERSION instead.
 #define FIRMWARE_MAJOR_VERSION  2
 #define FIRMWARE_MINOR_VERSION  8
-#define FIRMWARE_BUGFIX_VERSION 1
+#define FIRMWARE_BUGFIX_VERSION 2
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
