@@ -15,16 +15,18 @@ DeviceFirmata::DeviceFirmata(const char *luRootName) {
 
 //---------------------------------------------------------------------------
 
-void DeviceFirmata::reset(){}
+void DeviceFirmata::reset() {
+  dt->reset();
+}
 
-void DeviceFirmata::handleCapability(byte pin){}
+void DeviceFirmata::handleCapability(byte pin) {}
 
 boolean DeviceFirmata::handlePinMode(byte pin, int mode) {
   return false;
 }
 
 void DeviceFirmata::update() {
-  dt->dispatchTimers();
+  dt->dispatchTimers((ClientReporter*)this);
 }
 
 // The first six bytes of argv for DEVICE_QUERY messages are: action, reserved,
@@ -57,15 +59,14 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     dpCount = base64_decode((char *)dpBlock, (char *)(argv + 6), argc - 6);
   }
 
-  int status = dispatchDeviceAction(action, handle, dpCount, dpBlock);
-
-  sendDeviceResponse(handle, action, status, dpBlock);
+  dispatchDeviceAction(action, handle, dpCount, dpBlock);
   return true;
 }
 
 //---------------------------------------------------------------------------
 
-int DeviceFirmata::dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock) {
+void DeviceFirmata::dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock) {
+  int status = 0;
   int count = 0;
   int reg = 0;
   int flags = 0;
@@ -73,65 +74,120 @@ int DeviceFirmata::dispatchDeviceAction(int action, int handle, int dpCount, byt
   switch (action) {
   case DD_OPEN:
     flags = handle;
-    return dt->open((char *)dpBlock, flags);
+    status = dt->open((char *)dpBlock, flags);
+    reportOpen(status);
+    break;
 
   case DD_STATUS:
     count = from16LEToHost(dpBlock);
     reg   = from16LEToHost(dpBlock + 2);
-    return dt->status(handle,reg, count, dpBlock);
+    status = dt->status(handle, reg, count, dpBlock);
+    reportStatus(handle, status, dpBlock);
+    break;
 
   case DD_CONTROL:
     count = from16LEToHost(dpBlock);
     reg   = from16LEToHost(dpBlock + 2);
-    return dt->control(handle, reg, count, dpBlock + 4);
+    status = dt->control(handle, reg, count, dpBlock + 4);
+    reportControl(handle, status);
+    break;
 
   case DD_READ:
     count = from16LEToHost(dpBlock);
-    return dt->read(handle, count, dpBlock);
+    status = dt->read(handle, count, dpBlock);
+    reportRead(handle, status, dpBlock);
+    break;
 
   case DD_WRITE:
     count = from16LEToHost(dpBlock);
-    return dt->read(handle, count, dpBlock + 2);
+    status = dt->read(handle, count, dpBlock + 2);
+    reportWrite(handle, status);
+    break;
 
   case DD_CLOSE:
-    return dt->close(handle);
+    status = dt->close(handle);
+    reportClose(handle, status);
+    break;
 
   default:
-    return ENOSYS;
+    status = ENOSYS;
+    break;
   }
 }
+
+//---------------------------------------------------------------------------
+
+/**
+ * This method is called when there is a message to be sent back to the
+ * client.  It may be in response to a DEVICE_REQUEST that was just
+ * processed, or it may be an asynchronous event such as a stepper motor in
+ * a new position or a continuous read data packet.
+ * @param handle  The 14-bit handle identifying the device and unit
+ * number the message is coming from
+ * @param action  The method identifier to use in the response.
+ * @param status  Status value to send or number of bytes in dpBlock to send
+ * @param dpBlock The decoded (raw) parameter block to send upwards.
+ */
+void DeviceFirmata::sendDeviceResponse(int action, int handle, int status, const byte *dpB) {
+  byte epB[1 + ((MAX_DPB_LENGTH + 2) / 3) * 4];
+  byte header[8] = {START_SYSEX, DEVICE_RESPONSE};
+  int epCount = 0;
+
+  header[2] = (byte) action;
+  header[3] = (byte) 0;
+  header[4] = (byte)getUnitHandle(handle);
+  header[5] = (byte)getDeviceHandle(handle);
+  header[6] = (byte)(status & 0x7F);
+  header[7] = (byte)((status >> 7) & 0x7F);
+
+  for (int idx = 0; idx < 8; idx++) {
+    Firmata.write(header[idx]);
+  }
 
 //  dpB -> decoded parameter block
 //  epB -> encoded parameter block
 
-void DeviceFirmata::sendDeviceResponse(int handle, int action, int status) {
-  sendDeviceResponse(handle, action, status, 0);
-}
+  if (status > 0 && status <= MAX_DPB_LENGTH && dpB != 0) {
+    epCount = base64_encode((char *)epB, (char *)dpB, status);
+  }
 
-void DeviceFirmata::sendDeviceResponse(int handle, int action, int status, const byte *dpB) {
-  byte epB[1 + ((MAX_DPB_LENGTH + 2) / 3) * 4];
-
-  Firmata.write(START_SYSEX);
-  Firmata.write(DEVICE_RESPONSE);
-  Firmata.write(action & 0x7F);
-  Firmata.write(0);
-  if (action == DD_OPEN) {
-    Firmata.write(0);
-    Firmata.write(0);
-    Firmata.write(status & 0x7F);                   // status is handle or error
-    Firmata.write((status >> 7) & 0x7F);
-  } else {
-    Firmata.write(handle & 0x7F);
-    Firmata.write((handle >> 7) & 0x7F);
-    Firmata.write(status & 0x7F);                   // status is bytecount or error
-    Firmata.write((status >> 7) & 0x7F);
-
-    if (status > 0 && status <= MAX_DPB_LENGTH) {   // status is bytecount
-      int epCount = base64_encode((char *)epB, (char *)dpB, status);
-      for (int idx = 0; idx < epCount; idx++) {
-        Firmata.write(epB[idx]);
-      }
-    }
+  for (int idx = 0; idx < epCount; idx++) {
+    Firmata.write(epB[idx]);
   }
   Firmata.write(END_SYSEX);
 }
+
+//---------------------------------------------------------------------------
+
+void DeviceFirmata::reportOpen(int status) {
+  sendDeviceResponse(DD_OPEN, 0, status);
+}
+
+void DeviceFirmata::reportStatus(int handle, int status, const byte *dpB) {
+  if (status < 0) {
+    sendDeviceResponse(DD_STATUS, handle, status);
+  } else {
+    sendDeviceResponse(DD_STATUS, handle, status, dpB);
+  }
+}
+
+void DeviceFirmata::reportRead(int handle, int status, const byte *dpB) {
+  if (status < 0) {
+    sendDeviceResponse(DD_READ, handle, status);
+  } else {
+    sendDeviceResponse(DD_READ, handle, status, dpB);
+  }
+}
+
+void DeviceFirmata::reportControl(int handle, int status) {
+  sendDeviceResponse(DD_CONTROL, handle, status);
+}
+
+void DeviceFirmata::reportWrite(int handle, int status) {
+  sendDeviceResponse(DD_WRITE, handle, status);
+}
+
+void DeviceFirmata::reportClose(int handle, int status) {
+  sendDeviceResponse(DD_CLOSE, handle, status);
+}
+

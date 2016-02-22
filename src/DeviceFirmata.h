@@ -6,6 +6,7 @@
 #include <LuniLib.h>
 #include <Device/DeviceDriver.h>
 #include <Device/DeviceTable.h>
+#include <Device/ClientReporter.h>
 
 #define MAX_DPB_LENGTH 128  // decoded parameter block length (plain text)
 
@@ -18,9 +19,11 @@
 #define  DD_WRITE   0x04
 #define  DD_CLOSE   0x05
 
-class DeviceFirmata: public FirmataFeature {
+class DeviceFirmata: public FirmataFeature, ClientReporter {
 public:
     DeviceFirmata(const char *luRootName = 0);
+
+    // FirmataFeature
 
     void reset();
     void handleCapability(byte pin);
@@ -29,12 +32,20 @@ public:
 
     void update();
 
+    // ClientReporter
+
+    void reportOpen(int status);
+    void reportStatus(int handle, int status, const byte *dpB);
+    void reportRead(int handle, int status, const byte *dpB);
+    void reportControl(int handle, int status);
+    void reportWrite(int handle, int status);
+    void reportClose(int handle, int status);
+
 private:
     DeviceTable *dt;
 
-    int dispatchDeviceAction(int act, int handle, int pc, byte *pv);
-    void sendDeviceResponse(int handle, int action, int status);
-    void sendDeviceResponse(int handle, int action, int status, const byte *dpBlock);
+    void dispatchDeviceAction(int act, int handle, int pc, byte *pv);
+    void sendDeviceResponse(int action, int handle, int status, const byte *dpBlock = 0);
 };
 
 #endif
