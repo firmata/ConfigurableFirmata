@@ -44,8 +44,8 @@ public:
 private:
     DeviceTable *dt;
 
-    void dispatchDeviceAction(int act, int handle, int pc, byte *pv);
-    void sendDeviceResponse(int action, int handle, int status, const byte *dpBlock = 0);
+    void dispatchDeviceAction(int handle, int act, int pc, byte *pv);
+    void sendDeviceResponse(int handle, int action, int status, const byte *dpBlock = 0);
 };
 
 #endif
