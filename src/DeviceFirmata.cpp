@@ -51,7 +51,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
 
   int dpCount = base64_dec_len((char *)(argv + 6), argc - 6);
   if (dpCount > MAX_DPB_LENGTH) {
-    sendDeviceResponse(handle, action, EMSGSIZE);
+    sendDeviceResponse(action, handle, EMSGSIZE);
     return true;
   }
 
@@ -128,7 +128,7 @@ void DeviceFirmata::dispatchDeviceAction(int handle, int action, int dpCount, by
  * @param status  Status value to send or number of bytes in dpBlock to send
  * @param dpBlock The decoded (raw) parameter block to send upwards.
  */
-void DeviceFirmata::sendDeviceResponse(int handle, int action, int status, const byte *dpB) {
+void DeviceFirmata::sendDeviceResponse(int action, int handle, int status, const byte *dpB) {
   byte epB[1 + ((MAX_DPB_LENGTH + 2) / 3) * 4];
   byte header[8] = {START_SYSEX, DEVICE_RESPONSE};
   int epCount = 0;
