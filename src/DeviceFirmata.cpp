@@ -26,7 +26,7 @@ boolean DeviceFirmata::handlePinMode(byte pin, int mode) {
 }
 
 void DeviceFirmata::update() {
-  dt->dispatchTimers((ClientReporter*)this);
+  int status = dt->dispatchTimers((ClientReporter*)this);
 }
 
 // The first six bytes of argv for DEVICE_QUERY messages are: action, reserved,
