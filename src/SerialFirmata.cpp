@@ -66,6 +66,11 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
                 // because all Arduino pins are set to OUTPUT by default in StandardFirmata.
                 pinMode(pins.rx, INPUT);
               }
+#if defined(SERIAL_STORE_AND_FORWARD)    
+              lastAvailableBytes[portId] = 0;
+              lastReceive[portId] = 0;
+              maxCharDelay[portId] = 50000 / baud; // 8N1 = 10 bits per char -> 50 bits max. char/char delay 
+#endif              
               ((HardwareSerial*)serialPort)->begin(baud);
             }
           } else {
@@ -105,6 +110,11 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
             if (serialPort != NULL) {
               Firmata.setPinMode(swRxPin, PIN_MODE_SERIAL);
               Firmata.setPinMode(swTxPin, PIN_MODE_SERIAL);
+#if defined(SERIAL_STORE_AND_FORWARD)    
+              lastAvailableBytes[portId] = 0;
+              lastReceive[portId] = 0;
+              maxCharDelay[portId] = 50000 / baud; // 8N1 = 10 bits per char -> 50 bits max. char/char delay 
+#endif              
               ((SoftwareSerial*)serialPort)->begin(baud);
             }
 #endif
@@ -282,6 +292,10 @@ void SerialFirmata::checkSerial()
 
   if (serialIndex > -1) {
 
+#if defined(SERIAL_STORE_AND_FORWARD)    
+    unsigned long currentMillis = millis();
+#endif
+
     // loop through all reporting (READ_CONTINUOUS) serial ports
     for (byte i = 0; i < serialIndex + 1; i++) {
       portId = reportSerial[i];
@@ -296,27 +310,43 @@ void SerialFirmata::checkSerial()
         continue;
       }
 #endif
-      if (serialPort->available() > 0) {
-        Firmata.write(START_SYSEX);
-        Firmata.write(SERIAL_MESSAGE);
-        Firmata.write(SERIAL_REPLY | portId);
-
-        if (bytesToRead == 0 || (serialPort->available() <= bytesToRead)) {
-          numBytesToRead = serialPort->available();
-        } else {
-          numBytesToRead = bytesToRead;
+      int availableBytes = serialPort->available();
+      if (availableBytes > 0) {
+        bool read = true;
+        
+#if defined(SERIAL_STORE_AND_FORWARD)    
+        // check if reading should be delayed to collect some bytes before forwarding (for baud rates up to 19200)
+        if (maxCharDelay[portId]) {          
+          // inter character delay exceeded or more than 48 bytes available or more bytes available than required          
+          read = (lastAvailableBytes[portId] > 0 && (currentMillis - lastReceive[portId]) >= maxCharDelay[portId]) || (bytesToRead == 0 && availableBytes >= 48) || (bytesToRead > 0 && availableBytes >= bytesToRead);
+          if (availableBytes > lastAvailableBytes[portId]) {
+            lastReceive[portId] = currentMillis;
+            lastAvailableBytes[portId] = availableBytes;
+          }
         }
+#endif
 
-        // relay serial data to the serial device
-        while (numBytesToRead > 0) {
-          serialData = serialPort->read();
-          Firmata.write(serialData & 0x7F);
-          Firmata.write((serialData >> 7) & 0x7F);
-          numBytesToRead--;
+        if (read) {
+          Firmata.write(START_SYSEX);
+          Firmata.write(SERIAL_MESSAGE);
+          Firmata.write(SERIAL_REPLY | portId);
+
+          if (bytesToRead == 0 || (serialPort->available() <= bytesToRead)) {
+            numBytesToRead = serialPort->available();
+          } else {
+            numBytesToRead = bytesToRead;
+          }
+
+          // relay serial data to the serial device
+          while (numBytesToRead > 0) {
+            serialData = serialPort->read();
+            Firmata.write(serialData & 0x7F);
+            Firmata.write((serialData >> 7) & 0x7F);
+            numBytesToRead--;
+          }
+          Firmata.write(END_SYSEX);
         }
-        Firmata.write(END_SYSEX);
       }
-
     }
   }
 }

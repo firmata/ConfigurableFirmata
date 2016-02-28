@@ -142,6 +142,12 @@ class SerialFirmata: public FirmataFeature
     int serialBytesToRead[SERIAL_READ_ARR_LEN];
     signed char serialIndex;
 
+#if defined(SERIAL_STORE_AND_FORWARD)    
+    unsigned long lastReceive[SERIAL_READ_ARR_LEN];
+    unsigned char maxCharDelay[SERIAL_READ_ARR_LEN];
+    int lastAvailableBytes[SERIAL_READ_ARR_LEN];
+#endif
+    
     Stream *swSerial0;
     Stream *swSerial1;
     Stream *swSerial2;
