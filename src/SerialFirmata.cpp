@@ -48,160 +48,158 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
     Stream *serialPort;
     byte mode = argv[0] & SERIAL_MODE_MASK;
     byte portId = argv[0] & SERIAL_PORT_ID_MASK;
+    if (portId >= SERIAL_READ_ARR_LEN) return false;
 
-    if (portId < SERIAL_READ_ARR_LEN)
-    {
-      switch (mode) {
-        case SERIAL_CONFIG:
-          {
-            long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
-            serial_pins pins;
-#if defined(SERIAL_STORE_AND_FORWARD)
-            lastAvailableBytes[portId] = 0;
-            lastReceive[portId] = 0;
-            maxCharDelay[portId] = 50000 / baud; // 8N1 = 10 bits per char -> 50 bits max. char/char delay
-#endif
-            if (portId < 8) {
-              serialPort = getPortFromId(portId);
-              if (serialPort != NULL) {
-                pins = getSerialPinNumbers(portId);
-                if (pins.rx != 0 && pins.tx != 0) {
-                  Firmata.setPinMode(pins.rx, PIN_MODE_SERIAL);
-                  Firmata.setPinMode(pins.tx, PIN_MODE_SERIAL);
-                  // Fixes an issue where some serial devices would not work properly with Arduino Due
-                  // because all Arduino pins are set to OUTPUT by default in StandardFirmata.
-                  pinMode(pins.rx, INPUT);
-                }
-                ((HardwareSerial*)serialPort)->begin(baud);
-              }
-            } else {
-#if defined(SoftwareSerial_h)
-              byte swTxPin, swRxPin;
-              if (argc > 4) {
-                swRxPin = argv[4];
-                swTxPin = argv[5];
-              } else {
-                // RX and TX pins must be specified when using software serial
-                Firmata.sendString("Specify serial RX and TX pins");
-                return false;
-              }
-              switch (portId) {
-                case SW_SERIAL0:
-                  if (swSerial0 == NULL) {
-                    swSerial0 = new SoftwareSerial(swRxPin, swTxPin);
-                  }
-                  break;
-                case SW_SERIAL1:
-                  if (swSerial1 == NULL) {
-                    swSerial1 = new SoftwareSerial(swRxPin, swTxPin);
-                  }
-                  break;
-                case SW_SERIAL2:
-                  if (swSerial2 == NULL) {
-                    swSerial2 = new SoftwareSerial(swRxPin, swTxPin);
-                  }
-                  break;
-                case SW_SERIAL3:
-                  if (swSerial3 == NULL) {
-                    swSerial3 = new SoftwareSerial(swRxPin, swTxPin);
-                  }
-                  break;
-              }
-              serialPort = getPortFromId(portId);
-              if (serialPort != NULL) {
-                Firmata.setPinMode(swRxPin, PIN_MODE_SERIAL);
-                Firmata.setPinMode(swTxPin, PIN_MODE_SERIAL);
-                ((SoftwareSerial*)serialPort)->begin(baud);
-              }
-#endif
-            }
-            break; // SERIAL_CONFIG
-          }
-        case SERIAL_WRITE:
-          {
-            byte data;
-            serialPort = getPortFromId(portId);
-            if (serialPort == NULL) {
-              break;
-            }
-            for (byte i = 1; i < argc; i += 2) {
-              data = argv[i] + (argv[i + 1] << 7);
-              serialPort->write(data);
-            }
-            break; // SERIAL_WRITE
-          }
-        case SERIAL_READ:
-          if (argv[1] == SERIAL_READ_CONTINUOUSLY) {
-            if (serialIndex + 1 >= MAX_SERIAL_PORTS) {
-              break;
-            }
-
-            if (argc > 2) {
-              // maximum number of bytes to read from buffer per iteration of loop()
-              serialBytesToRead[portId] = (int)argv[2] | ((int)argv[3] << 7);
-            } else {
-              // read all available bytes per iteration of loop()
-              serialBytesToRead[portId] = 0;
-            }
-            serialIndex++;
-            reportSerial[serialIndex] = portId;
-          } else if (argv[1] == SERIAL_STOP_READING) {
-            byte serialIndexToSkip = 0;
-            if (serialIndex <= 0) {
-              serialIndex = -1;
-            } else {
-              for (byte i = 0; i < serialIndex + 1; i++) {
-                if (reportSerial[i] == portId) {
-                  serialIndexToSkip = i;
-                  break;
-                }
-              }
-              // shift elements over to fill space left by removed element
-              for (byte i = serialIndexToSkip; i < serialIndex + 1; i++) {
-                if (i < MAX_SERIAL_PORTS) {
-                  reportSerial[i] = reportSerial[i + 1];
-                }
-              }
-              serialIndex--;
-            }
-          }
-          break; // SERIAL_READ
-        case SERIAL_CLOSE:
-          serialPort = getPortFromId(portId);
-          if (serialPort != NULL) {
-            if (portId < 8) {
-              ((HardwareSerial*)serialPort)->end();
-            } else {
-#if defined(SoftwareSerial_h)
-              ((SoftwareSerial*)serialPort)->end();
-              if (serialPort != NULL) {
-                free(serialPort);
-                serialPort = NULL;
-              }
-#endif
-            }
-          }
-          break; // SERIAL_CLOSE
-        case SERIAL_FLUSH:
-          serialPort = getPortFromId(portId);
-          if (serialPort != NULL) {
-            getPortFromId(portId)->flush();
-          }
-          break; // SERIAL_FLUSH
-#if defined(SoftwareSerial_h)
-        case SERIAL_LISTEN:
-          // can only call listen() on software serial ports
-          if (portId > 7) {
+    switch (mode) {
+      case SERIAL_CONFIG:
+        {
+          long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
+          serial_pins pins;
+#if defined(SERIAL_STORE_AND_FORWARD)    
+          lastAvailableBytes[portId] = 0;
+          lastReceive[portId] = 0;
+          maxCharDelay[portId] = 50000 / baud; // 8N1 = 10 bits per char -> 50 bits max. char/char delay 
+#endif              
+          if (portId < 8) {
             serialPort = getPortFromId(portId);
             if (serialPort != NULL) {
-              ((SoftwareSerial*)serialPort)->listen();
+              pins = getSerialPinNumbers(portId);
+              if (pins.rx != 0 && pins.tx != 0) {
+                Firmata.setPinMode(pins.rx, PIN_MODE_SERIAL);
+                Firmata.setPinMode(pins.tx, PIN_MODE_SERIAL);
+                // Fixes an issue where some serial devices would not work properly with Arduino Due
+                // because all Arduino pins are set to OUTPUT by default in StandardFirmata.
+                pinMode(pins.rx, INPUT);
+              }
+              ((HardwareSerial*)serialPort)->begin(baud);
             }
-          }
-          break; // SERIAL_LISTEN
+          } else {
+#if defined(SoftwareSerial_h)
+            byte swTxPin, swRxPin;
+            if (argc > 4) {
+              swRxPin = argv[4];
+              swTxPin = argv[5];
+            } else {
+              // RX and TX pins must be specified when using software serial
+              Firmata.sendString("Specify serial RX and TX pins");
+              return false;
+            }
+            switch (portId) {
+              case SW_SERIAL0:
+                if (swSerial0 == NULL) {
+                  swSerial0 = new SoftwareSerial(swRxPin, swTxPin);
+                }
+                break;
+              case SW_SERIAL1:
+                if (swSerial1 == NULL) {
+                  swSerial1 = new SoftwareSerial(swRxPin, swTxPin);
+                }
+                break;
+              case SW_SERIAL2:
+                if (swSerial2 == NULL) {
+                  swSerial2 = new SoftwareSerial(swRxPin, swTxPin);
+                }
+                break;
+              case SW_SERIAL3:
+                if (swSerial3 == NULL) {
+                  swSerial3 = new SoftwareSerial(swRxPin, swTxPin);
+                }
+                break;
+            }
+            serialPort = getPortFromId(portId);
+            if (serialPort != NULL) {
+              Firmata.setPinMode(swRxPin, PIN_MODE_SERIAL);
+              Firmata.setPinMode(swTxPin, PIN_MODE_SERIAL);
+              ((SoftwareSerial*)serialPort)->begin(baud);
+            }
 #endif
-      }
-      return true;
+          }
+          break; // SERIAL_CONFIG
+        }
+      case SERIAL_WRITE:
+        {
+          byte data;
+          serialPort = getPortFromId(portId);
+          if (serialPort == NULL) {
+            break;
+          }
+          for (byte i = 1; i < argc; i += 2) {
+            data = argv[i] + (argv[i + 1] << 7);
+            serialPort->write(data);
+          }
+          break; // SERIAL_WRITE
+        }
+      case SERIAL_READ:
+        if (argv[1] == SERIAL_READ_CONTINUOUSLY) {
+          if (serialIndex + 1 >= MAX_SERIAL_PORTS) {
+            break;
+          }
+
+          if (argc > 2) {
+            // maximum number of bytes to read from buffer per iteration of loop()
+            serialBytesToRead[portId] = (int)argv[2] | ((int)argv[3] << 7);
+          } else {
+            // read all available bytes per iteration of loop()
+            serialBytesToRead[portId] = 0;
+          }
+          serialIndex++;
+          reportSerial[serialIndex] = portId;
+        } else if (argv[1] == SERIAL_STOP_READING) {
+          byte serialIndexToSkip = 0;
+          if (serialIndex <= 0) {
+            serialIndex = -1;
+          } else {
+            for (byte i = 0; i < serialIndex + 1; i++) {
+              if (reportSerial[i] == portId) {
+                serialIndexToSkip = i;
+                break;
+              }
+            }
+            // shift elements over to fill space left by removed element
+            for (byte i = serialIndexToSkip; i < serialIndex + 1; i++) {
+              if (i < MAX_SERIAL_PORTS) {
+                reportSerial[i] = reportSerial[i + 1];
+              }
+            }
+            serialIndex--;
+          }
+        }
+        break; // SERIAL_READ
+      case SERIAL_CLOSE:
+        serialPort = getPortFromId(portId);
+        if (serialPort != NULL) {
+          if (portId < 8) {
+            ((HardwareSerial*)serialPort)->end();
+          } else {
+#if defined(SoftwareSerial_h)
+            ((SoftwareSerial*)serialPort)->end();
+            if (serialPort != NULL) {
+              free(serialPort);
+              serialPort = NULL;
+            }
+#endif
+          }
+        }
+        break; // SERIAL_CLOSE
+      case SERIAL_FLUSH:
+        serialPort = getPortFromId(portId);
+        if (serialPort != NULL) {
+          getPortFromId(portId)->flush();
+        }
+        break; // SERIAL_FLUSH
+#if defined(SoftwareSerial_h)
+      case SERIAL_LISTEN:
+        // can only call listen() on software serial ports
+        if (portId > 7) {
+          serialPort = getPortFromId(portId);
+          if (serialPort != NULL) {
+            ((SoftwareSerial*)serialPort)->listen();
+          }
+        }
+        break; // SERIAL_LISTEN
+#endif
     }
+    return true;
   }
   return false;
 }
@@ -289,7 +287,7 @@ void SerialFirmata::checkSerial()
 
   if (serialIndex > -1) {
 
-#if defined(SERIAL_STORE_AND_FORWARD)    
+#if defined(SERIAL_STORE_AND_FORWARD)
     unsigned long currentMillis = millis();
 #endif
 
@@ -310,8 +308,8 @@ void SerialFirmata::checkSerial()
       int availableBytes = serialPort->available();
       if (availableBytes > 0) {
         bool read = true;
-        
-#if defined(SERIAL_STORE_AND_FORWARD)    
+
+#if defined(SERIAL_STORE_AND_FORWARD)
         // check if reading should be delayed to collect some bytes before
         // forwarding (for baud rates significantly below 57600 baud)
         if (maxCharDelay[portId]) {
