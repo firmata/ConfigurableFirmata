@@ -135,8 +135,8 @@ void DeviceFirmata::sendDeviceResponse(int action, int handle, int status, const
 
   header[2] = (byte) action;
   header[3] = (byte) 0;
-  header[4] = (byte)getUnitHandle(handle);
-  header[5] = (byte)getDeviceHandle(handle);
+  header[4] = (byte)getUnitNumber(handle);
+  header[5] = (byte)getDeviceNumber(handle);
   header[6] = (byte)(status & 0x7F);
   header[7] = (byte)((status >> 7) & 0x7F);
 
