@@ -333,6 +333,8 @@ void SerialFirmata::checkSerial()
           } else {
             numBytesToRead = bytesToRead;
           }
+          
+          lastAvailableBytes[portId] -= numBytesToRead; 
 
           // relay serial data to the serial device
           while (numBytesToRead > 0) {

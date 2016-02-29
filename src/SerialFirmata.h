@@ -23,6 +23,10 @@
 #include <SoftwareSerial.h>
 #endif
 
+//uncomment SERIAL_STORE_AND_FORWARD to collect bytes received by serial port until the receive buffer 
+// gets filled or a data gap is detected to avoid forwarding single bytes at baud rates below 50000
+//#define SERIAL_STORE_AND_FORWARD
+
 // Serial port Ids
 #define HW_SERIAL0                  0x00
 #define HW_SERIAL1                  0x01

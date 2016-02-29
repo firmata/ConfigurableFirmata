@@ -178,9 +178,6 @@ OneWireFirmata oneWire;
 #include <StepperFirmata.h>
 StepperFirmata stepper;
 
-//uncomment SERIAL_STORE_AND_FORWARD to collect bytes received by serial port until the receive buffer 
-// gets filled or a data gap is detected to avoid forwarding single bytes at baud rates below 50000
-//#define SERIAL_STORE_AND_FORWARD
 #include <SerialFirmata.h>
 SerialFirmata serial;
 
