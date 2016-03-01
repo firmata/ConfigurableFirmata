@@ -13,11 +13,9 @@
 // Firmata coding of DeviceDriver methods
 
 #define  DD_OPEN    0x00
-#define  DD_STATUS  0x01
-#define  DD_CONTROL 0x02
-#define  DD_READ    0x03
-#define  DD_WRITE   0x04
-#define  DD_CLOSE   0x05
+#define  DD_READ    0x01
+#define  DD_WRITE   0x02
+#define  DD_CLOSE   0x03
 
 class DeviceFirmata: public FirmataFeature, ClientReporter {
 public:
@@ -35,17 +33,14 @@ public:
     // ClientReporter
 
     void reportOpen(int status);
-    void reportStatus(int handle, int status, const byte *dpB);
-    void reportRead(int handle, int status, const byte *dpB);
-    void reportControl(int handle, int status);
-    void reportWrite(int handle, int status);
-    void reportClose(int handle, int status);
+    void reportClose(int status, int handle);
+    void reportRead(int status, int handle, const byte *dpB);
+    void reportWrite(int status, int handle, const byte *dpB);
 
 private:
     DeviceTable *dt;
 
-    void dispatchDeviceAction(int handle, int act, int pc, byte *pv);
-    void sendDeviceResponse(int action, int handle, int status, const byte *dpBlock = 0);
+    void sendDeviceResponse(int action, int status, int handle, int dpCount = 0, const byte *dpBlock = 0);
 };
 
 #endif
