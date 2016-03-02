@@ -41,6 +41,7 @@ void DeviceFirmata::update() {
 //  epB -> encoded parameter block
 
 boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
+      char *errString;
 
   byte dpBlock[1 + MAX_DPB_LENGTH]; // decoded parameter block
 
@@ -74,23 +75,23 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     reportOpen(status);
     break;
 
-  case DD_CLOSE:
-    status = dt->close(handle);
-    reportClose(status, handle);
-    break;
-
   case DD_READ:
-    reg   = from8LEToHost(dpBlock);
+    reg   = (int8_t)from8LEToHost(dpBlock);
     count = from16LEToHost(dpBlock + 1);
     status = dt->read(handle, reg, count, dpBlock + 3);
     reportRead(status, handle, dpBlock);
     break;
 
   case DD_WRITE:
-    reg   = from8LEToHost(dpBlock);
+    reg   = (int8_t)from8LEToHost(dpBlock);
     count = from16LEToHost(dpBlock + 1);
     status = dt->write(handle, reg, count, dpBlock + 3);
     reportWrite(status, handle, dpBlock);
+    break;
+
+  case DD_CLOSE:
+    status = dt->close(handle);
+    reportClose(status, handle);
     break;
 
   default:
@@ -111,10 +112,6 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
 void DeviceFirmata::reportOpen(int status) {
   sendDeviceResponse(DD_OPEN, status, 0);
 }
-
-void DeviceFirmata::reportClose(int status, int handle) {
-  sendDeviceResponse(DD_CLOSE, status, handle);
-}
 /**
  * Translates a message from the DeviceDriver environment to a call to a Firmata-aware method.
  * @param status The status code or actual byte count associated with this read.
@@ -134,6 +131,10 @@ void DeviceFirmata::reportClose(int status, int handle) {
 void DeviceFirmata::reportWrite(int status, int handle, const byte *dpB) {
   int dpCount = 3;
   sendDeviceResponse(DD_WRITE, status, handle, dpCount, dpB);
+}
+
+void DeviceFirmata::reportClose(int status, int handle) {
+  sendDeviceResponse(DD_CLOSE, status, handle);
 }
 
 //---------------------------------------------------------------------------
