@@ -55,10 +55,10 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
         {
           long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
           serial_pins pins;
-#if defined(SERIAL_STORE_AND_FORWARD)    
+#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)    
           lastAvailableBytes[portId] = 0;
           lastReceive[portId] = 0;
-          maxCharDelay[portId] = 50000 / baud; // 8N1 = 10 bits per char -> 50 bits max. char/char delay 
+          maxCharDelay[portId] = 50000 / baud; // 8N1 = 10 bits per char, max. 50 bits -> 50000 = 50bits * 1000ms/s
 #endif              
           if (portId < 8) {
             serialPort = getPortFromId(portId);
@@ -287,7 +287,7 @@ void SerialFirmata::checkSerial()
 
   if (serialIndex > -1) {
 
-#if defined(SERIAL_STORE_AND_FORWARD)
+#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)
     unsigned long currentMillis = millis();
 #endif
 
@@ -309,7 +309,7 @@ void SerialFirmata::checkSerial()
       if (availableBytes > 0) {
         bool read = true;
 
-#if defined(SERIAL_STORE_AND_FORWARD)
+#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)
         // check if reading should be delayed to collect some bytes before
         // forwarding (for baud rates significantly below 57600 baud)
         if (maxCharDelay[portId]) {
@@ -334,7 +334,9 @@ void SerialFirmata::checkSerial()
             numBytesToRead = bytesToRead;
           }
           
+#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)
           lastAvailableBytes[portId] -= numBytesToRead; 
+#endif
 
           // relay serial data to the serial device
           while (numBytesToRead > 0) {
