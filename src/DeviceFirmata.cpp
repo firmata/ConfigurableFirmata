@@ -31,110 +31,132 @@ void DeviceFirmata::update() {
 
 //---------------------------------------------------------------------------
 
-// The first six bytes of argv for DEVICE_QUERY messages are: action, reserved,
-// handle-low, handle-high, reserved, reserved. They are all constrained to
-// 7-bit values.The bytes that follow, if any, are the parameter block. The
-// parameter block is encoded with base-64 in the sysex message body during
-// transmission to and from this Firmata server.
-
-//  dpB -> decoded parameter block
-//  epB -> encoded parameter block
+// The entire body of each device driver message is encoded in base-64
+// during transmission to and from this Firmata server.  The first 9 bytes
+// of the decoded message body form a prologue that contains slots for all
+// the common query and request parameters.  Any following bytes are used
+// in the open() and write() methods.
 
 boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
-      char *errString;
+  if (command != DEVICE_QUERY) return false;
 
-  byte dpBlock[1 + MAX_DPB_LENGTH]; // decoded parameter block
-
-  if (command != DEVICE_QUERY) {
-    return false;
-  }
-
-  int action = argv[0];
-  int handle = (argv[3] << 7) | argv[2];
-
-  int dpCount = base64_dec_len((char *)(argv + 6), argc - 6);
-  if (dpCount > MAX_DPB_LENGTH) {
-    sendDeviceResponse(action, EMSGSIZE, handle);
+  if (argc < 12) {
+    reportError(EMSGSIZE);
     return true;
   }
+  byte parameterBlock[9];   // 9-byte beginning of every decoded DEVICE_QUERY message
+  byte *dataBlock = 0;      // data from the client for use in open() and write()
+  byte *inputBuffer = 0;    // data from the device in response to read()
 
-  if (dpCount > 0) {
-    dpCount = base64_decode((char *)dpBlock, (char *)(argv + 6), argc - 6);
+  base64_decode((char *)parameterBlock, (char *)(argv), 12);
+
+  int dataBlockLength = (argc == 12) ? 0 : base64_dec_len((char *)(argv + 12), argc - 12);
+  if (dataBlockLength > 0) {
+    dataBlock =  new byte[dataBlockLength];
+    if (dataBlock == 0) {
+      reportError(ENOMEM);
+      return true;
+    }
+    base64_decode((char *)dataBlock, (char *)(argv + 12), argc - 12);
   }
+
+  int action = from8LEToHost(parameterBlock);
+  int handle = from16LEToHost(parameterBlock+1);
+  int reg    = (int)from16LEToHost(parameterBlock+3);
+  int count  = from16LEToHost(parameterBlock+5);
 
   int flags = 0;
   int status = 0;
-  int reg = 0;
-  int count = 0;
 
   switch (action) {
 
   case DD_OPEN:
-    flags = handle;
-    status = dt->open((char *)dpBlock, flags);
-    reportOpen(status);
+    if (dataBlockLength == 0) {
+      reportError(EINVAL);
+    } else {
+      flags = handle;
+      status = dt->open((const char *)dataBlock, flags);
+      reportOpen(status);
+    }
     break;
 
   case DD_READ:
-    reg   = (int8_t)from8LEToHost(dpBlock);
-    count = from16LEToHost(dpBlock + 1);
-    status = dt->read(handle, reg, count, dpBlock + 3);
-    reportRead(status, handle, dpBlock);
+    if (dataBlockLength != 0) {
+      reportError(EINVAL);
+    } else {
+      inputBuffer = new byte[count];
+      if (inputBuffer == 0) {
+        reportError(ENOMEM);
+      } else {
+        status = dt->read(handle, reg, count, inputBuffer);
+        reportRead(status, handle, reg, count, inputBuffer);
+      }
+    }
     break;
 
   case DD_WRITE:
-    reg   = (int8_t)from8LEToHost(dpBlock);
-    count = from16LEToHost(dpBlock + 1);
-    status = dt->write(handle, reg, count, dpBlock + 3);
-    reportWrite(status, handle, dpBlock);
+    if (dataBlockLength != count) {
+      reportError(EINVAL);
+    } else {
+      status = dt->write(handle, reg, count, dataBlock);
+      reportWrite(status, handle, reg, count);
+    }
     break;
 
   case DD_CLOSE:
-    status = dt->close(handle);
-    reportClose(status, handle);
+    if (dataBlockLength != 0) {
+      reportError(EINVAL);
+    } else {
+      status = dt->close(handle);
+      reportClose(status, handle);
+    }
     break;
 
   default:
-    sendDeviceResponse(action, ENOSYS, handle);
+    reportError(ENOTSUP);
     break;
-
   }
+
+  delete dataBlock;
+  delete inputBuffer;
   return true;
 }
 
 //---------------------------------------------------------------------------
 
-  // in all cases, open and close don't return any bytes in the parameter buffer
-  // on error, both read and write return 3 bytes in the parameter buffer
-  // on read success, 3 bytes plus the data read are returned in the parameter buffer
-  // on write success, 3 bytes are returned in the parameter buffer
-
 void DeviceFirmata::reportOpen(int status) {
-  sendDeviceResponse(DD_OPEN, status, 0);
+  sendDeviceResponse(DD_OPEN, status);
 }
 /**
  * Translates a message from the DeviceDriver environment to a call to a Firmata-aware method.
  * @param status The status code or actual byte count associated with this read.
- * @param handle The 14-bit handle of the unit doing the reply
- * @param dpB    The byte buffer holding the reg, requested byte count and the data that was read
+ * @param handle The handle of the unit doing the reply
+ * @param reg The register identifier associated with the read() being reported
+ * @param count The number of bytes that were requested.  May be less than or
+ * equal to the byte count in status after a successful read.
+ * @param buf The byte[] result of the read().
  */
-  void DeviceFirmata::reportRead(int status, int handle, const byte *dpB) {
-  int dpCount = (status >= 0) ? status + 3 : 3;
-  sendDeviceResponse(DD_READ, status, handle, dpCount, dpB);
+void DeviceFirmata::reportRead(int status, int handle, int reg, int count, const byte *buf) {
+  sendDeviceResponse(DD_READ, status, handle, reg, count, buf);
 }
 /**
  * Translates a message from the DeviceDriver environment to a call to a Firmata-aware method.
  * @param status The status code or actual byte count associated with this write.
- * @param handle The 14-bit handle of the unit doing the reply
- * @param dpB    The byte buffer holding the reg and requested byte count
+ * @param handle The handle of the unit doing the reply
+ * @param reg The register identifier associated with the write() being reported
+ * @param count The number of bytes that were requested.  May be less than or
+ * equal to the byte count in status after a successful write.
  */
-void DeviceFirmata::reportWrite(int status, int handle, const byte *dpB) {
-  int dpCount = 3;
-  sendDeviceResponse(DD_WRITE, status, handle, dpCount, dpB);
+void DeviceFirmata::reportWrite(int status, int handle, int reg, int count) {
+  sendDeviceResponse(DD_WRITE, status, handle, reg, count);
 }
 
 void DeviceFirmata::reportClose(int status, int handle) {
   sendDeviceResponse(DD_CLOSE, status, handle);
+}
+
+void DeviceFirmata::reportError(int status) {
+  sendDeviceResponse(DD_CLOSE, status);
 }
 
 //---------------------------------------------------------------------------
@@ -144,37 +166,57 @@ void DeviceFirmata::reportClose(int status, int handle) {
  * client.  It may be in response to a DEVICE_REQUEST that was just
  * processed, or it may be an asynchronous event such as a stepper motor in
  * a new position or a continuous read data packet.
+ *
+ *  dmB -> decoded message body
+ *  emB -> encoded message body
+ *
  * @param action  The method identifier to use in the response.
- * @param status  Status value to send or number of bytes actually read or written
- * @param handle  The 14-bit handle identifying the device and unit number the message is coming from
- * @param dpCount The number of bytes to be encoded from the dpB and sent on
- * @param dpBlock The decoded (raw) parameter block to send upwards after encoding
+ * @param status  Status value, new handle (open), or number of bytes actually read or written
+ * @param handle  The handle identifying the device and unit number the message is coming from
+ * @param reg The register number associated with this message
+ * @param count The number of bytes specified originally by the caller
+ * @param dataBytes The raw data read from the device, if any
  */
-void DeviceFirmata::sendDeviceResponse(int action, int status, int handle, int dpCount, const byte *dpB) {
-  byte epB[1 + 4 + ((MAX_DPB_LENGTH + 2) / 3) * 4];
-  byte header[8] = {START_SYSEX, DEVICE_RESPONSE};
-  int epCount = 0;
+void DeviceFirmata::sendDeviceResponse(int action, int status, int handle, int reg, int count,
+                                       const byte *dataBytes) {
 
-  header[2] = (byte) action;
-  header[3] = (byte) 0;
-  header[4] = (byte)getUnitNumber(handle);
-  header[5] = (byte)getDeviceNumber(handle);
-  header[6] = (byte)(status & 0x7F);
-  header[7] = (byte)((status >> 7) & 0x7F);
+  byte dP[9];       // decoded (raw) message prologue
+  byte eP[12];      // encoded message prologue
+  byte *eD;         // encoded data bytes
 
-  for (int idx = 0; idx < 8; idx++) {
-    Firmata.write(header[idx]);
+  Firmata.write(START_SYSEX);
+  Firmata.write(DEVICE_RESPONSE);
+
+  dP[0] = (byte) action;
+  dP[1] = (byte) lowByte(handle);
+  dP[2] = (byte) highByte(handle);
+  dP[3] = (byte) lowByte(reg);
+  dP[4] = (byte) highByte(reg);
+  dP[5] = (byte) lowByte(count);
+  dP[6] = (byte) highByte(count);
+  dP[7] = (byte) lowByte(status);
+  dP[8] = (byte) highByte(status);
+
+  base64_encode((char *)eP, (char *)dP, 9);
+
+  for (int idx = 0; idx < 12; idx++) {
+    Firmata.write(eP[idx]);
   }
 
-//  dpB -> decoded parameter block
-//  epB -> encoded parameter block
-
-  if (dpCount > 0 && dpCount <= MAX_DPB_LENGTH && dpB != 0) {
-    epCount = base64_encode((char *)epB, (char *)dpB, dpCount);
-  }
-
-  for (int idx = 0; idx < epCount; idx++) {
-    Firmata.write(epB[idx]);
+  if (action == DD_READ && status > 0) {
+    int eDCount = base64_enc_len(status);
+    eD = new byte[eDCount];
+    if (dataBytes == 0 || eD == 0) {
+      for (int idx = 0; idx < eDCount; idx++) {
+        Firmata.write('/');     // Error.  This value will be decoded as 0x3F, ie, all 6 bits set.
+      }
+    } else {
+      base64_encode((char *)eD, (char *)dataBytes, status);
+      for (int idx = 0; idx < eDCount; idx++) {
+        Firmata.write(eD[idx]);     // Success.  These are the encoded data bytes.
+      }
+    }
+    delete eD;
   }
   Firmata.write(END_SYSEX);
 }

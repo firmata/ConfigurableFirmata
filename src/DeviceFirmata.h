@@ -8,7 +8,7 @@
 #include <Device/DeviceTable.h>
 #include <Device/ClientReporter.h>
 
-#define MAX_DPB_LENGTH 128  // decoded parameter block length (plain text)
+#define MAX_READ_COUNT 150  // max number of bytes that can be read with one message
 
 // Firmata coding of DeviceDriver methods
 
@@ -33,14 +33,15 @@ public:
     // ClientReporter
 
     void reportOpen(int status);
+    void reportRead(int status, int handle, int reg, int count, const byte *dataBytes);
+    void reportWrite(int status, int handle, int reg, int count);
     void reportClose(int status, int handle);
-    void reportRead(int status, int handle, const byte *dpB);
-    void reportWrite(int status, int handle, const byte *dpB);
+    void reportError(int status);
 
 private:
     DeviceTable *dt;
 
-    void sendDeviceResponse(int action, int status, int handle, int dpCount = 0, const byte *dpBlock = 0);
+    void sendDeviceResponse(int action, int status, int handle = 0, int reg = 0, int count = 0, const byte *dataBytes = 0);
 };
 
 #endif
