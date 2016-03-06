@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: January 23rd, 2016
+  Last updated by Jens B.: March 5th, 2016
 */
 
 #include "SerialFirmata.h"
@@ -55,11 +55,12 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
         {
           long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
           serial_pins pins;
-#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)    
+#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)
           lastAvailableBytes[portId] = 0;
           lastReceive[portId] = 0;
-          maxCharDelay[portId] = 50000 / baud; // 8N1 = 10 bits per char, max. 50 bits -> 50000 = 50bits * 1000ms/s
-#endif              
+          // 8N1 = 10 bits per char, max. 50 bits -> 50000 = 50bits * 1000ms/s
+          maxCharDelay[portId] = 50000 / baud;
+#endif
           if (portId < 8) {
             serialPort = getPortFromId(portId);
             if (serialPort != NULL) {
@@ -333,9 +334,9 @@ void SerialFirmata::checkSerial()
           } else {
             numBytesToRead = bytesToRead;
           }
-          
+
 #if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)
-          lastAvailableBytes[portId] -= numBytesToRead; 
+          lastAvailableBytes[portId] -= numBytesToRead;
 #endif
 
           // relay serial data to the serial device
