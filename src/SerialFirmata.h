@@ -23,6 +23,10 @@
 #include <SoftwareSerial.h>
 #endif
 
+//uncomment FIRMATA_SERIAL_PORT_RX_BUFFERING to collect bytes received by serial port until the receive buffer 
+// gets filled or a data gap is detected to avoid forwarding single bytes at baud rates below 50000
+//#define FIRMATA_SERIAL_PORT_RX_BUFFERING
+
 // Serial port Ids
 #define HW_SERIAL0                  0x00
 #define HW_SERIAL1                  0x01
@@ -142,6 +146,12 @@ class SerialFirmata: public FirmataFeature
     int serialBytesToRead[SERIAL_READ_ARR_LEN];
     signed char serialIndex;
 
+#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)    
+    unsigned long lastReceive[SERIAL_READ_ARR_LEN];
+    unsigned char maxCharDelay[SERIAL_READ_ARR_LEN];
+    int lastAvailableBytes[SERIAL_READ_ARR_LEN];
+#endif
+    
     Stream *swSerial0;
     Stream *swSerial1;
     Stream *swSerial2;
