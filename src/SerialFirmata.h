@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jens B.: March 5th, 2016
+  Last updated March 6th, 2016
 */
 
 #ifndef SerialFirmata_h
@@ -150,7 +150,6 @@ class SerialFirmata: public FirmataFeature
     unsigned long lastReceive[SERIAL_READ_ARR_LEN];
     unsigned char maxCharDelay[SERIAL_READ_ARR_LEN];
     int lastAvailableBytes[SERIAL_READ_ARR_LEN];
-    boolean rxBufferingEnabled[SERIAL_READ_ARR_LEN];
 
     Stream *swSerial0;
     Stream *swSerial1;
