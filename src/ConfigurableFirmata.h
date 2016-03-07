@@ -24,8 +24,9 @@
 #define FIRMATA_PROTOCOL_MAJOR_VERSION  2 // for non-compatible changes
 // #define FIRMATA_PROTOCOL_MINOR_VERSION  5 // for backwards compatible changes
 // #define FIRMATA_PROTOCOL_BUGFIX_VERSION 1 // for bugfix releases
-#define FIRMATA_PROTOCOL_MINOR_VERSION  6 // DEVICE_QUERY/_RESPONSE is ...
-#define FIRMATA_PROTOCOL_BUGFIX_VERSION 0 // ... proposed for Firmata 2.6
+//
+#define FIRMATA_PROTOCOL_MINOR_VERSION  6 // Proposal for Firmata 2.6 with ...
+#define FIRMATA_PROTOCOL_BUGFIX_VERSION 7 // ... DEVICE_QUERY/_RESPONSE v 0.7
 
 /*
  * Version numbers for the Firmata library.
@@ -36,8 +37,9 @@
 #define FIRMATA_FIRMWARE_MAJOR_VERSION  2 // for non-compatible changes
 // #define FIRMATA_FIRMWARE_MINOR_VERSION  8 // for backwards compatible changes
 // #define FIRMATA_FIRMWARE_BUGFIX_VERSION 1 // for bugfix releases
-#define FIRMATA_FIRMWARE_MINOR_VERSION  9 // DeviceFirmata firmware update is ...
-#define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // ... proposed for ConfigurableFirmata 2.9
+//
+#define FIRMATA_FIRMWARE_MINOR_VERSION  9 // DeviceFirmata feature is proposed ...
+#define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // ... for ConfigurableFirmata 2.9
 
 // DEPRECATED as of ConfigurableFirmata v2.8.1.
 // Use FIRMATA_PROTOCOL_[MAJOR|MINOR|BUGFIX]_VERSION instead.

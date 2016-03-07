@@ -61,9 +61,9 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
   }
 
   int action = from8LEToHost(parameterBlock);
-  int handle = from16LEToHost(parameterBlock+1);
+  int handle = (int)from16LEToHost(parameterBlock+1);
   int reg    = (int)from16LEToHost(parameterBlock+3);
-  int count  = from16LEToHost(parameterBlock+5);
+  int count  = (int)from16LEToHost(parameterBlock+5);
 
   int flags = 0;
   int status = 0;
