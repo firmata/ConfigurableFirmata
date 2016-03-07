@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jens B.: March 5th, 2016
+  Last updated March 6th, 2016
 */
 
 #include "SerialFirmata.h"
@@ -55,11 +55,17 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
         {
           long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
           serial_pins pins;
-#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)
           lastAvailableBytes[portId] = 0;
           lastReceive[portId] = 0;
+// this ifdef will be removed once a command to enable RX buffering has been added to the protocol
+#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)
           // 8N1 = 10 bits per char, max. 50 bits -> 50000 = 50bits * 1000ms/s
+          // char delay value (ms) to detect the end of a message, defaults to 50 bits * 1000 / baud rate
+          // a value of 0 will disable RX buffering, resulting in single byte transfers to the host with
+          // baud rates below approximately 56k (varies with CPU speed)
           maxCharDelay[portId] = 50000 / baud;
+#else
+          maxCharDelay[portId] = 0;
 #endif
           if (portId < 8) {
             serialPort = getPortFromId(portId);
@@ -288,9 +294,7 @@ void SerialFirmata::checkSerial()
 
   if (serialIndex > -1) {
 
-#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)
     unsigned long currentMillis = millis();
-#endif
 
     // loop through all reporting (READ_CONTINUOUS) serial ports
     for (byte i = 0; i < serialIndex + 1; i++) {
@@ -310,7 +314,6 @@ void SerialFirmata::checkSerial()
       if (availableBytes > 0) {
         bool read = true;
 
-#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)
         // check if reading should be delayed to collect some bytes before
         // forwarding (for baud rates significantly below 57600 baud)
         if (maxCharDelay[portId]) {
@@ -322,7 +325,6 @@ void SerialFirmata::checkSerial()
             lastAvailableBytes[portId] = availableBytes;
           }
         }
-#endif
 
         if (read) {
           Firmata.write(START_SYSEX);
@@ -335,9 +337,11 @@ void SerialFirmata::checkSerial()
             numBytesToRead = bytesToRead;
           }
 
-#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)
-          lastAvailableBytes[portId] -= numBytesToRead;
-#endif
+          if (lastAvailableBytes[portId] - numBytesToRead >= 0) {
+            lastAvailableBytes[portId] -= numBytesToRead;
+          } else {
+            lastAvailableBytes[portId] = 0;
+          }
 
           // relay serial data to the serial device
           while (numBytesToRead > 0) {
