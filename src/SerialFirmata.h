@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: January 23rd, 2016
+  Last updated March 6th, 2016
 */
 
 #ifndef SerialFirmata_h
@@ -22,6 +22,11 @@
 #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ARC32) || (ARDUINO >= 100 && ARDUINO < 10500)
 #include <SoftwareSerial.h>
 #endif
+
+// uncomment FIRMATA_SERIAL_PORT_RX_BUFFERING to collect bytes received by serial port until the
+// receive buffer gets filled or a data gap is detected to avoid forwarding single bytes at baud
+// rates below 50000
+//#define FIRMATA_SERIAL_PORT_RX_BUFFERING
 
 // Serial port Ids
 #define HW_SERIAL0                  0x00
@@ -96,9 +101,9 @@ inline serial_pins getSerialPinNumbers(uint8_t portId) {
   serial_pins pins;
   switch (portId) {
 #if defined(PIN_SERIAL_RX)
-      // case HW_SERIAL0:
-      //   // TODO when use of HW_SERIAL0 is enabled
-      //   break;
+    // case HW_SERIAL0:
+    //   // TODO when use of HW_SERIAL0 is enabled
+    //   break;
 #endif
 #if defined(PIN_SERIAL1_RX)
     case HW_SERIAL1:
@@ -141,6 +146,10 @@ class SerialFirmata: public FirmataFeature
     byte reportSerial[MAX_SERIAL_PORTS];
     int serialBytesToRead[SERIAL_READ_ARR_LEN];
     signed char serialIndex;
+
+    unsigned long lastReceive[SERIAL_READ_ARR_LEN];
+    unsigned char maxCharDelay[SERIAL_READ_ARR_LEN];
+    int lastAvailableBytes[SERIAL_READ_ARR_LEN];
 
     Stream *swSerial0;
     Stream *swSerial1;
