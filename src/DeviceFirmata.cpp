@@ -52,18 +52,18 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
 
   int dataBlockLength = (argc == 12) ? 0 : base64_dec_len((char *)(argv + 12), argc - 12);
   if (dataBlockLength > 0) {
-    dataBlock =  new byte[dataBlockLength];
+    dataBlock =  new byte[dataBlockLength+1];
     if (dataBlock == 0) {
       reportError(ENOMEM);
       return true;
     }
-    base64_decode((char *)dataBlock, (char *)(argv + 12), argc - 12);
+    dataBlockLength = base64_decode((char *)dataBlock, (char *)(argv + 12), argc - 12);
   }
 
   int action = from8LEToHost(parameterBlock);
-  int handle = (int)from16LEToHost(parameterBlock+1);
-  int reg    = (int)from16LEToHost(parameterBlock+3);
-  int count  = (int)from16LEToHost(parameterBlock+5);
+  int handle = from16LEToHost(parameterBlock+1);
+  int reg    = from16LEToHost(parameterBlock+3);
+  int count  = from16LEToHost(parameterBlock+5);
 
   int flags = 0;
   int status = 0;
