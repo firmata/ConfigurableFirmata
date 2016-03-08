@@ -37,6 +37,11 @@ void DeviceFirmata::update() {
 // the common query and request parameters.  Any following bytes are used
 // in the open() and write() methods.
 
+// Note that the base64 library adds a null terminator after the decoded data.
+// This means that the decode targets need to be at least one byte bigger than
+// the actual data size.  This also makes it possible to use the decoded data
+// as a null-terminated string without having to add the null (eg, open())
+
 boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
   if (command != DEVICE_QUERY) return false;
 
@@ -44,7 +49,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     reportError(EMSGSIZE);
     return true;
   }
-  byte parameterBlock[9];   // 9-byte beginning of every decoded DEVICE_QUERY message
+  byte parameterBlock[10];  // 9-byte beginning of every decoded DEVICE_QUERY message
   byte *dataBlock = 0;      // data from the client for use in open() and write()
   byte *inputBuffer = 0;    // data from the device in response to read()
 
@@ -176,12 +181,15 @@ void DeviceFirmata::reportError(int status) {
  * @param reg The register number associated with this message
  * @param count The number of bytes specified originally by the caller
  * @param dataBytes The raw data read from the device, if any
+ *
+ * Note:  The base64 encoder adds a null at the end of the encoded data.  Thus the encode
+ * target buffer needs to be one byte longer than the calculated data length.
  */
 void DeviceFirmata::sendDeviceResponse(int action, int status, int handle, int reg, int count,
                                        const byte *dataBytes) {
 
-  byte dP[9];       // decoded (raw) message prologue
-  byte eP[12];      // encoded message prologue
+  byte dP[9];       // source (raw) message prologue
+  byte eP[12+1];    // encoded message prologue
   byte *eD;         // encoded data bytes
 
   Firmata.write(START_SYSEX);
@@ -205,7 +213,7 @@ void DeviceFirmata::sendDeviceResponse(int action, int status, int handle, int r
 
   if (action == DD_READ && status > 0) {
     int eDCount = base64_enc_len(status);
-    eD = new byte[eDCount];
+    eD = new byte[eDCount+1];
     if (dataBytes == 0 || eD == 0) {
       for (int idx = 0; idx < eDCount; idx++) {
         Firmata.write('/');     // Error.  This value will be decoded as 0x3F, ie, all 6 bits set.
