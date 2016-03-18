@@ -9,8 +9,8 @@ extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
-DeviceFirmata::DeviceFirmata(const char *luRootName) {
-  dt = new DeviceTable(selectedDevices, luRootName);
+DeviceFirmata::DeviceFirmata() {
+  dt = new DeviceTable(selectedDevices);
 }
 
 //---------------------------------------------------------------------------
@@ -26,7 +26,7 @@ boolean DeviceFirmata::handlePinMode(byte pin, int mode) {
 }
 
 void DeviceFirmata::update() {
-  int status = dt->dispatchTimers((ClientReporter*)this);
+  dt->dispatchTimers((ClientReporter*)this);
 }
 
 //---------------------------------------------------------------------------
@@ -34,8 +34,9 @@ void DeviceFirmata::update() {
 // The entire body of each device driver message is encoded in base-64
 // during transmission to and from this Firmata server.  The first 9 bytes
 // of the decoded message body form a prologue that contains slots for all
-// the common query and request parameters.  Any following bytes are used
-// in the open() and write() methods.
+// the common query and request parameters.  Following bytes in a query
+// are used by the open() and write() methods; following bytes in a response
+// are used by the read() method.
 
 // Note that the base64 library adds a null terminator after the decoded data.
 // This means that the decode targets need to be at least one byte bigger than

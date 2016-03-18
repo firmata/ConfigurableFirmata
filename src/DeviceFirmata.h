@@ -19,7 +19,7 @@
 
 class DeviceFirmata: public FirmataFeature, ClientReporter {
 public:
-    DeviceFirmata(const char *luRootName = 0);
+    DeviceFirmata();
 
     // FirmataFeature
 
