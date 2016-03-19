@@ -5,18 +5,25 @@
 #include "DeviceFirmata.h"
 #include <Base64.h>
 
+// Create one globally visible pointer to the DeviceTable object for
+// DeviceFirmata and others to use when making calls to the device
+// drivers in the table.  If LuniLib is being used without DeviceFirmata,
+// then whatever class calls 'new DeviceTable(...)' should define the
+// Device pointer instead.
+
+DeviceTable *Device;
 extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
 DeviceFirmata::DeviceFirmata() {
-  dt = new DeviceTable(selectedDevices);
+  Device = new DeviceTable(selectedDevices);
 }
 
 //---------------------------------------------------------------------------
 
 void DeviceFirmata::reset() {
-  dt->reset();
+  Device->reset();
 }
 
 void DeviceFirmata::handleCapability(byte pin) {}
@@ -26,7 +33,7 @@ boolean DeviceFirmata::handlePinMode(byte pin, int mode) {
 }
 
 void DeviceFirmata::update() {
-  dt->dispatchTimers((ClientReporter*)this);
+  Device->dispatchTimers((ClientReporter*)this);
 }
 
 //---------------------------------------------------------------------------
@@ -81,7 +88,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
       reportError(EINVAL);
     } else {
       flags = handle;
-      status = dt->open((const char *)dataBlock, flags);
+      status = Device->open((const char *)dataBlock, flags);
       reportOpen(status);
     }
     break;
@@ -94,7 +101,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
       if (inputBuffer == 0) {
         reportError(ENOMEM);
       } else {
-        status = dt->read(handle, reg, count, inputBuffer);
+        status = Device->read(handle, reg, count, inputBuffer);
         reportRead(status, handle, reg, count, inputBuffer);
       }
     }
@@ -104,7 +111,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     if (dataBlockLength != count) {
       reportError(EINVAL);
     } else {
-      status = dt->write(handle, reg, count, dataBlock);
+      status = Device->write(handle, reg, count, dataBlock);
       reportWrite(status, handle, reg, count);
     }
     break;
@@ -113,7 +120,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     if (dataBlockLength != 0) {
       reportError(EINVAL);
     } else {
-      status = dt->close(handle);
+      status = Device->close(handle);
       reportClose(status, handle);
     }
     break;

@@ -39,7 +39,6 @@ public:
     void reportError(int status);
 
 private:
-    DeviceTable *dt;
 
     void sendDeviceResponse(int action, int status, int handle = 0, int reg = 0, int count = 0, const byte *dataBytes = 0);
 };
