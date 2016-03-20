@@ -17,7 +17,7 @@ extern DeviceDriver *selectedDevices[];
 //----------------------------------------------------------------------------
 
 DeviceFirmata::DeviceFirmata() {
-  Device = new DeviceTable(selectedDevices);
+  Device = new DeviceTable(selectedDevices,this);
 }
 
 //---------------------------------------------------------------------------
@@ -33,7 +33,7 @@ boolean DeviceFirmata::handlePinMode(byte pin, int mode) {
 }
 
 void DeviceFirmata::update() {
-  Device->dispatchTimers((ClientReporter*)this);
+  Device->dispatchTimers();
 }
 
 //---------------------------------------------------------------------------
