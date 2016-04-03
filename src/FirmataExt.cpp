@@ -30,8 +30,13 @@ void handleSetPinModeCallback(byte pin, int mode)
 
 void handleSysexCallback(byte command, byte argc, byte* argv)
 {
+  char buf[100];
   if (!FirmataExtInstance->handleSysex(command, argc, argv)) {
-    Firmata.sendString("Unhandled sysex command");
+    buf[0] = '\0';
+    itoa(command,buf,16);
+    strlcat(buf," (hex), Unhandled SYSEX command.",100);
+    Firmata.sendString(buf);
+    // Firmata.sendString("Unhandled sysex command "+itoa());
   }
 }
 
