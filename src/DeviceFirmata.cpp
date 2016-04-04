@@ -89,7 +89,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     } else {
       flags = handle;
       status = Device->open((const char *)dataBlock, flags);
-      reportOpen(status);
+      reportOpen(status,dataBlock);
     }
     break;
 
@@ -137,8 +137,8 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
 
 //---------------------------------------------------------------------------
 
-void DeviceFirmata::reportOpen(int status) {
-  sendDeviceResponse(DD_OPEN, status);
+void DeviceFirmata::reportOpen(int status, const byte *buf) {
+  sendDeviceResponse(DD_OPEN, status, 0, 0, 0, buf);
 }
 /**
  * Translates a message from the DeviceDriver environment to a call to a Firmata-aware method.
@@ -196,7 +196,7 @@ void DeviceFirmata::reportError(int status) {
 void DeviceFirmata::sendDeviceResponse(int action, int status, int handle, int reg, int count,
                                        const byte *dataBytes) {
 
-  byte dP[9];       // source (raw) message prologue
+  byte dP[9];       // decoded (raw) message prologue
   byte eP[12+1];    // encoded message prologue
   byte *eD;         // encoded data bytes
 
@@ -219,20 +219,30 @@ void DeviceFirmata::sendDeviceResponse(int action, int status, int handle, int r
     Firmata.write(eP[idx]);
   }
 
-  if (action == DD_READ && status > 0) {
-    int eDCount = base64_enc_len(status);
-    eD = new byte[eDCount+1];
-    if (dataBytes == 0 || eD == 0) {
-      for (int idx = 0; idx < eDCount; idx++) {
-        Firmata.write('/');     // Error.  This value will be decoded as 0x3F, ie, all 6 bits set.
-      }
-    } else {
-      base64_encode((char *)eD, (char *)dataBytes, status);
-      for (int idx = 0; idx < eDCount; idx++) {
-        Firmata.write(eD[idx]);     // Success.  These are the encoded data bytes.
-      }
+  int rawCount = 0;
+  int encCount = 0;
+
+  if (dataBytes != 0) {
+    if (action == DD_OPEN) {
+      rawCount = strlen((const char *)dataBytes)+1;
+    } else if (action == DD_READ && status > 0) {
+      rawCount = status;
     }
-    delete eD;
+    encCount = base64_enc_len(rawCount);
+    if (encCount > 0) {
+      eD = new byte[encCount+1];
+      if (eD == 0) {
+        for (int idx = 0; idx < encCount; idx++) {
+          Firmata.write('/');     // Memory allocation error.  This value will be decoded as 0x3F, ie, all 6 bits set.
+        }
+      } else {
+        base64_encode((char *)eD, (char *)dataBytes, rawCount);
+        for (int idx = 0; idx < encCount; idx++) {
+          Firmata.write(eD[idx]);     // Success.  These are the encoded data bytes.
+        }
+      }
+      delete eD;
+    }
   }
   Firmata.write(END_SYSEX);
 }

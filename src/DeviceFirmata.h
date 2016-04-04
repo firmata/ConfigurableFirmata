@@ -32,7 +32,7 @@ public:
 
     // ClientReporter
 
-    void reportOpen(int status);
+    void reportOpen(int status, const byte *buf);
     void reportRead(int status, int handle, int reg, int count, const byte *dataBytes);
     void reportWrite(int status, int handle, int reg, int count);
     void reportClose(int status, int handle);
