@@ -3,6 +3,7 @@
 */
 
 #include "DeviceFirmata.h"
+#include "utility/Boards.h"
 #include <Base64.h>
 
 // Create one globally visible pointer to the DeviceTable object for
@@ -26,7 +27,75 @@ void DeviceFirmata::reset() {
   Device->reset();
 }
 
-void DeviceFirmata::handleCapability(byte pin) {}
+void DeviceFirmata::handleCapability(byte pin) {
+
+// Digital Input
+
+  if (IS_PIN_DIGITAL(pin)) {
+    Firmata.write((byte)INPUT);
+    Firmata.write(1);
+    Firmata.write((byte)PIN_MODE_PULLUP);
+    Firmata.write(1);
+  }
+
+// Digital Output
+
+  if (IS_PIN_DIGITAL(pin)) {
+    Firmata.write((byte)OUTPUT);
+    Firmata.write(1);
+  }
+
+  // One Wire
+
+  if (IS_PIN_DIGITAL(pin)) {
+    Firmata.write(PIN_MODE_ONEWIRE);
+    Firmata.write(1);
+  }
+
+  // Analog Input
+
+  if (IS_PIN_ANALOG(pin)) {
+    Firmata.write(PIN_MODE_ANALOG);
+    Firmata.write(10); // 10 = 10-bit resolution
+  }
+
+  //  Analog Output
+
+  if (IS_PIN_PWM(pin)) {
+    Firmata.write(PIN_MODE_PWM);
+    Firmata.write(8); // 8 = 8-bit resolution
+  }
+
+  // Servo Control
+
+  #define MAX_SERVOS 10
+  if (IS_PIN_SERVO(pin)) {
+    Firmata.write(PIN_MODE_SERVO);
+    Firmata.write(14); //14 bit resolution (Servo takes int as argument)
+  }
+
+  // I2C
+
+  if (IS_PIN_I2C(pin)) {
+    Firmata.write(PIN_MODE_I2C);
+    Firmata.write(1); // TODO: could assign a number to map to SCL or SDA
+  }
+
+  // Stepper Motor
+
+  if (IS_PIN_DIGITAL(pin)) {
+    Firmata.write(PIN_MODE_STEPPER);
+    Firmata.write(21); //21 bits used for number of steps
+  }
+
+  // Serial
+
+  // if (IS_PIN_SERIAL(pin)) {
+  //   Firmata.write(PIN_MODE_SERIAL);
+  //   Firmata.write(getSerialPinType(pin));
+  // }
+
+}
 
 boolean DeviceFirmata::handlePinMode(byte pin, int mode) {
   return false;
