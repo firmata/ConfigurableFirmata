@@ -142,13 +142,14 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     dataBlockLength = base64_decode((char *)dataBlock, (char *)(argv + 12), argc - 12);
   }
 
-  int action = from8LEToHost(parameterBlock);
+  int action = (from8LEToHost(parameterBlock) & 0x0F);
+  int flags  = (from8LEToHost(parameterBlock) & 0xF0) >> 4;
   int handle = from16LEToHost(parameterBlock+1);
+  int openOpts = handle;
   int reg    = from16LEToHost(parameterBlock+3);
   int count  = from16LEToHost(parameterBlock+5);
 
-  int flags = 0;
-  int status = 0;
+  int status;
 
   switch (action) {
 
@@ -156,9 +157,8 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     if (dataBlockLength == 0) {
       reportError(EINVAL);
     } else {
-      flags = handle;
-      status = Device->open((const char *)dataBlock, flags);
-      reportOpen(status,dataBlock);
+      status = Device->open(openOpts, flags, (const char *)dataBlock);
+      reportOpen(status, openOpts, flags, dataBlock);
     }
     break;
 
@@ -170,8 +170,8 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
       if (inputBuffer == 0) {
         reportError(ENOMEM);
       } else {
-        status = Device->read(handle, reg, count, inputBuffer);
-        reportRead(status, handle, reg, count, inputBuffer);
+        status = Device->read(handle, flags, reg, count, inputBuffer);
+        reportRead(status, handle, flags, reg, count, inputBuffer);
       }
     }
     break;
@@ -180,8 +180,8 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     if (dataBlockLength != count) {
       reportError(EINVAL);
     } else {
-      status = Device->write(handle, reg, count, dataBlock);
-      reportWrite(status, handle, reg, count);
+      status = Device->write(handle, flags, reg, count, dataBlock);
+      reportWrite(status, handle, flags, reg, count);
     }
     break;
 
@@ -189,8 +189,8 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     if (dataBlockLength != 0) {
       reportError(EINVAL);
     } else {
-      status = Device->close(handle);
-      reportClose(status, handle);
+      status = Device->close(handle, flags);
+      reportClose(status, handle, flags);
     }
     break;
 
@@ -206,8 +206,8 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
 
 //---------------------------------------------------------------------------
 
-void DeviceFirmata::reportOpen(int status, const byte *buf) {
-  sendDeviceResponse(DD_OPEN, status, 0, 0, 0, buf);
+void DeviceFirmata::reportOpen(int status, int openOpts, int flags, const byte *buf) {
+  sendDeviceResponse(DD_OPEN, status, openOpts, flags, 0, 0,buf);
 }
 /**
  * Translates a message from the DeviceDriver environment to a call to a Firmata-aware method.
@@ -218,8 +218,8 @@ void DeviceFirmata::reportOpen(int status, const byte *buf) {
  * equal to the byte count in status after a successful read.
  * @param buf The byte[] result of the read().
  */
-void DeviceFirmata::reportRead(int status, int handle, int reg, int count, const byte *buf) {
-  sendDeviceResponse(DD_READ, status, handle, reg, count, buf);
+void DeviceFirmata::reportRead(int status, int handle, int flags, int reg, int count, const byte *buf) {
+  sendDeviceResponse(DD_READ, status, handle, flags, reg, count, buf);
 }
 /**
  * Translates a message from the DeviceDriver environment to a call to a Firmata-aware method.
@@ -229,12 +229,12 @@ void DeviceFirmata::reportRead(int status, int handle, int reg, int count, const
  * @param count The number of bytes that were requested.  May be less than or
  * equal to the byte count in status after a successful write.
  */
-void DeviceFirmata::reportWrite(int status, int handle, int reg, int count) {
-  sendDeviceResponse(DD_WRITE, status, handle, reg, count);
+void DeviceFirmata::reportWrite(int status, int handle, int flags, int reg, int count) {
+  sendDeviceResponse(DD_WRITE, status, handle, flags, reg, count);
 }
 
-void DeviceFirmata::reportClose(int status, int handle) {
-  sendDeviceResponse(DD_CLOSE, status, handle);
+void DeviceFirmata::reportClose(int status, int handle, int flags) {
+  sendDeviceResponse(DD_CLOSE, status, handle, flags);
 }
 
 void DeviceFirmata::reportError(int status) {
@@ -262,7 +262,7 @@ void DeviceFirmata::reportError(int status) {
  * Note:  The base64 encoder adds a null at the end of the encoded data.  Thus the encode
  * target buffer needs to be one byte longer than the calculated data length.
  */
-void DeviceFirmata::sendDeviceResponse(int action, int status, int handle, int reg, int count,
+void DeviceFirmata::sendDeviceResponse(int action, int status, int handle, int flags, int reg, int count,
                                        const byte *dataBytes) {
 
   byte dP[9];       // decoded (raw) message prologue
@@ -272,7 +272,7 @@ void DeviceFirmata::sendDeviceResponse(int action, int status, int handle, int r
   Firmata.write(START_SYSEX);
   Firmata.write(DEVICE_RESPONSE);
 
-  dP[0] = (byte) action;
+  dP[0] = (byte) ((flags & 0xF) << 4) | (action & 0xF);
   dP[1] = (byte) lowByte(handle);
   dP[2] = (byte) highByte(handle);
   dP[3] = (byte) lowByte(reg);
