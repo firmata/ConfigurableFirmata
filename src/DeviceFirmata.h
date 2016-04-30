@@ -8,15 +8,6 @@
 #include <Device/DeviceTable.h>
 #include <Device/ClientReporter.h>
 
-#define MAX_READ_COUNT 150  // max number of bytes that can be read with one message
-
-// Firmata coding of DeviceDriver methods
-
-#define  DD_OPEN    0x00
-#define  DD_READ    0x01
-#define  DD_WRITE   0x02
-#define  DD_CLOSE   0x03
-
 class DeviceFirmata: public FirmataFeature, ClientReporter {
 public:
     DeviceFirmata();
