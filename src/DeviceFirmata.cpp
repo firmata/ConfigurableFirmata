@@ -12,19 +12,19 @@
 // then whatever class calls 'new DeviceTable(...)' should define the
 // Device pointer instead.
 
-DeviceTable *Device;
+DeviceTable *globalDeviceTable;
 extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
 DeviceFirmata::DeviceFirmata() {
-  Device = new DeviceTable(selectedDevices,this);
+  globalDeviceTable = new DeviceTable(selectedDevices,this);
 }
 
 //---------------------------------------------------------------------------
 
 void DeviceFirmata::reset() {
-  Device->reset();
+  globalDeviceTable->reset();
 }
 
 void DeviceFirmata::handleCapability(byte pin) {
@@ -102,7 +102,7 @@ boolean DeviceFirmata::handlePinMode(byte pin, int mode) {
 }
 
 void DeviceFirmata::update() {
-  Device->dispatchTimers();
+  globalDeviceTable->dispatchTimers();
 }
 
 //---------------------------------------------------------------------------
@@ -153,16 +153,16 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
 
   switch (action) {
 
-  case DD_OPEN:
+  case (int)DAC::OPEN:
     if (dataBlockLength == 0) {
       reportError(EINVAL);
     } else {
-      status = Device->open(openOpts, flags, (const char *)dataBlock);
+      status = globalDeviceTable->open(openOpts, flags, (const char *)dataBlock);
       reportOpen(status, openOpts, flags, dataBlock);
     }
     break;
 
-  case DD_READ:
+  case (int)DAC::READ:
     if (dataBlockLength != 0) {
       reportError(EINVAL);
     } else {
@@ -170,26 +170,26 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
       if (inputBuffer == 0) {
         reportError(ENOMEM);
       } else {
-        status = Device->read(handle, flags, reg, count, inputBuffer);
+        status = globalDeviceTable->read(handle, flags, reg, count, inputBuffer);
         reportRead(status, handle, flags, reg, count, inputBuffer);
       }
     }
     break;
 
-  case DD_WRITE:
+  case (int)DAC::WRITE:
     if (dataBlockLength != count) {
       reportError(EINVAL);
     } else {
-      status = Device->write(handle, flags, reg, count, dataBlock);
+      status = globalDeviceTable->write(handle, flags, reg, count, dataBlock);
       reportWrite(status, handle, flags, reg, count);
     }
     break;
 
-  case DD_CLOSE:
+  case (int)DAC::CLOSE:
     if (dataBlockLength != 0) {
       reportError(EINVAL);
     } else {
-      status = Device->close(handle, flags);
+      status = globalDeviceTable->close(handle, flags);
       reportClose(status, handle, flags);
     }
     break;
@@ -207,7 +207,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
 //---------------------------------------------------------------------------
 
 void DeviceFirmata::reportOpen(int status, int openOpts, int flags, const byte *buf) {
-  sendDeviceResponse(DD_OPEN, status, openOpts, flags, 0, 0,buf);
+  sendDeviceResponse((int)DAC::OPEN, status, openOpts, flags, 0, 0,buf);
 }
 /**
  * Translates a message from the DeviceDriver environment to a call to a Firmata-aware method.
@@ -219,7 +219,7 @@ void DeviceFirmata::reportOpen(int status, int openOpts, int flags, const byte *
  * @param buf The byte[] result of the read().
  */
 void DeviceFirmata::reportRead(int status, int handle, int flags, int reg, int count, const byte *buf) {
-  sendDeviceResponse(DD_READ, status, handle, flags, reg, count, buf);
+  sendDeviceResponse((int)DAC::READ, status, handle, flags, reg, count, buf);
 }
 /**
  * Translates a message from the DeviceDriver environment to a call to a Firmata-aware method.
@@ -230,15 +230,15 @@ void DeviceFirmata::reportRead(int status, int handle, int flags, int reg, int c
  * equal to the byte count in status after a successful write.
  */
 void DeviceFirmata::reportWrite(int status, int handle, int flags, int reg, int count) {
-  sendDeviceResponse(DD_WRITE, status, handle, flags, reg, count);
+  sendDeviceResponse((int)DAC::WRITE, status, handle, flags, reg, count);
 }
 
 void DeviceFirmata::reportClose(int status, int handle, int flags) {
-  sendDeviceResponse(DD_CLOSE, status, handle, flags);
+  sendDeviceResponse((int)DAC::CLOSE, status, handle, flags);
 }
 
 void DeviceFirmata::reportError(int status) {
-  sendDeviceResponse(DD_CLOSE, status);
+  sendDeviceResponse((int)DAC::CLOSE, status);
 }
 
 //---------------------------------------------------------------------------
@@ -292,9 +292,9 @@ void DeviceFirmata::sendDeviceResponse(int action, int status, int handle, int f
   int encCount = 0;
 
   if (dataBytes != 0) {
-    if (action == DD_OPEN) {
+    if (action == (int)DAC::OPEN) {
       rawCount = strlen((const char *)dataBytes)+1;
-    } else if (action == DD_READ && status > 0) {
+    } else if (action == (int)DAC::READ && status > 0) {
       rawCount = status;
     }
     encCount = base64_enc_len(rawCount);
@@ -302,7 +302,7 @@ void DeviceFirmata::sendDeviceResponse(int action, int status, int handle, int f
       eD = new byte[encCount+1];
       if (eD == 0) {
         for (int idx = 0; idx < encCount; idx++) {
-          Firmata.write('/');     // Memory allocation error.  This value will be decoded as 0x3F, ie, all 6 bits set.
+          Firmata.write('/');     // Memory allocation error.  This value will be decoded as 0x3F, ie, all 7 bits set.
         }
       } else {
         base64_encode((char *)eD, (char *)dataBytes, rawCount);
