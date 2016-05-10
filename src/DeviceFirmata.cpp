@@ -241,6 +241,11 @@ void DeviceFirmata::reportError(int status) {
   sendDeviceResponse((int)DAC::CLOSE, status);
 }
 
+void DeviceFirmata::reportString(const byte *dataBytes) {
+  Firmata.sendString((char *)dataBytes);
+}
+
+
 //---------------------------------------------------------------------------
 
 /**

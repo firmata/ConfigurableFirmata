@@ -27,6 +27,7 @@ public:
     void reportRead(int status, int handle, int flags, int reg, int count, const byte *dataBytes);
     void reportWrite(int status, int handle, int flags,  int reg, int count);
     void reportClose(int status, int handle, int flags );
+    void reportString(const byte *dataBytes);
     void reportError(int status);
 
 private:
