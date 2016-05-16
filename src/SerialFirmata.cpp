@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: January 23rd, 2016
+  Last updated March 6th, 2016
 */
 
 #include "SerialFirmata.h"
@@ -48,13 +48,25 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
     Stream *serialPort;
     byte mode = argv[0] & SERIAL_MODE_MASK;
     byte portId = argv[0] & SERIAL_PORT_ID_MASK;
+    if (portId >= SERIAL_READ_ARR_LEN) return false;
 
     switch (mode) {
       case SERIAL_CONFIG:
         {
           long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
           serial_pins pins;
-
+          lastAvailableBytes[portId] = 0;
+          lastReceive[portId] = 0;
+// this ifdef will be removed once a command to enable RX buffering has been added to the protocol
+#if defined(FIRMATA_SERIAL_PORT_RX_BUFFERING)
+          // 8N1 = 10 bits per char, max. 50 bits -> 50000 = 50bits * 1000ms/s
+          // char delay value (ms) to detect the end of a message, defaults to 50 bits * 1000 / baud rate
+          // a value of 0 will disable RX buffering, resulting in single byte transfers to the host with
+          // baud rates below approximately 56k (varies with CPU speed)
+          maxCharDelay[portId] = 50000 / baud;
+#else
+          maxCharDelay[portId] = 0;
+#endif
           if (portId < 8) {
             serialPort = getPortFromId(portId);
             if (serialPort != NULL) {
@@ -282,6 +294,8 @@ void SerialFirmata::checkSerial()
 
   if (serialIndex > -1) {
 
+    unsigned long currentMillis = millis();
+
     // loop through all reporting (READ_CONTINUOUS) serial ports
     for (byte i = 0; i < serialIndex + 1; i++) {
       portId = reportSerial[i];
@@ -296,27 +310,49 @@ void SerialFirmata::checkSerial()
         continue;
       }
 #endif
-      if (serialPort->available() > 0) {
-        Firmata.write(START_SYSEX);
-        Firmata.write(SERIAL_MESSAGE);
-        Firmata.write(SERIAL_REPLY | portId);
+      int availableBytes = serialPort->available();
+      if (availableBytes > 0) {
+        bool read = true;
 
-        if (bytesToRead == 0 || (serialPort->available() <= bytesToRead)) {
-          numBytesToRead = serialPort->available();
-        } else {
-          numBytesToRead = bytesToRead;
+        // check if reading should be delayed to collect some bytes before
+        // forwarding (for baud rates significantly below 57600 baud)
+        if (maxCharDelay[portId]) {
+          // inter character delay exceeded or more than 48 bytes available or more bytes available than required
+          read = (lastAvailableBytes[portId] > 0 && (currentMillis - lastReceive[portId]) >= maxCharDelay[portId])
+                 || (bytesToRead == 0 && availableBytes >= 48) || (bytesToRead > 0 && availableBytes >= bytesToRead);
+          if (availableBytes > lastAvailableBytes[portId]) {
+            lastReceive[portId] = currentMillis;
+            lastAvailableBytes[portId] = availableBytes;
+          }
         }
 
-        // relay serial data to the serial device
-        while (numBytesToRead > 0) {
-          serialData = serialPort->read();
-          Firmata.write(serialData & 0x7F);
-          Firmata.write((serialData >> 7) & 0x7F);
-          numBytesToRead--;
+        if (read) {
+          Firmata.write(START_SYSEX);
+          Firmata.write(SERIAL_MESSAGE);
+          Firmata.write(SERIAL_REPLY | portId);
+
+          if (bytesToRead == 0 || (serialPort->available() <= bytesToRead)) {
+            numBytesToRead = serialPort->available();
+          } else {
+            numBytesToRead = bytesToRead;
+          }
+
+          if (lastAvailableBytes[portId] - numBytesToRead >= 0) {
+            lastAvailableBytes[portId] -= numBytesToRead;
+          } else {
+            lastAvailableBytes[portId] = 0;
+          }
+
+          // relay serial data to the serial device
+          while (numBytesToRead > 0) {
+            serialData = serialPort->read();
+            Firmata.write(serialData & 0x7F);
+            Firmata.write((serialData >> 7) & 0x7F);
+            numBytesToRead--;
+          }
+          Firmata.write(END_SYSEX);
         }
-        Firmata.write(END_SYSEX);
       }
-
     }
   }
 }
