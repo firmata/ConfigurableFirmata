@@ -6,103 +6,37 @@
 #include "utility/Boards.h"
 #include <Base64.h>
 
-// Create one globally visible pointer to the DeviceTable object for
-// DeviceFirmata and others to use when making calls to the device
-// drivers in the table.  If LuniLib is being used without DeviceFirmata,
-// then whatever class calls 'new DeviceTable(...)' should define the
-// Device pointer instead.
-
-DeviceTable *globalDeviceTable;
+DeviceTable *gDeviceTable;
 extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
 DeviceFirmata::DeviceFirmata() {
-  globalDeviceTable = new DeviceTable(selectedDevices,this);
+  gDeviceTable = new DeviceTable(selectedDevices,this);
 }
 
 //---------------------------------------------------------------------------
 
 void DeviceFirmata::reset() {
-  globalDeviceTable->reset();
+  gDeviceTable->reset();
 }
 
-void DeviceFirmata::handleCapability(byte pin) {
+// The pins that are currently being used by device drivers are already
+// marked as PIN_MODE_IGNORE, so we have no additional information to
+// provide to the list of capabilities.
 
-// Digital Input
+void DeviceFirmata::handleCapability(byte pin) {}
 
-  if (IS_PIN_DIGITAL(pin)) {
-    Firmata.write((byte)INPUT);
-    Firmata.write(1);
-    Firmata.write((byte)PIN_MODE_PULLUP);
-    Firmata.write(1);
-  }
-
-// Digital Output
-
-  if (IS_PIN_DIGITAL(pin)) {
-    Firmata.write((byte)OUTPUT);
-    Firmata.write(1);
-  }
-
-  // One Wire
-
-  if (IS_PIN_DIGITAL(pin)) {
-    Firmata.write(PIN_MODE_ONEWIRE);
-    Firmata.write(1);
-  }
-
-  // Analog Input
-
-  if (IS_PIN_ANALOG(pin)) {
-    Firmata.write(PIN_MODE_ANALOG);
-    Firmata.write(10); // 10 = 10-bit resolution
-  }
-
-  //  Analog Output
-
-  if (IS_PIN_PWM(pin)) {
-    Firmata.write(PIN_MODE_PWM);
-    Firmata.write(8); // 8 = 8-bit resolution
-  }
-
-  // Servo Control
-
-  #define MAX_SERVOS 10
-  if (IS_PIN_SERVO(pin)) {
-    Firmata.write(PIN_MODE_SERVO);
-    Firmata.write(14); //14 bit resolution (Servo takes int as argument)
-  }
-
-  // I2C
-
-  if (IS_PIN_I2C(pin)) {
-    Firmata.write(PIN_MODE_I2C);
-    Firmata.write(1); // TODO: could assign a number to map to SCL or SDA
-  }
-
-  // Stepper Motor
-
-  if (IS_PIN_DIGITAL(pin)) {
-    Firmata.write(PIN_MODE_STEPPER);
-    Firmata.write(21); //21 bits used for number of steps
-  }
-
-  // Serial
-
-  // if (IS_PIN_SERIAL(pin)) {
-  //   Firmata.write(PIN_MODE_SERIAL);
-  //   Firmata.write(getSerialPinType(pin));
-  // }
-
-}
+// Device driver capabilities do not necessarily map directly to Firmata pin
+// modes, and so none of the Firmata modes are recognized and all pin mode
+// requests are disavowed.
 
 boolean DeviceFirmata::handlePinMode(byte pin, int mode) {
   return false;
 }
 
 void DeviceFirmata::update() {
-  globalDeviceTable->dispatchTimers();
+  gDeviceTable->dispatchTimers();
 }
 
 //---------------------------------------------------------------------------
@@ -157,7 +91,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     if (dataBlockLength == 0) {
       reportError(EINVAL);
     } else {
-      status = globalDeviceTable->open(openOpts, flags, (const char *)dataBlock);
+      status = gDeviceTable->open(openOpts, flags, (const char *)dataBlock);
       reportOpen(status, openOpts, flags, dataBlock);
     }
     break;
@@ -170,7 +104,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
       if (inputBuffer == 0) {
         reportError(ENOMEM);
       } else {
-        status = globalDeviceTable->read(handle, flags, reg, count, inputBuffer);
+        status = gDeviceTable->read(handle, flags, reg, count, inputBuffer);
         reportRead(status, handle, flags, reg, count, inputBuffer);
       }
     }
@@ -180,7 +114,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     if (dataBlockLength != count) {
       reportError(EINVAL);
     } else {
-      status = globalDeviceTable->write(handle, flags, reg, count, dataBlock);
+      status = gDeviceTable->write(handle, flags, reg, count, dataBlock);
       reportWrite(status, handle, flags, reg, count);
     }
     break;
@@ -189,7 +123,7 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
     if (dataBlockLength != 0) {
       reportError(EINVAL);
     } else {
-      status = globalDeviceTable->close(handle, flags);
+      status = gDeviceTable->close(handle, flags);
       reportClose(status, handle, flags);
     }
     break;
@@ -205,6 +139,14 @@ boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
 }
 
 //---------------------------------------------------------------------------
+
+void reportPinClaim(int pin) {
+  Firmata.setPinMode((byte)pin, PIN_MODE_IGNORE);
+}
+
+void reportPinRelease(int pin) {
+  Firmata.setPinMode((byte)pin, INPUT);
+}
 
 void DeviceFirmata::reportOpen(int status, int openOpts, int flags, const byte *buf) {
   sendDeviceResponse((int)DAC::OPEN, status, openOpts, flags, 0, 0,buf);
