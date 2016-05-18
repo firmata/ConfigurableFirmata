@@ -29,8 +29,8 @@ public:
     void reportClose(int status, int handle, int flags );
     void reportString(const byte *dataBytes);
     void reportError(int status);
-    void reportPinClaim(int pin);
-    void reportPinRelease(int pin);
+    void reportClaimPin(int pin);
+    void reportReleasePin(int pin);
 
 private:
 
