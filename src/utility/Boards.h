@@ -29,11 +29,9 @@
 // this file).  If Servo.h wasn't included, this allows the code to still
 // compile, but without support for any Servos.  Hopefully that's what the
 // user intended by not including Servo.h
-// --> ConfigurableFirmata.h is included before Servo.h and so the following
-// --> definition causes a compiler warning.
-// #ifndef MAX_SERVOS
-// #define MAX_SERVOS 0
-// #endif
+#ifndef MAX_SERVOS
+#define MAX_SERVOS 0
+#endif
 
 /*
     Firmata Hardware Abstraction Layer
@@ -438,7 +436,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 2 || (p) == 3)
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
-#define IS_PIN_INTERRUPT(p)     (digitalPinToInterrupt(p)!= -1)
+#define IS_PIN_INTERRUPT(p)     digitalPinToInterrupt(p)
 #define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        (p) - 18
