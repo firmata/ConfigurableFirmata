@@ -15,6 +15,7 @@
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
   Copyright (C) 2015-2016 Jesse Frush. All rights reserved.
   Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2016 Jens B. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,42 +24,40 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: January 23rd, 2016
+  Last updated by Jeff Hoefs: July 17th, 2016
 */
 
 /*
   README
 
-  This is an example use of ConfigurableFirmata with WiFi. The easiest way to create a
-  configuration is use http://firmatabuilder.com and select the communication transport and the
-  firmata features to include and an Arduino sketch (.ino) file will be generated and downloaded
-  automatically.
+  This is an example use of ConfigurableFirmata with WiFi.
 
-  To manually configure a sketch, follow the instructions in this file.
-
-  ConfigurableFirmataWiFi is a WiFi server application. You will need a Firmata client library with
-  a network transport in order to establish a connection with ConfigurableFirmataWiFi.
+  ConfigurableFirmataWiFi enables the use of Firmata over a TCP connection. It can be configured as
+  either a TCP server or TCP client. To configure your Wi-Fi connection, follow the instructions in
+  the WIFI CONFIGURATION section of this file.
 
   To use ConfigurableFirmataWiFi you will need to have one of the following
   boards or shields:
 
-  - Arduino WiFi Shield (or clone)
+  - Arduino MKR1000 board (recommended)
+  - ESP8266 WiFi board compatible with ESP8266 Arduino core
   - Arduino WiFi Shield 101
-  - Arduino MKR1000 board (built-in WiFi 101)
-  - Adafruit HUZZAH CC3000 WiFi Shield (support coming soon)
+  - Arduino WiFi Shield (or clone)
 
-  Follow the instructions in the WIFI CONFIGURATION section below to configure your particular
-  hardware.
+  Follow the instructions in the wifiConfig.h file (wifiConfig.h tab in Arduino IDE) to
+  configure your particular hardware.
 
   Dependencies:
   - WiFi Shield 101 requires version 0.7.0 or higher of the WiFi101 library (available in Arduino
     1.6.8 or higher, or update the library via the Arduino Library Manager or clone from source:
     https://github.com/arduino-libraries/WiFi101)
+  - ESP8266 requires the Arduino ESP8266 core v2.1.0 or higher which can be obtained here:
+    https://github.com/esp8266/Arduino
 
-  In order to use the WiFi Shield 101 with Firmata you will need a board with at least
-  35k of Flash memory. This means you cannot use the WiFi Shield 101 with an Arduino Uno
-  or any other ATmega328p-based microcontroller or with an Arduino Leonardo or other
-  ATmega32u4-based microcontroller. Some boards that will work are:
+  In order to use the WiFi Shield 101 with Firmata you will need a board with at least 35k of Flash
+  memory. This means you cannot use the WiFi Shield 101 with an Arduino Uno or any other
+  ATmega328p-based microcontroller or with an Arduino Leonardo or other ATmega32u4-based
+  microcontroller. Some boards that will work are:
 
   - Arduino Zero
   - Arduino Due
@@ -89,89 +88,133 @@
 //#define SERIAL_DEBUG
 #include "utility/firmataDebug.h"
 
-#define WIFI_MAX_CONN_ATTEMPTS 3
+#define MAX_CONN_ATTEMPTS 20  // [500 ms] -> 10 s
 
 /*==============================================================================
  * WIFI CONFIGURATION
  *
  * You must configure your particular hardware. Follow the steps below.
  *
- * Currently ConfigurableFirmataWiFi is configured as a server. An option to
- * configure as a client may be added in the future.
+ * By default, ConfigurableFirmataWiFi is configured as a TCP server, to configure
+ * as a TCP client, see STEP 2.
  *============================================================================*/
 
 // STEP 1 [REQUIRED]
 // Uncomment / comment the appropriate set of includes for your hardware (OPTION A, B or C)
-// Option A is enabled by default.
+// Arduino MKR1000 or ESP8266 are enabled by default if compiling for either of those boards.
 
 /*
- * OPTION A: Configure for Arduino WiFi shield
- *
- * This will configure ConfigurableFirmataWiFi to use the original WiFi library (deprecated)
- * provided with the Arduino IDE. It is supported by the Arduino WiFi shield (a discontinued
- * product) and is compatible with 802.11 B/G networks.
- *
- * To configure ConfigurableFirmataWiFi to use the Arduino WiFi shield
- * leave the #define below uncommented.
- */
-#define ARDUINO_WIFI_SHIELD
-
-//do not modify these next 4 lines
-#ifdef ARDUINO_WIFI_SHIELD
-#include "utility/WiFiStream.h"
-WiFiStream stream;
-#endif
-
-/*
- * OPTION B: Configure for WiFi 101
+ * OPTION A: Configure for Arduino MKR1000 or Arduino WiFi Shield 101
  *
  * This will configure ConfigurableFirmataWiFi to use the WiFi101 library, which works with the
- * Arduino WiFi101 shield and devices that have the WiFi101 chip built in (such as the MKR1000). It
- * is compatible with 802.11 B/G/N networks.
+ * Arduino WiFi101 shield and devices that have the WiFi101 chip built in (such as the MKR1000).
+ * It is compatible with 802.11 B/G/N networks.
  *
- * To enable, uncomment the #define WIFI_101 below and verify the #define values under
- * options A and C are commented out.
+ * If you are using the MKR1000 board, continue on to STEP 2. If you are using the WiFi 101 shield,
+ * follow the instructions below.
+ *
+ * To enable for the WiFi 101 shield, uncomment the #define WIFI_101 below and verify the
+ * #define ARDUINO_WIFI_SHIELD is commented out for OPTION B.
  *
  * IMPORTANT: You must have the WiFI 101 library installed. To easily install this library, open
- * the library manager via: Arduino IDE Menus: Sketch > Include Library > Manage Libraries >
- * filter search for "WiFi101" > Select the result and click 'install'
+ * the library manager via: Arduino IDE Menus: Sketch > Include Library > Manage Libraries > filter
+ * search for "WiFi101" > Select the result and click 'install'
  */
 //#define WIFI_101
 
-//do not modify these next 4 lines
+//do not modify the following 11 lines
+#if defined(ARDUINO_SAMD_MKR1000) && !defined(WIFI_101)
+// automatically include if compiling for MRK1000
+#define WIFI_101
+#endif
 #ifdef WIFI_101
-#include "utility/WiFi101Stream.h"
-WiFi101Stream stream;
+#include <WiFi101.h>
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
+  #define WIFI_LIB_INCLUDED
 #endif
 
 /*
- * OPTION C: Configure for HUZZAH
+ * OPTION B: Configure for legacy Arduino WiFi shield
  *
- * HUZZAH is not yet supported, this will be added in a later revision to ConfigurableFirmataWiFi
+ * This will configure ConfigurableFirmataWiFi to use the original WiFi library (deprecated) provided
+ * with the Arduino IDE. It is supported by the Arduino WiFi shield (a discontinued product) and
+ * is compatible with 802.11 B/G networks.
+ *
+ * To configure ConfigurableFirmataWiFi to use the legacy Arduino WiFi shield
+ * leave the #define below uncommented and ensure #define WIFI_101 is commented out for OPTION A.
  */
+//#define ARDUINO_WIFI_SHIELD
 
-//------------------------------
-// TODO
-//------------------------------
-//#define HUZZAH_WIFI
+//do not modify the following 10 lines
+#ifdef ARDUINO_WIFI_SHIELD
+#include <WiFi.h>
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
+  #ifdef WIFI_LIB_INCLUDED
+  #define MULTIPLE_WIFI_LIB_INCLUDES
+  #else
+  #define WIFI_LIB_INCLUDED
+  #endif
+#endif
+
+/*
+ * OPTION C: Configure for ESP8266
+ *
+ * This will configure ConfigurableFirmataWiFi to use the ESP8266WiFi library for boards
+ * with an ESP8266 chip. It is compatible with 802.11 B/G/N networks.
+ *
+ * The appropriate libraries are included automatically when compiling for the ESP8266 so
+ * continue on to STEP 2.
+ *
+ * IMPORTANT: You must have the esp8266 board support installed. To easily install this board see
+ * the instructions here: https://github.com/esp8266/Arduino#installing-with-boards-manager.
+ */
+//do not modify the following 14 lines
+#ifdef ESP8266
+// automatically include if compiling for ESP8266
+#define ESP8266_WIFI
+#endif
+#ifdef ESP8266_WIFI
+#include <ESP8266WiFi.h>
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
+  #ifdef WIFI_LIB_INCLUDED
+  #define MULTIPLE_WIFI_LIB_INCLUDES
+  #else
+  #define WIFI_LIB_INCLUDED
+  #endif
+#endif
 
 
-// STEP 2 [REQUIRED for all boards and shields]
+// STEP 2 [OPTIONAL for all boards and shields]
+// If you want to setup you board as a TCP client, uncomment the following define and replace
+// the IP address with the IP address of your server.
+//#define SERVER_IP 10, 0, 0, 15
+
+
+// STEP 3 [REQUIRED for all boards and shields]
 // replace this with your wireless network SSID
 char ssid[] = "your_network_name";
 
-// STEP 3 [OPTIONAL for all boards and shields]
-// If you want to use a static IP (v4) address, uncomment the line below. You can also change the IP.
-// If this line is commented out, the WiFi shield will attempt to get an IP from the DHCP server
-// #define STATIC_IP_ADDRESS 192,168,1,113
 
-// STEP 4 [REQUIRED for all boards and shields]
+// STEP 4 [OPTIONAL for all boards and shields]
+// If you want to use a static IP (v4) address, uncomment the line below. You can also change the IP.
+// If the first line is commented out, the WiFi shield will attempt to get an IP from the DHCP server.
+// If you are using a static IP with the ESP8266 then you must also uncomment the SUBNET and GATEWAY.
+//#define STATIC_IP_ADDRESS  192,168,1,113
+//#define SUBNET_MASK        255,255,255,0 // REQUIRED for ESP8266_WIFI, optional for others
+//#define GATEWAY_IP_ADDRESS 0,0,0,0       // REQUIRED for ESP8266_WIFI, optional for others
+
+
+// STEP 5 [REQUIRED for all boards and shields]
 // define your port number here, you will need this to open a TCP connection to your Arduino
 #define SERVER_PORT 3030
 
-// STEP 5 [REQUIRED for all boards and shields]
-// determine your network security type (OPTION A, B, or C). Option A is the most common, and the default.
 
+// STEP 6 [REQUIRED for all boards and shields]
+// determine your network security type (OPTION A, B, or C). Option A is the most common, and the
+// default.
 
 /*
  * OPTION A: WPA / WPA2
@@ -187,14 +230,15 @@ char ssid[] = "your_network_name";
 char wpa_passphrase[] = "your_wpa_passphrase";
 #endif  //WIFI_WPA_SECURITY
 
+
 /*
- * OPTION B: WEP
+ * OPTION B: WEP (not supported for ESP8266)
  *
  * WEP is a less common (and regarded as less safe) security type. A WEP key and its associated
  * index are required to connect to this type.
  *
- * To enable, Uncomment the #define below, set your wep_index and wep_key values appropriately, and
- * verify the #define values under options A and C are commented out.
+ * To enable, Uncomment the #define below, set your wep_index and wep_key values appropriately,
+ * and verify the #define values under options A and C are commented out.
  */
 //#define WIFI_WEP_SECURITY
 
@@ -221,11 +265,11 @@ char wep_key[] = "your_wep_key";
  * CONFIGURATION ERROR CHECK (don't change anything here)
  *============================================================================*/
 
-#if ((defined(ARDUINO_WIFI_SHIELD) && (defined(WIFI_101) || defined(HUZZAH_WIFI))) || (defined(WIFI_101) && defined(HUZZAH_WIFI)))
+#ifdef MULTIPLE_WIFI_LIB_INCLUDES
 #error "you may not define more than one wifi device type in wifiConfig.h."
-#endif //WIFI device type check
+#endif
 
-#if !(defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(HUZZAH_WIFI))
+#ifndef WIFI_LIB_INCLUDED
 #error "you must define a wifi device type in wifiConfig.h."
 #endif
 
@@ -237,18 +281,42 @@ char wep_key[] = "your_wep_key";
 #error "you must define a wifi security type in wifiConfig.h."
 #endif  //WIFI_* security define check
 
+#if (defined(ESP8266_WIFI) && !(defined(WIFI_NO_SECURITY) || (defined(WIFI_WPA_SECURITY))))
+#error "you must choose between WIFI_NO_SECURITY and WIFI_WPA_SECURITY"
+#endif
+
+/*==============================================================================
+ * WIFI STREAM (don't change anything here)
+ *============================================================================*/
+
+#ifdef SERVER_IP
+  WiFiClientStream stream(IPAddress(SERVER_IP), SERVER_PORT);
+#else
+  WiFiServerStream stream(SERVER_PORT);
+#endif
+
 /*==============================================================================
  * PIN IGNORE MACROS (don't change anything here)
  *============================================================================*/
 
+#if defined(WIFI_101) && !defined(ARDUINO_SAMD_MKR1000)
 // ignore SPI pins, pin 5 (reset WiFi101 shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
-// also don't ignore SS pin if it's not pin 10
-// TODO - need to differentiate between Arduino WiFi1 101 Shield and Arduino MKR1000
-#define IS_IGNORE_WIFI101_SHIELD(p)  ((p) == 10 || (IS_PIN_SPI(p) && (p) != SS) || (p) == 5 || (p) == 7)
+// also don't ignore SS pin if it's not pin 10. Not needed for Arduino MKR1000.
+#define IS_IGNORE_PIN(p)  ((p) == 10 || (IS_PIN_SPI(p) && (p) != SS) || (p) == 5 || (p) == 7)
 
+#elif defined(ARDUINO_WIFI_SHIELD) && defined(__AVR_ATmega32U4__)
 // ignore SPI pins, pin 4 (SS for SD-Card on WiFi-shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
-#define IS_IGNORE_WIFI_SHIELD(p)     ((IS_PIN_SPI(p) || (p) == 4) || (p) == 7 || (p) == 10)
+// On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
+#define IS_IGNORE_PIN(p)  ((IS_PIN_SPI(p) || (p) == 4) || (p) == 7 || (p) == 10 || (p) == 24 || (p) == 28)
 
+#elif defined(ARDUINO_WIFI_SHIELD)
+// ignore SPI pins, pin 4 (SS for SD-Card on WiFi-shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
+#define IS_IGNORE_PIN(p)  ((IS_PIN_SPI(p) || (p) == 4) || (p) == 7 || (p) == 10)
+
+#elif defined(ESP8266_WIFI) && defined(SERIAL_DEBUG)
+#define IS_IGNORE_PIN(p)  ((p) == 1)
+
+#endif
 
 /*==============================================================================
  * FIRMATA FEATURE CONFIGURATION
@@ -325,9 +393,15 @@ FirmataReporting reporting;
 #ifdef STATIC_IP_ADDRESS
 IPAddress local_ip(STATIC_IP_ADDRESS);
 #endif
+#ifdef SUBNET_MASK
+IPAddress subnet(SUBNET_MASK);
+#endif
+#ifdef GATEWAY_IP_ADDRESS
+IPAddress gateway(GATEWAY_IP_ADDRESS);
+#endif
 
-int wifiConnectionAttemptCounter = 0;
-int wifiStatus = WL_IDLE_STATUS;
+int connectionAttempts = 0;
+bool streamConnected = false;
 
 /*==============================================================================
  * FUNCTIONS
@@ -358,117 +432,133 @@ void systemResetCallback()
 #endif
 }
 
+/*
+ * Called when a TCP connection is either connected or disconnected.
+ * TODO:
+ * - report connected or reconnected state to host (to be added to protocol)
+ */
+void hostConnectionCallback(byte state)
+{
+  switch (state) {
+    case HOST_CONNECTION_CONNECTED:
+      DEBUG_PRINTLN( "TCP connection established" );
+      break;
+    case HOST_CONNECTION_DISCONNECTED:
+      DEBUG_PRINTLN( "TCP connection disconnected" );
+      break;
+  }
+}
+
 void printWifiStatus() {
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
   if ( WiFi.status() != WL_CONNECTED )
   {
     DEBUG_PRINT( "WiFi connection failed. Status value: " );
     DEBUG_PRINTLN( WiFi.status() );
   }
   else
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
   {
     // print the SSID of the network you're attached to:
     DEBUG_PRINT( "SSID: " );
-
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
     DEBUG_PRINTLN( WiFi.SSID() );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
 
     // print your WiFi shield's IP address:
     DEBUG_PRINT( "IP Address: " );
-
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
     IPAddress ip = WiFi.localIP();
     DEBUG_PRINTLN( ip );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
 
     // print the received signal strength:
     DEBUG_PRINT( "signal strength (RSSI): " );
-
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
     long rssi = WiFi.RSSI();
     DEBUG_PRINT( rssi );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
-
     DEBUG_PRINTLN( " dBm" );
   }
 }
 
-/*==============================================================================
- * SETUP()
- *============================================================================*/
-
-void setup()
+/*
+ * ConfigurableFirmataWiFi communicates with WiFi shields over SPI. Therefore all
+ * SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
+ * Additional pins may also need to be ignored depending on the particular board or
+ * shield in use.
+ */
+void ignorePins()
 {
-  /*
-   * WIFI SETUP
-   */
-  DEBUG_BEGIN(9600);
+#ifdef IS_IGNORE_PIN
+  for (byte i = 0; i < TOTAL_PINS; i++) {
+    if (IS_IGNORE_PIN(i)) {
+      Firmata.setPinMode(i, PIN_MODE_IGNORE);
+    }
+  }
+#endif
 
-  /*
-   * This statement will clarify how a connection is being made
-   */
+  //Set up controls for the Arduino WiFi Shield SS for the SD Card
+#ifdef ARDUINO_WIFI_SHIELD
+  // Arduino WiFi Shield has SD SS wired to D4
+  pinMode(PIN_TO_DIGITAL(4), OUTPUT);    // switch off SD card bypassing Firmata
+  digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
+
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
+#endif
+
+#endif //ARDUINO_WIFI_SHIELD
+}
+
+void initTransport()
+{
+  // This statement will clarify how a connection is being made
   DEBUG_PRINT( "ConfigurableFirmataWiFi will attempt a WiFi connection " );
 #if defined(WIFI_101)
   DEBUG_PRINTLN( "using the WiFi 101 library." );
 #elif defined(ARDUINO_WIFI_SHIELD)
   DEBUG_PRINTLN( "using the legacy WiFi library." );
-#elif defined(HUZZAH_WIFI)
-  DEBUG_PRINTLN( "using the HUZZAH WiFi library." );
+#elif defined(ESP8266_WIFI)
+  DEBUG_PRINTLN( "using the ESP8266 WiFi library." );
   //else should never happen here as error-checking in wifiConfig.h will catch this
 #endif  //defined(WIFI_101)
 
-  /*
-   * Configure WiFi IP Address
-   */
+  // Configure WiFi IP Address
 #ifdef STATIC_IP_ADDRESS
   DEBUG_PRINT( "Using static IP: " );
   DEBUG_PRINTLN( local_ip );
-  //you can also provide a static IP in the begin() functions, but this simplifies
-  //ifdef logic in this sketch due to support for all different encryption types.
+#if defined(ESP8266_WIFI) || (defined(SUBNET_MASK) && defined(GATEWAY_IP_ADDRESS))
+  stream.config( local_ip , gateway, subnet );
+#else
+  // you can also provide a static IP in the begin() functions, but this simplifies
+  // ifdef logic in this sketch due to support for all different encryption types.
   stream.config( local_ip );
+#endif
 #else
   DEBUG_PRINTLN( "IP will be requested from DHCP ..." );
 #endif
 
-  /*
-   * Configure WiFi security
-   */
+  stream.attach(hostConnectionCallback);
+
+  // Configure WiFi security and initiate WiFi connection
 #if defined(WIFI_WEP_SECURITY)
-  while (wifiStatus != WL_CONNECTED) {
-    DEBUG_PRINT( "Attempting to connect to WEP SSID: " );
-    DEBUG_PRINTLN(ssid);
-    wifiStatus = stream.begin( ssid, wep_index, wep_key, SERVER_PORT );
-    delay(5000); // TODO - determine minimum delay
-    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
-  }
-
+  DEBUG_PRINT( "Attempting to connect to WEP SSID: " );
+  DEBUG_PRINTLN(ssid);
+  stream.begin(ssid, wep_index, wep_key);
 #elif defined(WIFI_WPA_SECURITY)
-  while (wifiStatus != WL_CONNECTED) {
-    DEBUG_PRINT( "Attempting to connect to WPA SSID: " );
-    DEBUG_PRINTLN(ssid);
-    wifiStatus = stream.begin(ssid, wpa_passphrase, SERVER_PORT);
-    delay(5000); // TODO - determine minimum delay
-    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
-  }
-
+  DEBUG_PRINT( "Attempting to connect to WPA SSID: " );
+  DEBUG_PRINTLN(ssid);
+  stream.begin(ssid, wpa_passphrase);
 #else                          //OPEN network
-  while (wifiStatus != WL_CONNECTED) {
-    DEBUG_PRINTLN( "Attempting to connect to open SSID: " );
-    DEBUG_PRINTLN(ssid);
-    wifiStatus = stream.begin(ssid, SERVER_PORT);
-    delay(5000); // TODO - determine minimum delay
-    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
-  }
+  DEBUG_PRINTLN( "Attempting to connect to open SSID: " );
+  DEBUG_PRINTLN(ssid);
+  stream.begin(ssid);
 #endif //defined(WIFI_WEP_SECURITY)
-
   DEBUG_PRINTLN( "WiFi setup done" );
-  printWifiStatus();
 
-  /*
-   * FIRMATA SETUP
-   */
+  // Wait for connection to access point to be established.
+  while (WiFi.status() != WL_CONNECTED && ++connectionAttempts <= MAX_CONN_ATTEMPTS) {
+    delay(500);
+    DEBUG_PRINT(".");
+  }
+  printWifiStatus();
+}
+
+void initFirmata()
+{
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
 
 #ifdef FirmataExt_h
@@ -512,46 +602,25 @@ void setup()
   /* systemResetCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-  // ConfigurableFirmataWiFi communicates with WiFi shields over SPI. Therefore all
-  // SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
-  // Additional pins may also need to be ignored depending on the particular board or
-  // shield in use.
+  ignorePins();
 
-  for (byte i = 0; i < TOTAL_PINS; i++) {
-#if defined(ARDUINO_WIFI_SHIELD)
-    if (IS_IGNORE_WIFI_SHIELD(i)
-  #if defined(__AVR_ATmega32U4__)
-        || 24 == i // On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
-        || 28 == i
-  #endif  //defined(__AVR_ATmega32U4__)
-       ) {
-#elif defined (WIFI_101)
-    if (IS_IGNORE_WIFI101_SHIELD(i)) {
-#elif defined (HUZZAH_WIFI)
-    // TODO
-    if (false) {
-#else
-    if (false) {
-#endif
-      Firmata.setPinMode(i, PIN_MODE_IGNORE);
-    }
-  }
-
-  //Set up controls for the Arduino WiFi Shield SS for the SD Card
-#ifdef ARDUINO_WIFI_SHIELD
-  // Arduino WiFi, Arduino WiFi Shield and Arduino Yun all have SD SS wired to D4
-  pinMode(PIN_TO_DIGITAL(4), OUTPUT);    // switch off SD card bypassing Firmata
-  digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
-
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
-#endif  //defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-
-#endif  //ARDUINO_WIFI_SHIELD
-
-  // start up Network Firmata:
+  // Initialize Firmata to use the WiFi stream object as the transport.
   Firmata.begin(stream);
   systemResetCallback();  // reset to default config
+}
+
+
+/*==============================================================================
+ * SETUP()
+ *============================================================================*/
+
+void setup()
+{
+  DEBUG_BEGIN(9600);
+
+  initTransport();
+
+  initFirmata();
 }
 
 /*==============================================================================
