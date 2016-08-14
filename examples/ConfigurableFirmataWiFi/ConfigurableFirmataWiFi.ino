@@ -210,7 +210,7 @@ char ssid[] = "your_network_name";
 
 // STEP 5 [REQUIRED for all boards and shields]
 // define your port number here, you will need this to open a TCP connection to your Arduino
-#define SERVER_PORT 3030
+#define NETWORK_PORT 3030
 
 
 // STEP 6 [REQUIRED for all boards and shields]
@@ -291,9 +291,9 @@ char wep_key[] = "your_wep_key";
  *============================================================================*/
 
 #ifdef SERVER_IP
-  WiFiClientStream stream(IPAddress(SERVER_IP), SERVER_PORT);
+  WiFiClientStream stream(IPAddress(SERVER_IP), NETWORK_PORT);
 #else
-  WiFiServerStream stream(SERVER_PORT);
+  WiFiServerStream stream(NETWORK_PORT);
 #endif
 
 /*==============================================================================
