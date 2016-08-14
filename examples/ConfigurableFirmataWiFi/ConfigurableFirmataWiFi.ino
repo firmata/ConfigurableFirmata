@@ -188,8 +188,9 @@
 
 
 // STEP 2 [OPTIONAL for all boards and shields]
-// If you want to setup you board as a TCP client, uncomment the following define and replace
-// the IP address with the IP address of your server.
+// By default the board/shield is configured as a TCP server.
+// If you want to setup you board/shield as a TCP client, uncomment the following define and
+// replace the SERVER_IP address below with the IP address of your remote server.
 //#define SERVER_IP 10, 0, 0, 15
 
 
