@@ -24,7 +24,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: July 17th, 2016
+  Last updated by Jeff Hoefs: August 14th, 2016
 */
 
 /*
