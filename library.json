@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/firmata/ConfigurableFirmata.git"
   },
-  "version": "2.9.0",
+  "version": "2.9.1",
   "exclude": [
     "extras",
     "test"
