@@ -4,7 +4,7 @@
   as well as EasyDriver (http://schmalzhaus.com/EasyDriver/) and
   other step + direction drive circuits.
 
-  FirmataStepper (0.2) by Jeff Hoefs
+  FirmataStepper (0.3) by Jeff Hoefs
 
   EasyDriver support based on modifications by Chris Coleman
 
@@ -108,28 +108,28 @@ class FirmataStepper
     void stepMotor(byte step_num, byte direction);
     void updateStepPosition();
     bool running;
-    byte interface;     // Type of interface: DRIVER, TWO_WIRE or FOUR_WIRE
-    byte direction;        // Direction of rotation
-    unsigned long step_delay;    // delay between steps, in microseconds
-    int steps_per_rev;      // number of steps to make one revolution
-    long step_number;        // which step the motor is on
-    long steps_to_move;   // total number of teps to move
-    byte stepDelay;       // delay between steps (default = 1, increase for high current drivers)
+    byte interface; // Type of interface: DRIVER, TWO_WIRE or FOUR_WIRE
+    byte direction; // Direction of rotation
+    unsigned long step_delay; // delay between steps, in microseconds
+    int steps_per_rev; // number of steps to make one revolution
+    long step_number; // which step the motor is on
+    long steps_to_move; // total number of teps to move
+    byte stepDelay; // delay between steps (default = 1, increase for high current drivers)
 
     byte run_state;
     int accel_count;
     unsigned long min_delay;
-    long decel_start;
+    unsigned long decel_start;
     int decel_val;
 
     long lastAccelDelay;
-    long stepCount;
+    unsigned long stepCount;
     unsigned int rest;
 
-    float alpha;  // PI * 2 / steps_per_rev
-    long at_x100;  // alpha * T1_FREQ * 100
-    long ax20000;  // alph a* 20000
-    float alpha_x2;  // alpha * 2
+    float alpha; // PI * 2 / steps_per_rev
+    long at_x100; // alpha * T1_FREQ * 100
+    long ax20000; // alph a* 20000
+    float alpha_x2; // alpha * 2
 
     // motor pin numbers:
     byte dir_pin;
