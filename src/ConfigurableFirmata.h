@@ -217,7 +217,7 @@ class FirmataClass
     sysexCallbackFunction currentSysexCallback;
     delayTaskCallbackFunction delayTaskCallback;
 
-    boolean blinkVersionDisabled = false;
+    boolean blinkVersionDisabled;
 
     /* private methods ------------------------------ */
     void processSysexMessage(void);

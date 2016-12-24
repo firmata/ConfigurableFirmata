@@ -66,6 +66,7 @@ FirmataClass::FirmataClass()
 {
   firmwareVersionCount = 0;
   firmwareVersionVector = 0;
+  blinkVersionDisabled = false;
   systemReset();
 }
 
