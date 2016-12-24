@@ -9,17 +9,19 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated March 6th, 2016
+  Last updated December 23rd, 2016
 */
 
 #include "SerialFirmata.h"
 
 SerialFirmata::SerialFirmata()
 {
+#if defined(SoftwareSerial_h)
   swSerial0 = NULL;
   swSerial1 = NULL;
   swSerial2 = NULL;
   swSerial3 = NULL;
+#endif
 
   serialIndex = -1;
 }
