@@ -458,6 +458,22 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
+// RedBearLab BLE Nano with factory switch settings (S1 - S10)
+#elif defined(BLE_NANO)
+#define TOTAL_ANALOG_PINS       6
+#define TOTAL_PINS              15 // 9 digital + 3 analog
+#define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) <= 14)
+#define IS_PIN_ANALOG(p)        ((p) == 8 || (p) == 9 || (p) == 10 || (p) == 11 || (p) == 12 || (p) == 14) //A0~A5
+#define IS_PIN_PWM(p)           ((p) == 3 || (p) == 5 || (p) == 6)
+#define IS_PIN_SERVO(p)         ((p) >= 2 && (p) <= 7)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) == CS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 8)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
+
+
 // Pinoccio Scout
 // Note: digital pins 9-16 are usable but not labeled on the board numerically.
 // SS=9, MOSI=10, MISO=11, SCK=12, RX1=13, TX1=14, SCL=15, SDA=16
