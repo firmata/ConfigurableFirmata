@@ -11,7 +11,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated January 19th, 2015
+  Last updated December 23rd, 2016
 */
 
 #ifndef Firmata_Boards_h
@@ -575,7 +575,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
-
 // ESP8266
 // note: boot mode GPIOs 0, 2 and 15 can be used as outputs, GPIOs 6-11 are in use for flash IO
 #elif defined(ESP8266)
@@ -688,8 +687,6 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
   return 1;
 #endif
 }
-
-
 
 
 #ifndef TOTAL_PORTS
