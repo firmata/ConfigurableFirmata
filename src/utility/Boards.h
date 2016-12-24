@@ -565,6 +565,10 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_SERIAL(p)        0
 #endif
 
+#ifndef DEFAULT_PWM_RESOLUTION
+#define DEFAULT_PWM_RESOLUTION  8
+#endif
+
 /*==============================================================================
  * readPort() - Read an 8 bit port
  *============================================================================*/
