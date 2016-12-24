@@ -13,7 +13,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: November 22nd, 2015
+  Last updated December 23rd, 2016
 */
 
 #include <ConfigurableFirmata.h>
@@ -44,7 +44,7 @@ void AnalogOutputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_PWM(pin)) {
     Firmata.write(PIN_MODE_PWM);
-    Firmata.write(8); // 8 = 8-bit resolution
+    Firmata.write(DEFAULT_PWM_RESOLUTION);
   }
 }
 
