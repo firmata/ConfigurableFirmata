@@ -13,7 +13,7 @@
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
-  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2017 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated December 23rd, 2016
+  Last updated January 29th, 2017
 */
 
 /*
@@ -43,14 +43,6 @@
 */
 
 #include "ConfigurableFirmata.h"
-
-/*
- * Uncomment the #define SERIAL_DEBUG line below to receive serial output messages relating to your
- * connection that may help in the event of connection issues. If defined, some boards may not begin
- * executing this sketch until the Serial console is opened.
- */
-//#define SERIAL_DEBUG
-#include "utility/firmataDebug.h"
 
 // min cannot be < 0x0006. Adjust max if necessary
 #define FIRMATA_BLE_MIN_INTERVAL    0x0006 // 7.5ms (7.5 / 1.25)
@@ -243,7 +235,29 @@ void systemResetCallback()
  * SETUP()
  *============================================================================*/
 
-void setup()
+void ignorePins()
+{
+#ifdef BLE_REQ
+  for (byte i = 0; i < TOTAL_PINS; i++) {
+    if (IS_IGNORE_BLE_PINS(i)) {
+      Firmata.setPinMode(i, PIN_MODE_IGNORE);
+    }
+  }
+#endif
+}
+
+void initTransport()
+{
+  stream.setLocalName(FIRMATA_BLE_LOCAL_NAME);
+  // set the BLE connection interval - this is the fastest interval you can read inputs
+  stream.setConnectionInterval(FIRMATA_BLE_MIN_INTERVAL, FIRMATA_BLE_MAX_INTERVAL);
+  // set how often the BLE TX buffer is flushed (if not full)
+  stream.setFlushInterval(FIRMATA_BLE_MAX_INTERVAL);
+
+  stream.begin();
+}
+
+void initFirmata()
 {
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
 
@@ -288,24 +302,18 @@ void setup()
   /* systemResetCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-  stream.setLocalName(FIRMATA_BLE_LOCAL_NAME);
-  // set the BLE connection interval - this is the fastest interval you can read inputs
-  stream.setConnectionInterval(FIRMATA_BLE_MIN_INTERVAL, FIRMATA_BLE_MAX_INTERVAL);
-  // set how often the BLE TX buffer is flushed (if not full)
-  stream.setFlushInterval(FIRMATA_BLE_MAX_INTERVAL);
+  ignorePins();
 
-#ifdef BLE_REQ
-  for (byte i = 0; i < TOTAL_PINS; i++) {
-    if (IS_IGNORE_BLE_PINS(i)) {
-      Firmata.setPinMode(i, PIN_MODE_IGNORE);
-    }
-  }
-#endif
-
-  stream.begin();
+  // Initialize Firmata to use the BLE stream object as the transport.
   Firmata.begin(stream);
-
   systemResetCallback();  // reset to default config
+}
+
+void setup()
+{
+  initTransport();
+
+  initFirmata();
 }
 
 /*==============================================================================
