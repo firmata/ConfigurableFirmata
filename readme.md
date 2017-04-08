@@ -1,15 +1,15 @@
-#ConfigurableFirmata
+# ConfigurableFirmata
 
 [![Join the chat at https://gitter.im/firmata/ConfigurableFirmata](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/firmata/ConfigurableFirmata?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Firmata is a protocol for communicating with microcontrollers from software on a host computer. The [protocol](https://github.com/firmata/protocol) can be implemented in firmware on any microcontroller architecture as well as software on any host computer software package. The arduino repository described here is a Firmata library for Arduino and Arduino-compatible devices. If you would like to contribute to Firmata, please see the [Contributing](#contributing) section below.
 
-##Installation
+## Installation
 
 - **If you are using Arduino IDE version 1.6.4 or higher** go to `Sketch > Include Library > Manage Libraries` and then search for "ConfigurableFirmata" and click on `Install` after tapping on the ConfigurableFirmata item in the filtered results. You can also use this same method to update ConfigurableFirmata in the future.
 - **If you are using an older version of the Arduino IDE**, download or clone ConfigurableFirmata to your Arduino sketchbook library folder. This is typically `/Documents/Arduino/libraries/` on Mac or Linux or `\My Documents\Arduino\libraries\` on Windows.
 
-##Usage
+## Usage
 
 ConfigurableFirmata is a version of Firmata that breaks features such as Digital Input, Digital Output, Analog Input, Analog Output, I2C, etc into [individual classes](https://github.com/firmata/ConfigurableFirmata/tree/master/src) making it easier to mix and match standard features with custom features.
 
@@ -17,7 +17,7 @@ The easiest way to use ConfigurableFirmata is with [firmatabuilder](http://firma
 
 Another way to use ConfigurableFirmata is by adding or removing various include statements in the [ConfigurableFirmata.ino](https://github.com/firmata/ConfigurableFirmata/blob/master/examples/ConfigurableFirmata/ConfigurableFirmata.ino) example file.
 
-##Firmata Wrapper Libraries
+## Firmata Wrapper Libraries
 
 You can use the ConfigurableFirmata architecture to wrap 3rd party libraries to include
 functionality not included in the base ConfigurableFirmata.ino example. See [FirmataEncoder](https://github.com/firmata/FirmataEncoder) for an example of a Firmata wrapper. To include a Firmata wrapper your
@@ -35,7 +35,7 @@ directory.
 A Firmata wrapper template library will be published soon along with instructions for creating
 a wrapper library.
 
-##Firmata Client Libraries
+## Firmata Client Libraries
 Only a few Firmata client libraries currently support ConfigurableFirmata:
 
 * javascript
@@ -48,7 +48,7 @@ Only a few Firmata client libraries currently support ConfigurableFirmata:
 *Additional Firmata client libraries may work as well. If you're a client library developer and have verified that you library works with ConfigurableFirmata, please [open an issue](https://github.com/firmata/ConfigurableFirmata/issues) with a request to add the link.*
 
 <a name="contributing" />
-##Contributing
+## Contributing
 
 If you discover a bug or would like to propose a new feature, please open a new [issue](https://github.com/firmata/ConfigurableFirmata/issues?sort=created&state=open).
 
