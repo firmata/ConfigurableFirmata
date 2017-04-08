@@ -47,7 +47,6 @@ Only a few Firmata client libraries currently support ConfigurableFirmata:
 
 *Additional Firmata client libraries may work as well. If you're a client library developer and have verified that you library works with ConfigurableFirmata, please [open an issue](https://github.com/firmata/ConfigurableFirmata/issues) with a request to add the link.*
 
-<a name="contributing" />
 ## Contributing
 
 If you discover a bug or would like to propose a new feature, please open a new [issue](https://github.com/firmata/ConfigurableFirmata/issues?sort=created&state=open).
