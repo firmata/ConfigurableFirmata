@@ -100,8 +100,8 @@
 #define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
 
 // pin modes
-//#define INPUT                 0x00 // defined in Arduino.h
-//#define OUTPUT                0x01 // defined in Arduino.h
+#define PIN_MODE_INPUT          0x00 // pin connfigured for digital input
+#define PIN_MODE_OUTPUT         0x01 // pin configured for digital output
 #define PIN_MODE_ANALOG         0x02 // analog pin in analogInput mode
 #define PIN_MODE_PWM            0x03 // digital pin in PWM output mode
 #define PIN_MODE_SERVO          0x04 // digital pin in Servo output mode
@@ -115,7 +115,9 @@
 #define PIN_MODE_IGNORE         0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
 #define TOTAL_PIN_MODES         13
 // DEPRECATED as of Firmata v2.5
-#define ANALOG                  0x02 // same as PIN_MODE_ANALOG
+// #undef ANALOG
+// #define ANALOG                  0x02 // same as PIN_MODE_ANALOG
+#undef PWM
 #define PWM                     0x03 // same as PIN_MODE_PWM
 #define SERVO                   0x04 // same as PIN_MODE_SERVO
 #define SHIFT                   0x05 // same as PIN_MODE_SHIFT

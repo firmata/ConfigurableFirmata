@@ -52,7 +52,8 @@ void AnalogInputFirmata::reportAnalog(byte analogPin, int value)
         // Send pin value immediately. This is helpful when connected via
         // ethernet, wi-fi or bluetooth so pin states can be known upon
         // reconnecting.
-        Firmata.sendAnalog(analogPin, analogRead(analogPin));
+        // Firmata.sendAnalog(analogPin, analogRead(analogPin));
+        Firmata.sendAnalog(analogPin, analogRead(analogInputToDigitalPin(analogPin)));
       }
     }
   }
@@ -79,7 +80,11 @@ void AnalogInputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_ANALOG(pin)) {
     Firmata.write(PIN_MODE_ANALOG);
+#ifdef DEFAULT_ADC_RESOLUTION
+    Firmata.write(DEFAULT_ADC_RESOLUTION);
+#elif
     Firmata.write(10); // 10 = 10-bit resolution
+#endif
   }
 }
 
@@ -102,7 +107,8 @@ void AnalogInputFirmata::report()
     if (IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == PIN_MODE_ANALOG) {
       analogPin = PIN_TO_ANALOG(pin);
       if (analogInputsToReport & (1 << analogPin)) {
-        Firmata.sendAnalog(analogPin, analogRead(analogPin));
+        // Firmata.sendAnalog(analogPin, analogRead(analogPin));
+        Firmata.sendAnalog(analogPin, analogRead(analogInputToDigitalPin(analogPin)));
       }
     }
   }

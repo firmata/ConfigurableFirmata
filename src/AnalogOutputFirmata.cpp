@@ -20,6 +20,11 @@
 #include "AnalogFirmata.h"
 #include "AnalogOutputFirmata.h"
 
+// Hack to compile for ESP32 boards until arduino-esp32 supports analogWrite
+#ifdef ESP32
+void analogWrite(byte pin, int value);
+#endif
+
 AnalogOutputFirmata::AnalogOutputFirmata()
 {
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);

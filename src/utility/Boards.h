@@ -596,6 +596,33 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 #define DEFAULT_PWM_RESOLUTION  10
 
+// ESP32
+// Tested on Sparkfun ESP32 Thing, may work with other ESP32 boards, but not verified.
+// Pins D34 - D39 Digital Input only
+// TODO: validate if Serial2 maps to rx = 16, tx = 17
+// ESP32 boards currently only work with Firmata over Wi-Fi.
+// Supply > 500mA to the board (laptop USB current is typically not enough, use a powered USB hub).
+#elif defined(ESP32)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
+#define TOTAL_PINS              NUM_DIGITAL_PINS
+#define VERSION_BLINK_PIN       LED_BUILTIN
+// Serial0 not supported
+// #define PIN_SERIAL_RX           3
+// #define PIN_SERIAL_TX           1
+#define IS_PIN_DIGITAL(p)       ((p) < 6 || ((p) >= 12 && (p) < 24) || ((p) >= 25 && (p) < 28) || ((p) >= 32 && (p) <= 39))
+#define IS_PIN_ANALOG(p)        ((p) == 0 || (p) == 2 || (p) == 4 || ((p) >= 12 && (p) < 16) || ((p >= 25 && (p) < 28) || ((p) >= 32 && (p) < 37) || (p) == 39))
+#define IS_PIN_PWM(p)           (0) // analogWrite is not yet supported
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_INTERRUPT(p)     (digitalPinToInterrupt(p) > NOT_AN_INTERRUPT)
+// #define IS_PIN_SERIAL(p)        ((p) == PIN_SERIAL_RX || (p) == PIN_SERIAL_TX)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        digitalPinToAnalogChannel(p) // defined in esp32-hal-gpio.h
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
+#define DEFAULT_ADC_RESOLUTION  12
+
 
 // anything else
 #else
@@ -604,7 +631,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 
 // as long this is not defined for all boards:
 #ifndef IS_PIN_SPI
-#define IS_PIN_SPI(p)           (0)
+#define IS_PIN_SPI(p)           0
 #endif
 
 #ifndef IS_PIN_SERIAL
@@ -613,6 +640,10 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 
 #ifndef DEFAULT_PWM_RESOLUTION
 #define DEFAULT_PWM_RESOLUTION  8
+#endif
+
+#ifndef DEFAULT_ADC_RESOLUTION
+#define DEFAULT_ADC_RESOLUTION  10
 #endif
 
 /*==============================================================================

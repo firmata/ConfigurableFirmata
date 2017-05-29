@@ -14,7 +14,7 @@
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
   Copyright (C) 2015-2016 Jesse Frush. All rights reserved.
-  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2017 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2016 Jens B. All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -24,7 +24,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: August 14th, 2016
+  Last updated by Jeff Hoefs: May 28th, 2017
 */
 
 /*
@@ -43,6 +43,7 @@
   - ESP8266 WiFi board compatible with ESP8266 Arduino core
   - Arduino WiFi Shield 101
   - Arduino WiFi Shield (or clone)
+  - ESP32 board compatible with ESP32 Arduino core
 
   Follow the instructions in the wifiConfig.h file (wifiConfig.h tab in Arduino IDE) to
   configure your particular hardware.
@@ -53,6 +54,7 @@
     https://github.com/arduino-libraries/WiFi101)
   - ESP8266 requires the Arduino ESP8266 core v2.1.0 or higher which can be obtained here:
     https://github.com/esp8266/Arduino
+  - ESP32 requires the Arduino ESP32 core: https://github.com/espressif/arduino-esp32
 
   In order to use the WiFi Shield 101 with Firmata you will need a board with at least 35k of Flash
   memory. This means you cannot use the WiFi Shield 101 with an Arduino Uno or any other
@@ -85,7 +87,7 @@
  * connection that may help in the event of connection issues. If defined, some boards may not begin
  * executing this sketch until the Serial console is opened.
  */
-//#define SERIAL_DEBUG
+#define SERIAL_DEBUG
 #include "utility/firmataDebug.h"
 
 #define MAX_CONN_ATTEMPTS 20  // [500 ms] -> 10 s
@@ -100,8 +102,8 @@
  *============================================================================*/
 
 // STEP 1 [REQUIRED]
-// Uncomment / comment the appropriate set of includes for your hardware (OPTION A, B or C)
-// Arduino MKR1000 or ESP8266 are enabled by default if compiling for either of those boards.
+// Uncomment / comment the appropriate set of includes for your hardware (OPTION A, B, C, or D).
+// Arduino MKR1000, ESP8266 and ESP32 boards are enabled by default if compiling for any of those boards.
 
 /*
  * OPTION A: Configure for Arduino MKR1000 or Arduino WiFi Shield 101
@@ -177,6 +179,30 @@
 #endif
 #ifdef ESP8266_WIFI
 #include <ESP8266WiFi.h>
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
+  #ifdef WIFI_LIB_INCLUDED
+  #define MULTIPLE_WIFI_LIB_INCLUDES
+  #else
+  #define WIFI_LIB_INCLUDED
+  #endif
+#endif
+
+/*
+ * OPTION D: Configure for ESP32
+ *
+ * This will configure ConfigurableFirmataWiFi to use the ESP32 WiFi library for boards
+ * with an ESP32 chip. It is compatible with 802.11 B/G/N networks.
+ *
+ * The appropriate libraries are included automatically when compiling for the ESP32 so
+ * continue on to STEP 2.
+ *
+ * IMPORTANT: You must have the esp32 board support installed. To easily install this board see
+ * the instructions here: https://github.com/espressif/arduino-esp32#installation-instructions.
+ */
+#ifdef ESP32
+#define ESP32_WIFI
+#include <WiFi.h>
 #include "utility/WiFiClientStream.h"
 #include "utility/WiFiServerStream.h"
   #ifdef WIFI_LIB_INCLUDED
@@ -282,7 +308,7 @@ char wep_key[] = "your_wep_key";
 #error "you must define a wifi security type in wifiConfig.h."
 #endif  //WIFI_* security define check
 
-#if (defined(ESP8266_WIFI) && !(defined(WIFI_NO_SECURITY) || (defined(WIFI_WPA_SECURITY))))
+#if ((defined(ESP8266_WIFI) || defined(ESP32_WIFI)) && !(defined(WIFI_NO_SECURITY) || (defined(WIFI_WPA_SECURITY))))
 #error "you must choose between WIFI_NO_SECURITY and WIFI_WPA_SECURITY"
 #endif
 
@@ -317,6 +343,9 @@ char wep_key[] = "your_wep_key";
 #elif defined(ESP8266_WIFI) && defined(SERIAL_DEBUG)
 #define IS_IGNORE_PIN(p)  ((p) == 1)
 
+#elif defined(ESP32_WIFI) && defined(SERIAL_DEBUG)
+#define IS_IGNORE_PIN(p)  ((p) == 1 || (p) == 3)
+
 #endif
 
 /*==============================================================================
@@ -339,12 +368,18 @@ DigitalOutputFirmata digitalOutput;
 #include <AnalogInputFirmata.h>
 AnalogInputFirmata analogInput;
 
+// analogWrite not supported for ESP32 boards
+#ifndef ESP32
 #include <AnalogOutputFirmata.h>
 AnalogOutputFirmata analogOutput;
+#endif
 
+// servo not supported for ESP32 boards
+#ifndef ESP32
 #include <Servo.h>
 #include <ServoFirmata.h>
 ServoFirmata servo;
+#endif
 // ServoFirmata depends on AnalogOutputFirmata
 #if defined ServoFirmata_h && ! defined AnalogOutputFirmata_h
 #error AnalogOutputFirmata must be included to use ServoFirmata
@@ -514,6 +549,8 @@ void initTransport()
   DEBUG_PRINTLN( "using the legacy WiFi library." );
 #elif defined(ESP8266_WIFI)
   DEBUG_PRINTLN( "using the ESP8266 WiFi library." );
+#elif defined(ESP32_WIFI)
+  DEBUG_PRINTLN( "using the ESP32 WiFi library." );
   //else should never happen here as error-checking in wifiConfig.h will catch this
 #endif  //defined(WIFI_101)
 
