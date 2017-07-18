@@ -72,6 +72,7 @@
 /* 0x00-0x0F reserved for user-defined commands */
 #define SERIAL_MESSAGE          0x60 // communicate with serial devices, including other boards
 #define ENCODER_DATA            0x61 // reply with encoders current positions
+#define ACCELSTEPPER_DATA       0x62 // control a stepper motor
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
 #define STEPPER_DATA            0x72 // control a stepper motor
