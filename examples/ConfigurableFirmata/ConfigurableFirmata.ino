@@ -178,6 +178,9 @@ OneWireFirmata oneWire;
 #include <StepperFirmata.h>
 StepperFirmata stepper;
 
+#include <AccelStepperFirmata.h>
+AccelStepperFirmata accelStepper;
+
 #include <SerialFirmata.h>
 SerialFirmata serial;
 
@@ -316,6 +319,9 @@ void setup()
 #ifdef StepperFirmata_h
   firmataExt.addFeature(stepper);
 #endif
+#ifdef AccelStepperFirmata_h
+  firmataExt.addFeature(accelStepper);
+#endif
 #ifdef SerialFirmata_h
   firmataExt.addFeature(serial);
 #endif
@@ -416,6 +422,9 @@ runtasks: scheduler.runTasks();
 #endif
 #ifdef StepperFirmata_h
   stepper.update();
+#endif
+#ifdef AccelStepperFirmata_h
+  accelStepper.update();
 #endif
 #ifdef SerialFirmata_h
   serial.update();
