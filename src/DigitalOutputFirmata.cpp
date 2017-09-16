@@ -35,7 +35,7 @@ void digitalOutputWriteCallback(byte port, int value)
 void handleSetPinValueCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS && IS_PIN_DIGITAL(pin)) {
-    if (Firmata.getPinMode(pin) == OUTPUT) {
+    if (Firmata.getPinMode(pin) == PIN_MODE_OUTPUT) {
       digitalWrite(pin, value);
       Firmata.setPinState(pin, value);
     }
@@ -71,11 +71,11 @@ void DigitalOutputFirmata::digitalWritePort(byte port, int value)
       // do not disturb non-digital pins (eg, Rx & Tx)
       if (IS_PIN_DIGITAL(pin)) {
         // do not touch pins in PWM, ANALOG, SERVO or other modes
-        if (Firmata.getPinMode(pin) == OUTPUT || Firmata.getPinMode(pin) == INPUT) {
+        if (Firmata.getPinMode(pin) == PIN_MODE_OUTPUT || Firmata.getPinMode(pin) == PIN_MODE_INPUT) {
           pinValue = ((byte)value & mask) ? 1 : 0;
-          if (Firmata.getPinMode(pin) == OUTPUT) {
+          if (Firmata.getPinMode(pin) == PIN_MODE_OUTPUT) {
             pinWriteMask |= mask;
-          } else if (Firmata.getPinMode(pin) == INPUT && pinValue == 1 && Firmata.getPinState(pin) != 1) {
+          } else if (Firmata.getPinMode(pin) == PIN_MODE_INPUT && pinValue == 1 && Firmata.getPinState(pin) != 1) {
             pinMode(pin, INPUT_PULLUP);
           }
           Firmata.setPinState(pin, pinValue);
@@ -89,7 +89,7 @@ void DigitalOutputFirmata::digitalWritePort(byte port, int value)
 
 boolean DigitalOutputFirmata::handlePinMode(byte pin, int mode)
 {
-  if (IS_PIN_DIGITAL(pin) && mode == OUTPUT && Firmata.getPinMode(pin) != PIN_MODE_IGNORE) {
+  if (IS_PIN_DIGITAL(pin) && mode == PIN_MODE_OUTPUT && Firmata.getPinMode(pin) != PIN_MODE_IGNORE) {
     digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
     pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
     return true;
@@ -100,7 +100,7 @@ boolean DigitalOutputFirmata::handlePinMode(byte pin, int mode)
 void DigitalOutputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
-    Firmata.write((byte)OUTPUT);
+    Firmata.write((byte)PIN_MODE_OUTPUT);
     Firmata.write(1);
   }
 }
