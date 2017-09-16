@@ -1,8 +1,8 @@
 /*
-  ConfigurableFirmata.pp - ConfigurableFirmata library v2.9.1 - 2016-8-14
+  ConfigurableFirmata.pp - ConfigurableFirmata library v2.10.0 - 2017-6-16
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (c) 2013 Norbert Truchsess. All rights reserved.
-  Copyright (c) 2013-2016 Jeff Hoefs. All rights reserved.
+  Copyright (c) 2013-2017 Jeff Hoefs. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public

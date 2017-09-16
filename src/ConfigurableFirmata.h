@@ -1,8 +1,8 @@
 /*
-  ConfigurableFirmata.h - ConfigurableFirmata library v2.9.1 - 2016-8-14
+  ConfigurableFirmata.h - ConfigurableFirmata library v2.10.0 - 2017-6-16
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (c) 2013 Norbert Truchsess. All rights reserved.
-  Copyright (c) 2013-2016 Jeff Hoefs. All rights reserved.
+  Copyright (c) 2013-2017 Jeff Hoefs. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -22,29 +22,29 @@
  * Query using the REPORT_VERSION message.
  */
 #define FIRMATA_PROTOCOL_MAJOR_VERSION  2 // for non-compatible changes
-#define FIRMATA_PROTOCOL_MINOR_VERSION  5 // for backwards compatible changes
-#define FIRMATA_PROTOCOL_BUGFIX_VERSION 1 // for bugfix releases
+#define FIRMATA_PROTOCOL_MINOR_VERSION  6 // for backwards compatible changes
+#define FIRMATA_PROTOCOL_BUGFIX_VERSION 0 // for bugfix releases
 
 /*
  * Version numbers for the Firmata library.
- * ConfigurableFirmata 2.9.1 implements version 2.5.1 of the Firmata protocol.
+ * ConfigurableFirmata 2.10.0 implements version 2.6.0 of the Firmata protocol.
  * The firmware version will not always equal the protocol version going forward.
  * Query using the REPORT_FIRMWARE message.
  */
 #define FIRMATA_FIRMWARE_MAJOR_VERSION  2 // for non-compatible changes
-#define FIRMATA_FIRMWARE_MINOR_VERSION  9 // for backwards compatible changes
-#define FIRMATA_FIRMWARE_BUGFIX_VERSION 1 // for bugfix releases
+#define FIRMATA_FIRMWARE_MINOR_VERSION  10 // for backwards compatible changes
+#define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
 // DEPRECATED as of ConfigurableFirmata v2.8.1.
 // Use FIRMATA_PROTOCOL_[MAJOR|MINOR|BUGFIX]_VERSION instead.
 #define FIRMATA_MAJOR_VERSION   2
-#define FIRMATA_MINOR_VERSION   5
-#define FIRMATA_BUGFIX_VERSION  1
+#define FIRMATA_MINOR_VERSION   6
+#define FIRMATA_BUGFIX_VERSION  0
 // DEPRECATED as of ConfigurableFirmata v2.8.1.
 //Use FIRMATA_FIRMWARE_[MAJOR|MINOR|BUGFIX]_VERSION instead.
 #define FIRMWARE_MAJOR_VERSION  2
-#define FIRMWARE_MINOR_VERSION  9
-#define FIRMWARE_BUGFIX_VERSION 1
+#define FIRMWARE_MINOR_VERSION  10
+#define FIRMWARE_BUGFIX_VERSION 0
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
