@@ -14,7 +14,7 @@
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
   Copyright (C) 2015-2016 Jesse Frush. All rights reserved.
-  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2017 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2016 Jens B. All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -24,7 +24,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: August 14th, 2016
+  Last updated: September 16th, 2017
 */
 
 /*
@@ -357,8 +357,13 @@ I2CFirmata i2c;
 #include <OneWireFirmata.h>
 OneWireFirmata oneWire;
 
+// StepperFirmata is deprecated as of ConfigurableFirmata v2.10.0. Please update your
+// client implementation to use the new, more full featured and scalable AccelStepperFirmata.
 #include <StepperFirmata.h>
 StepperFirmata stepper;
+
+#include <AccelStepperFirmata.h>
+AccelStepperFirmata accelStepper;
 
 #include <SerialFirmata.h>
 SerialFirmata serial;
@@ -587,6 +592,9 @@ void initFirmata()
 #ifdef StepperFirmata_h
   firmataExt.addFeature(stepper);
 #endif
+#ifdef AccelStepperFirmata_h
+firmataExt.addFeature(accelStepper);
+#endif
 #ifdef SerialFirmata_h
   firmataExt.addFeature(serial);
 #endif
@@ -669,6 +677,9 @@ runtasks: scheduler.runTasks();
 #endif
 #ifdef StepperFirmata_h
   stepper.update();
+#endif
+#ifdef AccelStepperFirmata_h
+accelStepper.update();
 #endif
 #ifdef SerialFirmata_h
   serial.update();

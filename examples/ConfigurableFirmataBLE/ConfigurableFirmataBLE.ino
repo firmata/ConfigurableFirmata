@@ -22,7 +22,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated January 29th, 2017
+  Last updated September 16th, 2017
 */
 
 /*
@@ -168,8 +168,13 @@ I2CFirmata i2c;
 #include <OneWireFirmata.h>
 OneWireFirmata oneWire;
 
+// StepperFirmata is deprecated as of ConfigurableFirmata v2.10.0. Please update your
+// client implementation to use the new, more full featured and scalable AccelStepperFirmata.
 #include <StepperFirmata.h>
 StepperFirmata stepper;
+
+#include <AccelStepperFirmata.h>
+AccelStepperFirmata accelStepper;
 
 #include <SerialFirmata.h>
 SerialFirmata serial;
@@ -286,6 +291,9 @@ void initFirmata()
 #ifdef StepperFirmata_h
   firmataExt.addFeature(stepper);
 #endif
+#ifdef AccelStepperFirmata_h
+firmataExt.addFeature(accelStepper);
+#endif
 #ifdef SerialFirmata_h
   firmataExt.addFeature(serial);
 #endif
@@ -363,6 +371,9 @@ runtasks: scheduler.runTasks();
 #endif
 #ifdef StepperFirmata_h
   stepper.update();
+#endif
+#ifdef AccelStepperFirmata_h
+accelStepper.update();
 #endif
 #ifdef SerialFirmata_h
   serial.update();

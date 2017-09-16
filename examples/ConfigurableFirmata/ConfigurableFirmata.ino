@@ -13,7 +13,7 @@
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
-  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2017 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: January 23rd, 2016
+  Last updated: September 16th, 2017
 */
 
 /*
@@ -175,6 +175,8 @@ I2CFirmata i2c;
 #include <OneWireFirmata.h>
 OneWireFirmata oneWire;
 
+// StepperFirmata is deprecated as of ConfigurableFirmata v2.10.0. Please update your
+// client implementation to use the new, more full featured and scalable AccelStepperFirmata.
 #include <StepperFirmata.h>
 StepperFirmata stepper;
 
