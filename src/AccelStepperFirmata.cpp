@@ -97,7 +97,7 @@ boolean AccelStepperFirmata::handleSysex(byte command, byte argc, byte *argv)
       if (stepCommand == ACCELSTEPPER_CONFIG) {
         interface = argv[index++];
         wireCount = (interface & 0x70) >> 4; // upper 3 bits are the wire count
-        stepType = (interface & 0x07) >> 1; // bits 4-6 are the step type
+        stepType = (interface & 0x0e) >> 1; // next 3 bits are the step type
         stepOrMotorPin1 = argv[index++]; // Step pin for driver or MotorPin1
         directionOrMotorPin2 = argv[index++]; // Direction pin for driver or motorPin2
 
