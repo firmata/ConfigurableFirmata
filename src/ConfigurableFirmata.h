@@ -81,6 +81,7 @@
 #define I2C_REQUEST             0x76 // send an I2C read/write request
 #define I2C_REPLY               0x77 // a reply to an I2C read request
 #define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins
+#define EXTENDED_ANALOG_READ    0x66 // single read from analog pin with extended options
 #define EXTENDED_ANALOG_WRITE   0x6F // analog write (PWM, Servo, etc) to any pin
 #define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value
 #define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value
@@ -93,6 +94,10 @@
 #define SCHEDULER_DATA          0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
+
+// EXTENDED_ANALOG_READ commmands
+#define EXTENDED_ANALOG_READ_QUERY 0x00
+#define EXTENDED_ANALOG_READ_RESPONSE 0x01
 
 // these are DEPRECATED to make the naming more consistent
 #define FIRMATA_STRING          0x71 // same as STRING_DATA
@@ -184,6 +189,7 @@ class FirmataClass
 
     /* utility methods */
     void sendValueAsTwo7bitBytes(int value);
+    void sendValueAs7bitBytes(int value, uint8_t minBytes = 0);
     void startSysex(void);
     void endSysex(void);
 

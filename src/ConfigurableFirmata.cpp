@@ -22,6 +22,7 @@
 extern "C" {
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
 }
 
 //******************************************************************************
@@ -36,6 +37,25 @@ void FirmataClass::sendValueAsTwo7bitBytes(int value)
 {
   FirmataStream->write(value & B01111111); // LSB
   FirmataStream->write(value >> 7 & B01111111); // MSB
+}
+
+/**
+ * Split an int into as many 7-bit values as necessary and write each value.
+ * @param value The int value to be split and written separately.
+ */
+void FirmataClass::sendValueAs7bitBytes(int value, uint8_t minBytes /* = 0 */)
+{
+  bool positive = (value >= 0);
+  bool lastMSBitHigh = false;
+  minBytes = constrain(minBytes - 1, 0, int(sizeof(value) * CHAR_BIT / 7));
+
+  for (uint8_t i = 0; i <= int(sizeof(value) * CHAR_BIT / 7); i++) {
+    if (positive && !value && !lastMSBitHigh && (i >= minBytes)) return; // positive ended in 0 and all 0's now
+    if (!positive && !~value && lastMSBitHigh && (i >= minBytes)) return; // negative ended in 1 and all 1's now
+    FirmataStream->write(value & B01111111);
+    lastMSBitHigh = (value & B01000000);
+    value >>= 7;
+  }
 }
 
 /**
@@ -397,17 +417,27 @@ boolean FirmataClass::isResetting(void)
 /**
  * Send an analog message to the Firmata host application. The range of pins is limited to [0..15]
  * when using the ANALOG_MESSAGE. The maximum value of the ANALOG_MESSAGE is limited to 14 bits
- * (16384). To increase the pin range or value, see the documentation for the EXTENDED_ANALOG
- * message.
- * @param pin The analog pin to send the value of (limited to pins 0 - 15).
+ * (16384). If pin or value is higher, then the EXTENDED_ANALOG_READ RESPONSE is used.
+ * @param pin The analog pin to send the value of.
  * @param value The value of the analog pin (0 - 1024 for 10-bit analog, 0 - 4096 for 12-bit, etc).
- * The maximum value is 14-bits (16384).
+ * The maximum value is that of an int.
  */
 void FirmataClass::sendAnalog(byte pin, int value)
 {
-  // pin can only be 0-15, so chop higher bits
-  FirmataStream->write(ANALOG_MESSAGE | (pin & 0xF));
-  sendValueAsTwo7bitBytes(value);
+  if ((pin <= 15) && !(value & ~0x3FFF)) {
+    // pin fits in 4 bits and value fits in 14 bits
+    // pin can only be 0-15, so chop higher bits
+    FirmataStream->write(ANALOG_MESSAGE | (pin & 0xF));
+    sendValueAsTwo7bitBytes(value);
+  } else {
+    // for higher pins, we need the EXTENDED_ANALOG_READ RESPONSE
+    FirmataStream->write(START_SYSEX);
+    FirmataStream->write(EXTENDED_ANALOG_READ);
+    FirmataStream->write(EXTENDED_ANALOG_READ_RESPONSE);
+    FirmataStream->write(pin & 0x7F);
+    sendValueAs7bitBytes(value);
+    FirmataStream->write(END_SYSEX);
+  }
 }
 
 /* (intentionally left out asterix here)
