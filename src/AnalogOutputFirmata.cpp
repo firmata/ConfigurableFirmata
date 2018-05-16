@@ -50,7 +50,7 @@ void AnalogOutputFirmata::handleCapability(byte pin)
 
 boolean AnalogOutputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
-  if (command == EXTENDED_ANALOG) {
+  if (command == EXTENDED_ANALOG_WRITE) {
     if (argc > 1) {
       int val = argv[1];
       if (argc > 2) val |= (argv[2] << 7);
