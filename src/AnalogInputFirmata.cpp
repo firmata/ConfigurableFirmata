@@ -63,16 +63,18 @@ void AnalogInputFirmata::reportAnalog(byte analogPin, int value)
 
 boolean AnalogInputFirmata::handlePinMode(byte pin, int mode)
 {
-  if (IS_PIN_ANALOG(pin)) {
-    if (mode == PIN_MODE_ANALOG) {
+  if (mode == PIN_MODE_ANALOG) {
+    if (IS_PIN_ANALOG(pin)) {
       reportAnalog(PIN_TO_ANALOG(pin), 1); // turn on reporting
       if (IS_PIN_DIGITAL(pin)) {
         pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
       }
-      return true;
     } else {
-      reportAnalog(PIN_TO_ANALOG(pin), 0); // turn off reporting
+      Firmata.sendString("PIN_MODE_ANALOG set for non analog pin");
     }
+    return true;
+  } else if (IS_PIN_ANALOG(pin)) {
+    reportAnalog(PIN_TO_ANALOG(pin), 0); // turn off reporting
   }
   return false;
 }
