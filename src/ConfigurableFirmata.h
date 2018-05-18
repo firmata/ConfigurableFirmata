@@ -189,7 +189,7 @@ class FirmataClass
 
     /* utility methods */
     void sendValueAsTwo7bitBytes(int value);
-    void sendValueAs7bitBytes(int value, uint8_t minBytes = 0);
+    void sendValueAs7bitBytes(int value, bool isSigned = true, uint8_t minBytes = 0);
     void startSysex(void);
     void endSysex(void);
 

@@ -42,18 +42,20 @@ void FirmataClass::sendValueAsTwo7bitBytes(int value)
 /**
  * Split an int into as many 7-bit values as necessary and write each value.
  * @param value The int value to be split and written separately.
+ * @param isSigned True if the value should be sent as a signed integer
+ * @param minBytes The minimum number of bytes to be sent (used to adhere to protocol)
  */
-void FirmataClass::sendValueAs7bitBytes(int value, uint8_t minBytes /* = 0 */)
+void FirmataClass::sendValueAs7bitBytes(int value, bool isSigned /* = true */, uint8_t minBytes /* = 0 */)
 {
-  bool positive = (value >= 0);
+  bool positive = !isSigned || (value >= 0);
   bool lastMSBitHigh = false;
   minBytes = constrain(minBytes - 1, 0, int(sizeof(value) * CHAR_BIT / 7));
 
   for (uint8_t i = 0; i <= int(sizeof(value) * CHAR_BIT / 7); i++) {
-    if (positive && !value && !lastMSBitHigh && (i >= minBytes)) return; // positive ended in 0 and all 0's now
-    if (!positive && !~value && lastMSBitHigh && (i >= minBytes)) return; // negative ended in 1 and all 1's now
+    if (positive && !value && (!lastMSBitHigh || !isSigned) && (i >= minBytes)) return; // positive and all 0's now
+    if (!positive && !~value && lastMSBitHigh && (i >= minBytes)) return; // negative and all 1's now
     FirmataStream->write(value & B01111111);
-    lastMSBitHigh = (value & B01000000);
+    lastMSBitHigh = bool(value & B01000000);
     value >>= 7;
   }
 }
@@ -435,7 +437,7 @@ void FirmataClass::sendAnalog(byte pin, int value)
     FirmataStream->write(EXTENDED_ANALOG_READ);
     FirmataStream->write(EXTENDED_ANALOG_READ_RESPONSE);
     FirmataStream->write(pin & 0x7F);
-    sendValueAs7bitBytes(value);
+    sendValueAs7bitBytes(value, false); // send unsigned integer value
     FirmataStream->write(END_SYSEX);
   }
 }
