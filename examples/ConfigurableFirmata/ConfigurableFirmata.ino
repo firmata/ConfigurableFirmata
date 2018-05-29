@@ -374,7 +374,7 @@ void setup()
   // start up the default Firmata using Serial interface:
   Firmata.begin(57600);
 #endif
-  systemResetCallback();  // reset to default config
+  Firmata.parse(SYSTEM_RESET);  // reset to default config
 }
 
 /*==============================================================================
