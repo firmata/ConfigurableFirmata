@@ -314,7 +314,7 @@ firmataExt.addFeature(accelStepper);
 
   // Initialize Firmata to use the BLE stream object as the transport.
   Firmata.begin(stream);
-  systemResetCallback();  // reset to default config
+  Firmata.parse(SYSTEM_RESET);  // reset to default config
 }
 
 void setup()
