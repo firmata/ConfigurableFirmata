@@ -81,6 +81,14 @@
 #define I2C_REQUEST             0x76 // send an I2C read/write request
 #define I2C_REPLY               0x77 // a reply to an I2C read request
 #define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins
+#define SPI_DATA                0x68 // SPI Commands start with this byte
+#define SPI_BEGIN               0x00 // Initialize the SPI bus for the given channel
+#define SPI_DEVICE_CONFIG       0x01
+#define SPI_TRANSFER            0x02
+#define SPI_WRITE               0x03
+#define SPI_READ                0x04
+#define SPI_REPLY               0x05
+#define SPI_END                 0x06
 #define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin
 #define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value
 #define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value
@@ -113,6 +121,7 @@
 #define PIN_MODE_ENCODER        0x09 // pin configured for rotary encoders
 #define PIN_MODE_SERIAL         0x0A // pin configured for serial communication
 #define PIN_MODE_PULLUP         0x0B // enable internal pull-up resistor for pin
+#define PIN_MODE_SPI            0x0C // pin configured for SPI
 #define PIN_MODE_IGNORE         0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
 #define TOTAL_PIN_MODES         13
 // DEPRECATED as of Firmata v2.5
@@ -163,6 +172,7 @@ class FirmataClass
     void sendDigital(byte pin, int value); // TODO implement this
     void sendDigitalPort(byte portNumber, int portData);
     void sendString(const __FlashStringHelper* flashString);
+	void sendString(const __FlashStringHelper* flashString, int errorData);
     void sendString(const char *string);
     void sendString(byte command, const char *string);
     void sendSysex(byte command, byte bytec, byte *bytev);
