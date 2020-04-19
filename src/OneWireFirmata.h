@@ -43,13 +43,13 @@
 struct ow_device_info
 {
   OneWire* device;
-  byte addr[8];
   boolean power;
 };
 
 class OneWireFirmata: public FirmataFeature
 {
   public:
+    OneWireFirmata();
     boolean handlePinMode(byte pin, int mode);
     void handleCapability(byte pin);
     boolean handleSysex(byte command, byte argc, byte* argv);

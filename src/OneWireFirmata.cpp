@@ -17,6 +17,14 @@
 #include "OneWireFirmata.h"
 #include "Encoder7Bit.h"
 
+OneWireFirmata::OneWireFirmata()
+{
+  for (int i = 0; i < TOTAL_PINS; i++) {
+    pinOneWire[i].device = NULL;
+    pinOneWire[i].power = false;
+  }
+}
+
 boolean OneWireFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin) && mode == PIN_MODE_ONEWIRE) {
@@ -39,9 +47,6 @@ void OneWireFirmata::oneWireConfig(byte pin, boolean power)
   ow_device_info *info = &pinOneWire[pin];
   if (info->device == NULL) {
     info->device = new OneWire(pin);
-  }
-  for (int i = 0; i < 8; i++) {
-    info->addr[i] = 0x0;
   }
   info->power = power;
 }
@@ -90,15 +95,9 @@ boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
             {
               if (subcommand & ONEWIRE_RESET_REQUEST_BIT) {
                 device->reset();
-                for (int i = 0; i < 8; i++) {
-                  info->addr[i] = 0x0;
-                }
               }
               if (subcommand & ONEWIRE_SKIP_REQUEST_BIT) {
                 device->skip();
-                for (byte i = 0; i < 8; i++) {
-                  info->addr[i] = 0x0;
-                }
               }
               if (subcommand & ONEWIRE_WITHDATA_REQUEST_BITS) {
                 int numBytes = num7BitOutbytes(argc - 2);
@@ -110,9 +109,6 @@ boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
                 if (subcommand & ONEWIRE_SELECT_REQUEST_BIT) {
                   if (numBytes < 8) break;
                   device->select(argv);
-                  for (int i = 0; i < 8; i++) {
-                    info->addr[i] = argv[i];
-                  }
                   argv += 8;
                   numBytes -= 8;
                 }
@@ -169,9 +165,6 @@ void OneWireFirmata::reset()
     if (pinOneWire[i].device) {
       free(pinOneWire[i].device);
       pinOneWire[i].device = NULL;
-    }
-    for (int j = 0; j < 8; j++) {
-      pinOneWire[i].addr[j] = 0;
     }
     pinOneWire[i].power = false;
   }
