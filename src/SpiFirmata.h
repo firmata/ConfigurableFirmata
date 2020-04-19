@@ -162,8 +162,6 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, boo
           data[j++] = argv[i] + (argv[i + 1] << 7);
 	  }
 	}
-	Firmata.sendString(F("In handleSpiTransfer : Real send"));
-	
 	digitalWrite(config[index].csPin, LOW);
 	SPI.transfer(data, j); 
 	if (argv[2] != 0)
@@ -171,9 +169,7 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, boo
 		// Default is deselect, so only skip this if the value is 0
 		digitalWrite(config[index].csPin, HIGH);
 	}
-	Firmata.sendString(F("In handleSpiTransfer : ???"));
 	if (sendReply) {
-		Firmata.sendString(F("In handleSpiTransfer : Send reply"));
 	  Firmata.startSysex();
 	  Firmata.write(SPI_DATA);
 	  Firmata.write(SPI_REPLY);
@@ -193,11 +189,6 @@ boolean SpiFirmata::handleSpiConfig(byte argc, byte *argv)
 	if (argc < 10) {
 		Firmata.sendString(F("Not enough data in SPI_DEVICE_CONFIG message"));
 		return false;
-	}
-	Firmata.sendString("SpiConfigMessage");
-	for (int i = 0; i < argc; i++)
-	{
-		Firmata.sendString(String(argv[i], HEX).c_str());
 	}
 	
   int index = -1; // the index where the new device will be added
@@ -247,7 +238,7 @@ boolean SpiFirmata::handleSpiConfig(byte argc, byte *argv)
   config[index].csPinOptions = argv[8];
   config[index].csPin = argv[9];
   config[index].used = true;
-  Firmata.sendString(F("Configured settings for device Id "), deviceIdChannel >> 3);
+  // Firmata.sendString(F("Configured settings for device Id "), deviceIdChannel >> 3);
 }
 
 int SpiFirmata::getConfigIndexForDevice(byte deviceIdChannel)
@@ -269,7 +260,6 @@ boolean SpiFirmata::handleSpiBegin(byte argc, byte *argv)
 		return false;
 	}
     enableSpiPins();
-	Firmata.sendString("SPI_BEGIN");
 	SPI.begin();
 
   }
@@ -307,7 +297,6 @@ boolean SpiFirmata::enableSpiPins()
 void SpiFirmata::disableSpiPins()
 {
   isSpiEnabled = false;
-  Firmata.sendString("SPI_END");
   SPI.end();
 }
 
