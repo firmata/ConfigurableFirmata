@@ -108,9 +108,9 @@ void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes,
 
   // check to be sure correct number of bytes were returned by slave
   if (numBytes < Wire.available()) {
-    Firmata.sendString("I2C: Too many bytes received");
+    Firmata.sendString(F("I2C: Too many bytes received"));
   } else if (numBytes > Wire.available()) {
-    Firmata.sendString("I2C: Too few bytes received");
+    Firmata.sendString(F("I2C: Too few bytes received"));
     numBytes = Wire.available();
   }
 
@@ -173,7 +173,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
   int slaveRegister;
   mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
   if (argv[1] & I2C_10BIT_ADDRESS_MODE_MASK) {
-    Firmata.sendString("10-bit addressing not supported");
+    Firmata.sendString(F("10-bit addressing not supported"));
     return;
   }
   else {
@@ -215,7 +215,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
     case I2C_READ_CONTINUOUSLY:
       if ((queryIndex + 1) >= I2C_MAX_QUERIES) {
         // too many queries, just ignore
-        Firmata.sendString("too many queries");
+        Firmata.sendString(F("too many queries"));
         break;
       }
       if (argc == 6) {
