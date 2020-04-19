@@ -90,7 +90,7 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
               swTxPin = argv[5];
             } else {
               // RX and TX pins must be specified when using software serial
-              Firmata.sendString("Specify serial RX and TX pins");
+              Firmata.sendString(F("Specify serial RX and TX pins"));
               return false;
             }
             switch (portId) {
