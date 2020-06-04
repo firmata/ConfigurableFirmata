@@ -19,12 +19,15 @@ const int NETWORK_PORT = 27016;
 // Note that the SERVO module currently is not supported on ESP32. So either disable this or patch the library
 #define ENABLE_SERVO 
 #define ENABLE_ACCELSTEPPER
-#define ENABLE_BASIC_SCHEDULER
+
+// This is rarely used
+// #define ENABLE_BASIC_SCHEDULER
 #define ENABLE_SERIAL
 #define ENABLE_I2C
 #define ENABLE_SPI
 #define ENABLE_ANALOG
 #define ENABLE_DIGITAL
+#define ENABLE_DHT
 
 
 #ifdef ENABLE_DIGITAL
@@ -72,6 +75,11 @@ OneWireFirmata oneWire;
 #ifdef ENABLE_SERIAL
 #include <SerialFirmata.h>
 SerialFirmata serial;
+#endif
+
+#ifdef ENABLE_DHT
+#include <DhtFirmata.h>
+DhtFirmata dhtFirmata;
 #endif
 
 #include <FirmataExt.h>

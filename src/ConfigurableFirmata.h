@@ -67,6 +67,7 @@
 #define STRING_DATA             0x71 // a string message with 14-bits per char
 #define STEPPER_DATA            0x72 // control a stepper motor
 #define ONEWIRE_DATA            0x73 // send an OneWire read/write/reset/select/skip/search request
+#define DHTSENSOR_DATA          0x74 // Used by DhtFirmata
 #define SHIFT_DATA              0x75 // a bitstream to/from a shift register
 #define I2C_REQUEST             0x76 // send an I2C read/write request
 #define I2C_REPLY               0x77 // a reply to an I2C read request
@@ -112,7 +113,12 @@
 #define PIN_MODE_ENCODER        0x09 // pin configured for rotary encoders
 #define PIN_MODE_SERIAL         0x0A // pin configured for serial communication
 #define PIN_MODE_PULLUP         0x0B // enable internal pull-up resistor for pin
+// Extensions under development
 #define PIN_MODE_SPI            0x0C // pin configured for SPI
+#define PIN_MODE_SONAR =        0x0D // pin configured for HC-SR04
+#define PIN_MODE_TONE =         0x0E // pin configured for tone
+#define PIN_MODE_DHT            0x0F // pin configured for DHT
+
 #define PIN_MODE_IGNORE         0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
 #define TOTAL_PIN_MODES         16
 
