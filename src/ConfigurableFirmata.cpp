@@ -648,7 +648,7 @@ int FirmataClass::getPinState(byte pin)
  * @param pin The pin to set the state of
  * @param state Set the state of the specified pin
  */
-void FirmataClass::setPinState(byte pin, int state)
+void FirmataClass::setPinState(byte pin, byte state)
 {
   pinState[pin] = state;
 }
