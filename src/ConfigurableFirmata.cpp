@@ -316,11 +316,11 @@ void FirmataClass::parse(byte inputData)
       //normal data byte - add to buffer
       storedInputData[sysexBytesRead] = inputData;
       sysexBytesRead++;
-      if (sysexBytesRead == MAX_DATA_BYTES)
-        {
-        Firmata.sendString(F("Discarding input message - exceeds buffer length"));
-        parsingSysex = false;
-        sysexBytesRead = 0;
+	  if (sysexBytesRead == MAX_DATA_BYTES)
+	  {
+		  Firmata.sendString(F("Discarding input message - exceeds buffer length"));
+		  parsingSysex = false;
+		  sysexBytesRead = 0;
         waitForData = 0;
       }
     }
@@ -500,7 +500,7 @@ void FirmataClass::sendSysex(byte command, byte bytec, byte *bytev)
  */
 void FirmataClass::sendString(byte command, const char *string)
 {
-  sendSysex(command, strlen(string), (byte *)string);
+  sendSysex(command, (byte)strlen(string), (byte *)string);
 }
 
 /**
@@ -508,7 +508,7 @@ void FirmataClass::sendString(byte command, const char *string)
  * @param flashString A pointer to the char string
  * @param sizeOfArgs Total size of argument list, in bytes, for the AVR based boards (that is sizeof(int) == 2)
  */
-void FirmataClass::sendString(const char *string)
+void FirmataClass::sendStringf(const FlashString* flashString, int sizeOfArgs, ...) 
 {
 	// The parameter "sizeOfArgs" is currently unused.
 	// 16 bit board?
@@ -547,7 +547,7 @@ void FirmataClass::sendString(const char *string)
  * Send a constant string to the Firmata host application.
  * @param string A pointer to the string in flash memory
  */
-void FirmataClass::sendString(const __FlashStringHelper* flashString)
+void FirmataClass::sendString(const FlashString* flashString)
 {
   int len = strlen_P((const char*)flashString);
   startSysex();
@@ -563,7 +563,7 @@ void FirmataClass::sendString(const __FlashStringHelper* flashString)
  * @param string A pointer to the string in flash memory
  * @param errorData A number that is sent out with the string (i.e. error code, unrecognized command number)
  */
-void FirmataClass::sendString(const __FlashStringHelper* flashString, int errorData)
+void FirmataClass::sendString(const FlashString* flashString, uint32_t errorData)
 {
   int len = strlen_P((const char*)flashString);
   startSysex();
@@ -571,7 +571,7 @@ void FirmataClass::sendString(const __FlashStringHelper* flashString, int errorD
   for (int i = 0; i < len; i++) {
     sendValueAsTwo7bitBytes(pgm_read_byte(((const char*)flashString) + i));
   }
-  String error = String(errorData, DEC);
+  String error = String(errorData, HEX);
   for (unsigned int i = 0; i < error.length(); i++) {
     sendValueAsTwo7bitBytes((byte)error.charAt(i));
   }
