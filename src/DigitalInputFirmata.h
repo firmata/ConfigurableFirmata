@@ -27,7 +27,7 @@ class DigitalInputFirmata: public FirmataFeature
   public:
     DigitalInputFirmata();
     void reportDigital(byte port, int value);
-    void report(void);
+    void report(bool elapsed);
     void handleCapability(byte pin);
     boolean handleSysex(byte command, byte argc, byte* argv);
     boolean handlePinMode(byte pin, int mode);

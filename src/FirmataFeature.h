@@ -26,6 +26,18 @@ class FirmataFeature
     virtual boolean handlePinMode(byte pin, int mode) = 0;
     virtual boolean handleSysex(byte command, byte argc, byte* argv) = 0;
     virtual void reset() = 0;
+
+    /// <summary>
+    /// Regularly called by main thread
+    /// </summary>
+    /// <param name="elapsed">True if the default reporting time has elapsed, false otherwise. Components wishing to report status in
+    /// a regular interval should not do anything if this is false.</param>
+    virtual void report(bool elapsed)
+    {
+      // Empty by default
+    }
+    virtual ~FirmataFeature()
+    = default;
 };
 
 #endif

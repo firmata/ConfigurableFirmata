@@ -225,7 +225,7 @@ void FirmataScheduler::reportTask(byte id, firmata_task *task, boolean error)
   Firmata.write(END_SYSEX);
 };
 
-void FirmataScheduler::runTasks()
+void FirmataScheduler::report(bool elapsed)
 {
   if (tasks) {
     long now = millis();

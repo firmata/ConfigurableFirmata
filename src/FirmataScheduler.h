@@ -51,7 +51,7 @@ class FirmataScheduler: public FirmataFeature
     void handleCapability(byte pin); //empty method
     boolean handlePinMode(byte pin, int mode); //empty method
     boolean handleSysex(byte command, byte argc, byte* argv);
-    void runTasks();
+    void report(bool elapsed);
     void reset();
     void createTask(byte id, int len);
     void deleteTask(byte id);

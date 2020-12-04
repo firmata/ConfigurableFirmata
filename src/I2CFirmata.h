@@ -55,7 +55,7 @@ class I2CFirmata: public FirmataFeature
     void handleCapability(byte pin);
     boolean handleSysex(byte command, byte argc, byte* argv);
     void reset();
-    void report();
+    void report(bool elapsed) override;
 
   private:
     /* for i2c read continuous more */
@@ -321,7 +321,7 @@ void I2CFirmata::reset()
   }
 }
 
-void I2CFirmata::report()
+void I2CFirmata::report(bool elapsed)
 {
   // report i2c data for all device with read continuous mode enabled
   if (queryIndex > -1) {

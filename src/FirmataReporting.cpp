@@ -50,10 +50,13 @@ boolean FirmataReporting::handleSysex(byte command, byte argc, byte* argv)
 boolean FirmataReporting::elapsed()
 {
   currentMillis = millis();
-  if (currentMillis - previousMillis > samplingInterval) {
+  if (currentMillis - previousMillis > samplingInterval) 
+  {
     previousMillis += samplingInterval;
     if (currentMillis - previousMillis > samplingInterval)
+    {
       previousMillis = currentMillis - samplingInterval;
+    }
     return true;
   }
   return false;
@@ -64,3 +67,4 @@ void FirmataReporting::reset()
   previousMillis = millis();
   samplingInterval = 19;
 }
+

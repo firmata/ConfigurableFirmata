@@ -94,8 +94,13 @@ void AnalogInputFirmata::reset()
   analogInputsToReport = 0;
 }
 
-void AnalogInputFirmata::report()
+void AnalogInputFirmata::report(bool elapsed)
 {
+  if (!elapsed)
+  {
+    return;
+  }
+
   byte pin, analogPin;
   /* ANALOGREAD - do all analogReads() at the configured sampling interval */
   for (pin = 0; pin < TOTAL_PINS; pin++) {

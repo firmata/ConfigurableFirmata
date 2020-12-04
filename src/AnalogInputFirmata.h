@@ -32,8 +32,7 @@ class AnalogInputFirmata: public FirmataFeature
     boolean handlePinMode(byte pin, int mode);
     boolean handleSysex(byte command, byte argc, byte* argv);
     void reset();
-    void report();
-
+    void report(bool elapsed) override;
   private:
     /* analog inputs */
     int analogInputsToReport; // bitwise array to store pin reporting
