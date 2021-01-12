@@ -99,8 +99,9 @@
 #define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
 
 // pin modes
-#define PIN_MODE_INPUT          0x00 // defined in Arduino.h
-#define PIN_MODE_OUTPUT         0x01 // defined in Arduino.h
+#define PIN_MODE_INPUT          0x00 // INPUT is defined in Arduino.h, but may conflict with other uses
+#define PIN_MODE_OUTPUT         0x01 // OUTPUT is defined in Arduino.h. Careful: OUTPUT is defined as 2 on ESP32!
+                                     // therefore OUTPUT and PIN_MODE_OUTPUT are not the same!
 #define PIN_MODE_ANALOG         0x02 // analog pin in analogInput mode
 #define PIN_MODE_PWM            0x03 // digital pin in PWM output mode
 #define PIN_MODE_SERVO          0x04 // digital pin in Servo output mode
@@ -145,7 +146,7 @@ class FirmataClass
     /* serial receive handling */
     int available(void);
     void processInput(void);
-    void parse(unsigned char value);
+    void parse(byte inputData);
     boolean isParsingMessage(void);
     boolean isResetting(void);
     /* serial send handling */

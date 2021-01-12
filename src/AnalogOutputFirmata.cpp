@@ -30,11 +30,37 @@ void AnalogOutputFirmata::reset()
 
 }
 
+#ifdef ESP32
+
+#define LEDC_BASE_FREQ 5000
+// Arduino like analogWrite
+// value has to be between 0 and valueMax
+void analogWrite(uint8_t channel, uint32_t value, uint32_t valueMax) {
+  // calculate duty, 8191 from 2 ^ 13 - 1
+  uint32_t duty = (8191 / valueMax) * min(value, valueMax);
+
+  // write duty to LEDC
+  ledcWrite(channel, duty);
+}
+
+void setupPwmPin(byte pin) {
+  // Setup timer and attach timer to a led pin
+  ledcSetup(pin, LEDC_BASE_FREQ, 13);
+  ledcAttachPin(PIN_TO_PWM(pin), pin);
+  analogWrite(PIN_TO_PWM(pin), 0);
+}
+#else
+void setupPwmPin(byte pin)
+{
+    pinMode(PIN_TO_PWM(pin), OUTPUT);
+    analogWrite(PIN_TO_PWM(pin), 0);
+}
+#endif
+
 boolean AnalogOutputFirmata::handlePinMode(byte pin, int mode)
 {
   if (mode == PIN_MODE_PWM && IS_PIN_PWM(pin)) {
-    pinMode(PIN_TO_PWM(pin), OUTPUT);
-    analogWrite(PIN_TO_PWM(pin), 0);
+    setupPwmPin(pin);
     return true;
   }
   return false;

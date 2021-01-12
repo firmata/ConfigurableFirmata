@@ -97,10 +97,10 @@ void DigitalInputFirmata::reportDigital(byte port, int value)
 boolean DigitalInputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin)) {
-    if (mode == INPUT || mode == PIN_MODE_PULLUP) {
+    if (mode == PIN_MODE_INPUT || mode == PIN_MODE_PULLUP) {
       portConfigInputs[pin / 8] |= (1 << (pin & 7));
-      if (mode == INPUT) {
-        pinMode(PIN_TO_DIGITAL(pin), INPUT);
+      if (mode == PIN_MODE_INPUT) {
+        pinMode(PIN_TO_DIGITAL(pin), PIN_MODE_INPUT);
       } else {
         pinMode(PIN_TO_DIGITAL(pin), INPUT_PULLUP);
         Firmata.setPinState(pin, 1);
@@ -116,10 +116,10 @@ boolean DigitalInputFirmata::handlePinMode(byte pin, int mode)
 void DigitalInputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
-    Firmata.write((byte)INPUT);
-    Firmata.write(1);
+    Firmata.write((byte)PIN_MODE_INPUT);
+    Firmata.write((byte)1);
     Firmata.write((byte)PIN_MODE_PULLUP);
-    Firmata.write(1);
+    Firmata.write((byte)1);
   }
 }
 
