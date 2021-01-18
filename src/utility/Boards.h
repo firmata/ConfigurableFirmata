@@ -724,6 +724,8 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define DEFAULT_PWM_RESOLUTION  8
 #endif
 
+#define MODE_INPUT 0 /* Because the name INPUT causes conflicts compiling on Windows */
+
 /*==============================================================================
  * readPort() - Read an 8 bit port
  *============================================================================*/
