@@ -202,9 +202,9 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
   }
 
   if (!extension) {
-    firmwareVersionCount = strlen(firmwareName) + 2;
+    firmwareVersionCount = (byte)(strlen(firmwareName) + 2);
   } else {
-    firmwareVersionCount = extension - firmwareName + 2;
+    firmwareVersionCount = (byte)(extension - firmwareName + 2);
   }
 
   // in case anyone calls setFirmwareNameAndVersion more than once
@@ -243,6 +243,10 @@ void FirmataClass::processSysexMessage(void)
     case STRING_DATA:
       if (currentStringCallback) {
         byte bufferLength = (sysexBytesRead - 1) / 2;
+        if (bufferLength <= 0)
+        {
+          break;
+        }
         byte i = 1;
         byte j = 0;
         while (j < bufferLength) {
@@ -291,16 +295,33 @@ void FirmataClass::parse(byte inputData)
 
   // TODO make sure it handles -1 properly
 
+  if (inputData == SYSTEM_RESET)
+  {
+      // A system reset shall always be done, regardless of the state of the parser.
+      parsingSysex = false;
+      sysexBytesRead = 0;
+      waitForData = 0;
+      systemReset();
+      return;
+  }
   if (parsingSysex) {
     if (inputData == END_SYSEX) {
       //stop sysex byte
       parsingSysex = false;
       //fire off handler function
       processSysexMessage();
-    } else {
-      //normal data byte - add to buffer
-      storedInputData[sysexBytesRead] = inputData;
-      sysexBytesRead++;
+    }
+    else {
+        //normal data byte - add to buffer
+        storedInputData[sysexBytesRead] = inputData;
+        sysexBytesRead++;
+        if (sysexBytesRead == MAX_DATA_BYTES)
+        {
+            Firmata.sendString(F("Discarding input message - exceeds buffer length"));
+            parsingSysex = false;
+            sysexBytesRead = 0;
+            waitForData = 0;
+        }
     }
   } else if ( (waitForData > 0) && (inputData < 128) ) {
     waitForData--;
@@ -483,11 +504,42 @@ void FirmataClass::sendString(byte command, const char *string)
 
 /**
  * Send a string to the Firmata host application.
- * @param string A pointer to the char string
- */
+ * @param flashString A pointer to the char string
+ * @param sizeOfArgs Total size of argument list, in bytes, for the AVR based boards (that is sizeof(int) == 2)
+  */
 void FirmataClass::sendString(const char *string)
 {
-  sendString(STRING_DATA, string);
+	// The parameter "sizeOfArgs" is currently unused.
+	// 16 bit board?
+#if UINT_MAX <= UINT16_MAX
+    const int maxSize = 32;
+#else
+    const int maxSize = 255;
+#endif
+	// 32 bit boards. Note that sizeOfArgs may not be correct here (since all arguments are 32-bit padded)
+	int len = strlen_P((const char*)flashString);
+	va_list va;
+    va_start (va, sizeOfArgs);
+	char bytesInput[maxSize];
+	char bytesOutput[maxSize];
+	startSysex();
+	FirmataStream->write(STRING_DATA);
+	for (int i = 0; i < len; i++) 
+	{
+		bytesInput[i] = (pgm_read_byte(((const char*)flashString) + i));
+    }
+	bytesInput[len] = 0;
+	memset(bytesOutput, 0, sizeof(char) * maxSize);
+	
+	vsnprintf(bytesOutput, maxSize, bytesInput, va);
+	len = strlen(bytesOutput);
+	for (int i = 0; i < len; i++) 
+	{
+		sendValueAsTwo7bitBytes(bytesOutput[i]);
+    }
+	
+	endSysex();
+    va_end (va);
 }
 
 /**
