@@ -25,14 +25,6 @@
 #include "WProgram.h"
 #endif
 
-// Normally Servo.h must be included before Firmata.h (which then includes
-// this file).  If Servo.h wasn't included, this allows the code to still
-// compile, but without support for any Servos.  Hopefully that's what the
-// user intended by not including Servo.h
-#ifndef MAX_SERVOS
-#define MAX_SERVOS 0
-#endif
-
 /*
     Firmata Hardware Abstraction Layer
 

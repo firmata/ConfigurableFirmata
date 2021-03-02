@@ -27,6 +27,12 @@
 class FirmataReporting: public FirmataFeature
 {
   public:
+    FirmataReporting()
+    {
+      currentMillis = 0;
+      previousMillis = 0;
+      samplingInterval = MINIMUM_SAMPLING_INTERVAL;
+    }
     void setSamplingInterval(int interval);
     void handleCapability(byte pin); //empty method
     boolean handlePinMode(byte pin, int mode); //empty method

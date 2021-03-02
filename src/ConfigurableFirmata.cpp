@@ -52,6 +52,7 @@ void FirmataClass::startSysex(void)
 void FirmataClass::endSysex(void)
 {
   FirmataStream->write(END_SYSEX);
+  FirmataStream->flush();
 }
 
 //******************************************************************************
@@ -312,16 +313,16 @@ void FirmataClass::parse(byte inputData)
       processSysexMessage();
     }
     else {
-        //normal data byte - add to buffer
-        storedInputData[sysexBytesRead] = inputData;
-        sysexBytesRead++;
-        if (sysexBytesRead == MAX_DATA_BYTES)
+      //normal data byte - add to buffer
+      storedInputData[sysexBytesRead] = inputData;
+      sysexBytesRead++;
+      if (sysexBytesRead == MAX_DATA_BYTES)
         {
-            Firmata.sendString(F("Discarding input message - exceeds buffer length"));
-            parsingSysex = false;
-            sysexBytesRead = 0;
-            waitForData = 0;
-        }
+        Firmata.sendString(F("Discarding input message - exceeds buffer length"));
+        parsingSysex = false;
+        sysexBytesRead = 0;
+        waitForData = 0;
+      }
     }
   } else if ( (waitForData > 0) && (inputData < 128) ) {
     waitForData--;
@@ -506,7 +507,7 @@ void FirmataClass::sendString(byte command, const char *string)
  * Send a string to the Firmata host application.
  * @param flashString A pointer to the char string
  * @param sizeOfArgs Total size of argument list, in bytes, for the AVR based boards (that is sizeof(int) == 2)
-  */
+ */
 void FirmataClass::sendString(const char *string)
 {
 	// The parameter "sizeOfArgs" is currently unused.
@@ -571,7 +572,7 @@ void FirmataClass::sendString(const __FlashStringHelper* flashString, int errorD
     sendValueAsTwo7bitBytes(pgm_read_byte(((const char*)flashString) + i));
   }
   String error = String(errorData, DEC);
-  for (int i = 0; i < error.length(); i++) {
+  for (unsigned int i = 0; i < error.length(); i++) {
     sendValueAsTwo7bitBytes((byte)error.charAt(i));
   }
   
