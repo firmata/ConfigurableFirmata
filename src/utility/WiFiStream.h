@@ -69,7 +69,7 @@ public:
  *           network configuration
  ******************************************************************************/
 
-#ifndef ESP8266
+#if !ESP8266 && !ESP32
   /**
    * configure a static local IP address without defining the local network
    * DHCP will be used as long as local IP address is not defined
@@ -160,7 +160,7 @@ public:
     return WiFi.status();
   }
 
-#ifndef ESP8266
+#if !ESP8266 && !ESP32
   /**
    * initialize WiFi with WEP security and initiate client connection
    * if WiFi connection is already established
