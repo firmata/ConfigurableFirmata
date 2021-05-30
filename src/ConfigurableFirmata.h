@@ -35,7 +35,6 @@
 #define FIRMATA_FIRMWARE_MINOR_VERSION  11 // for backwards compatible changes
 #define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
-
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
 // Arduino 101 also defines SET_PIN_MODE as a macro in scss_registers.h
@@ -80,6 +79,7 @@
 #define SPI_READ                0x04
 #define SPI_REPLY               0x05
 #define SPI_END                 0x06
+#define FREQUENCY_COMMAND       0x63 // Command for the Frequency module
 #define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin
 #define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value
 #define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value
@@ -118,6 +118,7 @@
 #define PIN_MODE_SONAR =        0x0D // pin configured for HC-SR04
 #define PIN_MODE_TONE =         0x0E // pin configured for tone
 #define PIN_MODE_DHT            0x0F // pin configured for DHT
+#define PIN_MODE_FREQUENCY      0x10 // pin configured for frequency measurement
 
 #define PIN_MODE_IGNORE         0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
 #define TOTAL_PIN_MODES         16
@@ -165,6 +166,12 @@ class FirmataClass
     void sendString(byte command, const char *string);
     void sendSysex(byte command, byte bytec, byte *bytev);
     void write(byte c);
+    void sendPackedUInt14(uint16_t value);
+    void sendPackedUInt32(uint32_t value);
+    void sendPackedUInt64(uint64_t value);
+    uint16_t decodePackedUInt14(byte* argv);
+    uint32_t decodePackedUInt32(byte* argv);
+    uint64_t decodePackedUInt64(byte* argv);
     /* attach & detach callback functions to messages */
     void attach(byte command, callbackFunction newFunction);
     void attach(byte command, systemResetCallbackFunction newFunction);
