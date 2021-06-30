@@ -29,7 +29,9 @@ jobs:
       - run: |
           mkdir -p "$HOME/Arduino/libraries"
           ln -s "$PWD" "$HOME/Arduino/libraries/."
-      - run: arduino-cli lib install "DHT sensor library"
+      - run: | 
+          arduino-cli lib install "DHT sensor library"
+          arduino-cli lib install "Servo"
 
       - run: |
           arduino-cli core update-index
