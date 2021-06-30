@@ -491,6 +491,21 @@ void FirmataClass::sendString(const char *string)
 }
 
 /**
+ * Send a constant string to the Firmata host application.
+ * @param string A pointer to the string in flash memory
+ */
+void FirmataClass::sendString(const __FlashStringHelper* flashString)
+{
+  int len = strlen_P((const char*)flashString);
+  startSysex();
+  FirmataStream->write(STRING_DATA);
+  for (int i = 0; i < len; i++) {
+    sendValueAsTwo7bitBytes(pgm_read_byte(((const char*)flashString) + i));
+  }
+  endSysex();
+}
+
+/**
  * A wrapper for Stream::available().
  * Write a single byte to the output stream.
  * @param c The byte to be written.
@@ -633,7 +648,7 @@ int FirmataClass::getPinState(byte pin)
  * @param pin The pin to set the state of
  * @param state Set the state of the specified pin
  */
-void FirmataClass::setPinState(byte pin, int state)
+void FirmataClass::setPinState(byte pin, byte state)
 {
   pinState[pin] = state;
 }

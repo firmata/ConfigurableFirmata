@@ -162,6 +162,7 @@ class FirmataClass
     void sendAnalog(byte pin, int value);
     void sendDigital(byte pin, int value); // TODO implement this
     void sendDigitalPort(byte portNumber, int portData);
+    void sendString(const __FlashStringHelper* flashString);
     void sendString(const char *string);
     void sendString(byte command, const char *string);
     void sendSysex(byte command, byte bytec, byte *bytev);
@@ -180,7 +181,7 @@ class FirmataClass
     void setPinMode(byte pin, byte config);
     /* access pin state */
     int getPinState(byte pin);
-    void setPinState(byte pin, int state);
+    void setPinState(byte pin, byte state);
 
     /* utility methods */
     void sendValueAsTwo7bitBytes(int value);
@@ -202,7 +203,7 @@ class FirmataClass
     int sysexBytesRead;
     /* pins configuration */
     byte pinConfig[TOTAL_PINS];         // configuration of every pin
-    int pinState[TOTAL_PINS];           // any value that has been written
+    byte pinState[TOTAL_PINS];           // any value that has been written
 
     boolean resetting;
 
