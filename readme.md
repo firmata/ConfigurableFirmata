@@ -4,10 +4,15 @@
 
 Firmata is a protocol for communicating with microcontrollers from software on a host computer. The [protocol](https://github.com/firmata/protocol) can be implemented in firmware on any microcontroller architecture as well as software on any host computer software package. The arduino repository described here is a Firmata library for Arduino and Arduino-compatible devices. If you would like to contribute to Firmata, please see the [Contributing](#contributing) section below.
 
+## Important NOTE
+
+Updates to ConfigurableFirmata are being laid out at the moment. The master branch will get new features added and existing features updated. In some cases, this may break clients or cause regressions. The last stable 2.xx release is available under [this branch](https://github.com/firmata/ConfigurableFirmata/tree/releases/v2.xx). So if you check out the repository manually (see below), be sure to switch to that branch if you need the stable version. Feedback on the current development version is welcome, of course.
+
 ## Installation
 
 - **If you are using Arduino IDE version 1.6.4 or higher** go to `Sketch > Include Library > Manage Libraries` and then search for "ConfigurableFirmata" and click on `Install` after tapping on the ConfigurableFirmata item in the filtered results. You can also use this same method to update ConfigurableFirmata in the future.
 - **If you are using an older version of the Arduino IDE**, download or clone ConfigurableFirmata to your Arduino sketchbook library folder. This is typically `/Documents/Arduino/libraries/` on Mac or Linux or `\My Documents\Arduino\libraries\` on Windows.
+- **If you want to edit things yourself or help in development**, clone this repo to `\My Documents\Arduino\libraries\ConfigurableFirmata` and start hacking. Just delete the folder if it exists already.
 
 ## Usage
 
