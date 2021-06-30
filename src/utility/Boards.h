@@ -828,5 +828,8 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
 #define TOTAL_PORTS             ((TOTAL_PINS + 7) / 8)
 #endif
 
-
+#ifndef ONLOW
+#define ONLOW                   LOW
+#define ONHIGH                  HIGH
+#endif
 #endif /* Firmata_Boards_h */
