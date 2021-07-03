@@ -192,8 +192,9 @@ class FirmataClass
   private:
     Stream *FirmataStream;
     /* firmware name and version */
-    byte firmwareVersionCount;
-    byte *firmwareVersionVector;
+    char *firmwareVersionName;
+    byte firmwareVersionMajor;
+    byte firmwareVersionMinor;
     /* input message handling */
     byte waitForData; // this flag says the next serial input will be data
     byte executeMultiByteCommand; // execute this after getting multi-byte data
