@@ -31,9 +31,11 @@ class FirmataReporting: public FirmataFeature
     void handleCapability(byte pin); //empty method
     boolean handlePinMode(byte pin, int mode); //empty method
     boolean handleSysex(byte command, byte argc, byte* argv);
-    boolean elapsed();
     void reset();
+
+    boolean elapsed();
   private:
+
     /* timer variables */
     unsigned long currentMillis;        // store the current value from millis()
     unsigned long previousMillis;       // for comparison with currentMillis

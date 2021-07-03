@@ -54,7 +54,7 @@ class AccelStepperFirmata: public FirmataFeature
     long decode28BitUnsignedInteger(byte arg1, byte arg2, byte arg3, byte arg4);
     long decode32BitSignedInteger(byte arg1, byte arg2, byte arg3, byte arg4, byte arg5);
     void encode32BitSignedInteger(long value, byte pdata[]);
-    void update();
+    void report(bool elapsed) override;
     void reset();
   private:
     AccelStepper *stepper[MAX_ACCELSTEPPERS];

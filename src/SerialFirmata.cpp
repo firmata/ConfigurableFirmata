@@ -213,7 +213,7 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
   return false;
 }
 
-void SerialFirmata::update()
+void SerialFirmata::report(bool elapsed)
 {
   checkSerial();
 }

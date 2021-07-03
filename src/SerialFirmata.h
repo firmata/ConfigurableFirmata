@@ -139,7 +139,7 @@ class SerialFirmata: public FirmataFeature
     boolean handlePinMode(byte pin, int mode);
     void handleCapability(byte pin);
     boolean handleSysex(byte command, byte argc, byte* argv);
-    void update();
+    void report(bool elapsed) override;
     void reset();
     void checkSerial();
 

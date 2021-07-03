@@ -381,7 +381,7 @@ void AccelStepperFirmata::encode32BitSignedInteger(long value, byte pdata[])
 /*==============================================================================
  * LOOP()
  *============================================================================*/
-void AccelStepperFirmata::update()
+void AccelStepperFirmata::report(bool elapsed)
 {
   bool stepsLeft;
 

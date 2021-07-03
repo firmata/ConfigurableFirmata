@@ -51,7 +51,7 @@ void DigitalInputFirmata::outputPort(byte portNumber, byte portValue, byte force
 /* -----------------------------------------------------------------------------
  * check all the active digital inputs for change of state, then add any events
  * to the Serial output queue using Serial.print() */
-void DigitalInputFirmata::report(void)
+void DigitalInputFirmata::report(bool elapsed)
 {
   /* Using non-looping code allows constants to be given to readPort().
    * The compiler will apply substantial optimizations if the inputs
