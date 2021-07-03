@@ -12,7 +12,12 @@
 
 #ifndef Encoder7Bit_h
 #define Encoder7Bit_h
-#include <Arduino.h>
+
+#if defined(ARDUINO) && ARDUINO >= 100
+#include "Arduino.h"  // for digitalRead, digitalWrite, etc
+#else
+#include "WProgram.h"
+#endif
 
 #define num7BitOutbytes(a)(((a)*7)>>3)
 
