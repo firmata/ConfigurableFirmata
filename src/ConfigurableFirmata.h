@@ -109,8 +109,8 @@
 #define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
 
 // pin modes
-//#define INPUT                 0x00 // defined in Arduino.h
-//#define OUTPUT                0x01 // defined in Arduino.h
+#define PIN_MODE_INPUT          0x00 // defined in Arduino.h
+#define PIN_MODE_OUTPUT         0x01 // defined in Arduino.h
 #define PIN_MODE_ANALOG         0x02 // analog pin in analogInput mode
 #define PIN_MODE_PWM            0x03 // digital pin in PWM output mode
 #define PIN_MODE_SERVO          0x04 // digital pin in Servo output mode
@@ -123,17 +123,7 @@
 #define PIN_MODE_PULLUP         0x0B // enable internal pull-up resistor for pin
 #define PIN_MODE_SPI            0x0C // pin configured for SPI
 #define PIN_MODE_IGNORE         0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
-#define TOTAL_PIN_MODES         13
-// DEPRECATED as of Firmata v2.5
-#define ANALOG                  0x02 // same as PIN_MODE_ANALOG
-#define PWM                     0x03 // same as PIN_MODE_PWM
-#define SERVO                   0x04 // same as PIN_MODE_SERVO
-#define SHIFT                   0x05 // same as PIN_MODE_SHIFT
-#define I2C                     0x06 // same as PIN_MODE_I2C
-#define ONEWIRE                 0x07 // same as PIN_MODE_ONEWIRE
-#define STEPPER                 0x08 // same as PIN_MODE_STEPPER
-#define ENCODER                 0x09 // same as PIN_MODE_ENCODER
-#define IGNORE                  0x7F // same as PIN_MODE_IGNORE
+#define TOTAL_PIN_MODES         16
 
 extern "C" {
   // callback function types
