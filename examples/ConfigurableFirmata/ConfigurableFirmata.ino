@@ -12,6 +12,7 @@
 #define ENABLE_BASIC_SCHEDULER
 #define ENABLE_SERIAL
 #define ENABLE_I2C
+#define ENABLE_SPI
 #define ENABLE_ANALOG
 #define ENABLE_DIGITAL
 
@@ -37,6 +38,12 @@ AnalogOutputFirmata analogOutput;
 #include <Wire.h>
 #include <I2CFirmata.h>
 I2CFirmata i2c;
+#endif
+
+#ifdef ENABLE_SPI
+#include <Wire.h>
+#include <SpiFirmata.h>
+SpiFirmata spi;
 #endif
 
 #ifdef ENABLE_ONE_WIRE
