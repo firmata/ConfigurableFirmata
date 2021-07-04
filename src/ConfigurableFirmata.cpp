@@ -489,7 +489,7 @@ void FirmataClass::sendStringf(const FlashString* flashString, int sizeOfArgs, .
 {
 	// The parameter "sizeOfArgs" is currently unused.
 	// 16 bit board?
-#if UINT_MAX <= UINT16_MAX
+#ifdef ARDUINO_ARCH_AVR
     const int maxSize = 32;
 #else
     const int maxSize = 255;

@@ -222,7 +222,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 // Arduino DUE
 #elif defined(__SAM3X8E__)
 #define TOTAL_ANALOG_PINS       12
-#define TOTAL_PINS              66 // 54 digital + 12 analog
+#define TOTAL_PINS              77 // Includes some special pins, which are normally outside the counting on these boards
+                                   // The SPI pins on the Arduino Due are 74-77
+#define TOTAL_DEFAULT_PINS      66 // 54 digital + 12 analog
 #define VERSION_BLINK_PIN       13
 #define PIN_SERIAL1_RX          19
 #define PIN_SERIAL1_TX          18
@@ -230,11 +232,12 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_SERIAL2_TX          16
 #define PIN_SERIAL3_RX          15
 #define PIN_SERIAL3_TX          14
-#define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) < TOTAL_PINS)
-#define IS_PIN_ANALOG(p)        ((p) >= 54 && (p) < TOTAL_PINS)
+#define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) < TOTAL_DEFAULT_PINS)
+#define IS_PIN_ANALOG(p)        ((p) >= 54 && (p) < TOTAL_DEFAULT_PINS)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         ((p) >= 2 && (p) - 2 < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21) // 70 71
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
 #define IS_PIN_SERIAL(p)        ((p) > 13 && (p) < 20)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 54)

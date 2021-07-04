@@ -36,5 +36,8 @@ jobs:
       - run: |
           arduino-cli core update-index
           arduino-cli core install arduino:avr
+          arduino-cli core install arduino:sam
 
       - run: arduino-cli compile --fqbn arduino:avr:uno ./examples/ConfigurableFirmata --warnings more
+
+      - run: arduino-cli compile --fqbn arduino:sam:arduino_due_x_dbg ./examples/ConfigurableFirmata --warnings more
