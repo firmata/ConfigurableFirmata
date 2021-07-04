@@ -32,19 +32,9 @@
  * Query using the REPORT_FIRMWARE message.
  */
 #define FIRMATA_FIRMWARE_MAJOR_VERSION  2 // for non-compatible changes
-#define FIRMATA_FIRMWARE_MINOR_VERSION  10 // for backwards compatible changes
-#define FIRMATA_FIRMWARE_BUGFIX_VERSION 1 // for bugfix releases
+#define FIRMATA_FIRMWARE_MINOR_VERSION  11 // for backwards compatible changes
+#define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
-// DEPRECATED as of ConfigurableFirmata v2.8.1.
-// Use FIRMATA_PROTOCOL_[MAJOR|MINOR|BUGFIX]_VERSION instead.
-#define FIRMATA_MAJOR_VERSION   2
-#define FIRMATA_MINOR_VERSION   6
-#define FIRMATA_BUGFIX_VERSION  0
-// DEPRECATED as of ConfigurableFirmata v2.8.1.
-//Use FIRMATA_FIRMWARE_[MAJOR|MINOR|BUGFIX]_VERSION instead.
-#define FIRMWARE_MAJOR_VERSION  2
-#define FIRMWARE_MINOR_VERSION  10
-#define FIRMWARE_BUGFIX_VERSION 1
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
@@ -109,8 +99,8 @@
 #define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
 
 // pin modes
-//#define INPUT                 0x00 // defined in Arduino.h
-//#define OUTPUT                0x01 // defined in Arduino.h
+#define PIN_MODE_INPUT          0x00 // defined in Arduino.h
+#define PIN_MODE_OUTPUT         0x01 // defined in Arduino.h
 #define PIN_MODE_ANALOG         0x02 // analog pin in analogInput mode
 #define PIN_MODE_PWM            0x03 // digital pin in PWM output mode
 #define PIN_MODE_SERVO          0x04 // digital pin in Servo output mode
@@ -123,17 +113,7 @@
 #define PIN_MODE_PULLUP         0x0B // enable internal pull-up resistor for pin
 #define PIN_MODE_SPI            0x0C // pin configured for SPI
 #define PIN_MODE_IGNORE         0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
-#define TOTAL_PIN_MODES         13
-// DEPRECATED as of Firmata v2.5
-#define ANALOG                  0x02 // same as PIN_MODE_ANALOG
-#define PWM                     0x03 // same as PIN_MODE_PWM
-#define SERVO                   0x04 // same as PIN_MODE_SERVO
-#define SHIFT                   0x05 // same as PIN_MODE_SHIFT
-#define I2C                     0x06 // same as PIN_MODE_I2C
-#define ONEWIRE                 0x07 // same as PIN_MODE_ONEWIRE
-#define STEPPER                 0x08 // same as PIN_MODE_STEPPER
-#define ENCODER                 0x09 // same as PIN_MODE_ENCODER
-#define IGNORE                  0x7F // same as PIN_MODE_IGNORE
+#define TOTAL_PIN_MODES         16
 
 extern "C" {
   // callback function types
@@ -144,6 +124,7 @@ extern "C" {
   typedef void (*delayTaskCallbackFunction)(long delay);
 }
 
+typedef const __FlashStringHelper FlashString;
 
 // TODO make it a subclass of a generic Serial/Stream base class
 class FirmataClass
@@ -171,9 +152,9 @@ class FirmataClass
     void sendAnalog(byte pin, int value);
     void sendDigital(byte pin, int value); // TODO implement this
     void sendDigitalPort(byte portNumber, int portData);
-    void sendString(const __FlashStringHelper* flashString);
-	void sendString(const __FlashStringHelper* flashString, int errorData);
-    void sendString(const char *string);
+    void sendString(const FlashString* flashString);
+    void sendString(const FlashString* flashString, uint32_t errorData);
+    void sendStringf(const FlashString* fmt, int sizeOfArgs, ...);
     void sendString(byte command, const char *string);
     void sendSysex(byte command, byte bytec, byte *bytev);
     void write(byte c);
@@ -201,8 +182,9 @@ class FirmataClass
   private:
     Stream *FirmataStream;
     /* firmware name and version */
-    byte firmwareVersionCount;
-    byte *firmwareVersionVector;
+    char *firmwareVersionName;
+    byte firmwareVersionMajor;
+    byte firmwareVersionMinor;
     /* input message handling */
     byte waitForData; // this flag says the next serial input will be data
     byte executeMultiByteCommand; // execute this after getting multi-byte data

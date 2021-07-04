@@ -52,6 +52,7 @@ void FirmataClass::startSysex(void)
 void FirmataClass::endSysex(void)
 {
   FirmataStream->write(END_SYSEX);
+  FirmataStream->flush();
 }
 
 //******************************************************************************
@@ -64,8 +65,9 @@ void FirmataClass::endSysex(void)
  */
 FirmataClass::FirmataClass()
 {
-  firmwareVersionCount = 0;
-  firmwareVersionVector = 0;
+  firmwareVersionMinor = 0;
+  firmwareVersionMajor = 0;
+  firmwareVersionName = nullptr;
   blinkVersionDisabled = false;
   systemReset();
 }
@@ -161,14 +163,16 @@ void FirmataClass::disableBlinkVersion()
 void FirmataClass::printFirmwareVersion(void)
 {
   byte i;
-
-  if (firmwareVersionCount) { // make sure that the name has been set before reporting
+  int len;
+  if (firmwareVersionMajor != 0) { // make sure that the name has been set before reporting
     startSysex();
     FirmataStream->write(REPORT_FIRMWARE);
-    FirmataStream->write(firmwareVersionVector[0]); // major version number
-    FirmataStream->write(firmwareVersionVector[1]); // minor version number
-    for (i = 2; i < firmwareVersionCount; ++i) {
-      sendValueAsTwo7bitBytes(firmwareVersionVector[i]);
+    FirmataStream->write(firmwareVersionMajor); // major version number
+    FirmataStream->write(firmwareVersionMinor); // minor version number
+	len = strlen(firmwareVersionName);
+    for (i = 0; i < len; ++i)
+	{ 
+      sendValueAsTwo7bitBytes(firmwareVersionName[i]);
     }
     endSysex();
   }
@@ -183,38 +187,9 @@ void FirmataClass::printFirmwareVersion(void)
  */
 void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte minor)
 {
-  const char *firmwareName;
-  const char *extension;
-
-  // parse out ".cpp" and "applet/" that comes from using __FILE__
-  extension = strstr(name, ".cpp");
-  firmwareName = strrchr(name, '/');
-
-  if (!firmwareName) {
-    // windows
-    firmwareName = strrchr(name, '\\');
-  }
-  if (!firmwareName) {
-    // user passed firmware name
-    firmwareName = name;
-  } else {
-    firmwareName ++;
-  }
-
-  if (!extension) {
-    firmwareVersionCount = strlen(firmwareName) + 2;
-  } else {
-    firmwareVersionCount = extension - firmwareName + 2;
-  }
-
-  // in case anyone calls setFirmwareNameAndVersion more than once
-  free(firmwareVersionVector);
-
-  firmwareVersionVector = (byte *) malloc(firmwareVersionCount + 1);
-  firmwareVersionVector[firmwareVersionCount] = 0;
-  firmwareVersionVector[0] = major;
-  firmwareVersionVector[1] = minor;
-  strncpy((char *)firmwareVersionVector + 2, firmwareName, firmwareVersionCount - 2);
+  firmwareVersionName = (char*)name;
+  firmwareVersionMajor = major;
+  firmwareVersionMinor = minor;
 }
 
 //------------------------------------------------------------------------------
@@ -243,6 +218,10 @@ void FirmataClass::processSysexMessage(void)
     case STRING_DATA:
       if (currentStringCallback) {
         byte bufferLength = (sysexBytesRead - 1) / 2;
+        if (bufferLength <= 0)
+        {
+          break;
+        }
         byte i = 1;
         byte j = 0;
         while (j < bufferLength) {
@@ -291,9 +270,18 @@ void FirmataClass::parse(byte inputData)
 
   // TODO make sure it handles -1 properly
 
+  if (inputData == SYSTEM_RESET)
+  {
+      // A system reset shall always be done, regardless of the state of the parser.
+      parsingSysex = false;
+      sysexBytesRead = 0;
+      waitForData = 0;
+      systemReset();
+      return;
+  }
   if (parsingSysex) {
     if (inputData == END_SYSEX) {
-      //stop sysex byte
+		//stop sysex byte
       parsingSysex = false;
       //fire off handler function
       processSysexMessage();
@@ -301,7 +289,14 @@ void FirmataClass::parse(byte inputData)
       //normal data byte - add to buffer
       storedInputData[sysexBytesRead] = inputData;
       sysexBytesRead++;
-    }
+	  if (sysexBytesRead == MAX_DATA_BYTES)
+	  {
+		  Firmata.sendString(F("Discarding input message - exceeds buffer length"));
+		  parsingSysex = false;
+		  sysexBytesRead = 0;
+        waitForData = 0;
+      }
+	  }
   } else if ( (waitForData > 0) && (inputData < 128) ) {
     waitForData--;
     storedInputData[waitForData] = inputData;
@@ -478,23 +473,58 @@ void FirmataClass::sendSysex(byte command, byte bytec, byte *bytev)
  */
 void FirmataClass::sendString(byte command, const char *string)
 {
-  sendSysex(command, strlen(string), (byte *)string);
+  if (string == nullptr)
+  {
+    return;
+  }
+  sendSysex(command, (byte)strlen(string), (byte *)string);
 }
 
 /**
  * Send a string to the Firmata host application.
- * @param string A pointer to the char string
+ * @param flashString A pointer to the char string
+ * @param sizeOfArgs Total size of argument list, in bytes, for the AVR based boards (that is sizeof(int) == 2)
  */
-void FirmataClass::sendString(const char *string)
+void FirmataClass::sendStringf(const FlashString* flashString, int sizeOfArgs, ...) 
 {
-  sendString(STRING_DATA, string);
+	// The parameter "sizeOfArgs" is currently unused.
+	// 16 bit board?
+#if UINT_MAX <= UINT16_MAX
+    const int maxSize = 32;
+#else
+    const int maxSize = 255;
+#endif
+	// 32 bit boards. Note that sizeOfArgs may not be correct here (since all arguments are 32-bit padded)
+	int len = strlen_P((const char*)flashString);
+	va_list va;
+    va_start (va, sizeOfArgs);
+	char bytesInput[maxSize];
+	char bytesOutput[maxSize];
+	startSysex();
+	FirmataStream->write(STRING_DATA);
+	for (int i = 0; i < len; i++) 
+	{
+		bytesInput[i] = (pgm_read_byte(((const char*)flashString) + i));
+    }
+	bytesInput[len] = 0;
+	memset(bytesOutput, 0, sizeof(char) * maxSize);
+	
+	vsnprintf(bytesOutput, maxSize, bytesInput, va);
+	len = strlen(bytesOutput);
+	for (int i = 0; i < len; i++) 
+	{
+		sendValueAsTwo7bitBytes(bytesOutput[i]);
+    }
+	
+	endSysex();
+    va_end (va);
 }
 
 /**
  * Send a constant string to the Firmata host application.
  * @param string A pointer to the string in flash memory
  */
-void FirmataClass::sendString(const __FlashStringHelper* flashString)
+void FirmataClass::sendString(const FlashString* flashString)
 {
   int len = strlen_P((const char*)flashString);
   startSysex();
@@ -510,7 +540,7 @@ void FirmataClass::sendString(const __FlashStringHelper* flashString)
  * @param string A pointer to the string in flash memory
  * @param errorData A number that is sent out with the string (i.e. error code, unrecognized command number)
  */
-void FirmataClass::sendString(const __FlashStringHelper* flashString, int errorData)
+void FirmataClass::sendString(const FlashString* flashString, uint32_t errorData)
 {
   int len = strlen_P((const char*)flashString);
   startSysex();
@@ -518,8 +548,8 @@ void FirmataClass::sendString(const __FlashStringHelper* flashString, int errorD
   for (int i = 0; i < len; i++) {
     sendValueAsTwo7bitBytes(pgm_read_byte(((const char*)flashString) + i));
   }
-  String error = String(errorData, DEC);
-  for (int i = 0; i < error.length(); i++) {
+  String error = String(errorData, HEX);
+  for (unsigned int i = 0; i < error.length(); i++) {
     sendValueAsTwo7bitBytes((byte)error.charAt(i));
   }
   

@@ -220,7 +220,7 @@ boolean SpiFirmata::handleSpiConfig(byte argc, byte *argv)
   }
   
   byte deviceIdChannel = argv[0];
-  if (deviceIdChannel & 0x3 != 0)
+  if ((deviceIdChannel & 0x3) != 0)
   {
 	  Firmata.sendString(F("SPI_DEVICE_CONFIG: Only channel 0 supported: "), deviceIdChannel);
 	  return false;
@@ -239,6 +239,7 @@ boolean SpiFirmata::handleSpiConfig(byte argc, byte *argv)
   config[index].csPin = argv[9];
   config[index].used = true;
   // Firmata.sendString(F("Configured settings for device Id "), deviceIdChannel >> 3);
+  return true;
 }
 
 int SpiFirmata::getConfigIndexForDevice(byte deviceIdChannel)

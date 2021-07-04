@@ -28,6 +28,12 @@ void reportDigitalInputCallback(byte port, int value)
 
 DigitalInputFirmata::DigitalInputFirmata()
 {
+  for (int i = 0; i < TOTAL_PORTS; i++)
+  {
+    portConfigInputs[i] = 0;
+    previousPINs[i] = 0;
+    reportPINs[i] = 0;
+  }
   DigitalInputFirmataInstance = this;
   Firmata.attach(REPORT_DIGITAL, reportDigitalInputCallback);
 }
