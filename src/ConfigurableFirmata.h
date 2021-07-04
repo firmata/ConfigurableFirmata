@@ -32,19 +32,9 @@
  * Query using the REPORT_FIRMWARE message.
  */
 #define FIRMATA_FIRMWARE_MAJOR_VERSION  2 // for non-compatible changes
-#define FIRMATA_FIRMWARE_MINOR_VERSION  10 // for backwards compatible changes
-#define FIRMATA_FIRMWARE_BUGFIX_VERSION 1 // for bugfix releases
+#define FIRMATA_FIRMWARE_MINOR_VERSION  11 // for backwards compatible changes
+#define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
-// DEPRECATED as of ConfigurableFirmata v2.8.1.
-// Use FIRMATA_PROTOCOL_[MAJOR|MINOR|BUGFIX]_VERSION instead.
-#define FIRMATA_MAJOR_VERSION   2
-#define FIRMATA_MINOR_VERSION   6
-#define FIRMATA_BUGFIX_VERSION  0
-// DEPRECATED as of ConfigurableFirmata v2.8.1.
-//Use FIRMATA_FIRMWARE_[MAJOR|MINOR|BUGFIX]_VERSION instead.
-#define FIRMWARE_MAJOR_VERSION  2
-#define FIRMWARE_MINOR_VERSION  10
-#define FIRMWARE_BUGFIX_VERSION 1
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
