@@ -4,9 +4,19 @@
 
 #include <ConfigurableFirmata.h>
 
+// Use this to enable WIFI instead of serial communication. Tested on ESP32, but should also
+// work with Wifi-enabled Arduinos
+// #define ENABLE_WIFI
+
+const char* ssid     = "your-ssid";
+const char* password = "your-password";
+const int NETWORK_PORT = 27016;
+
 // Use these defines to easily enable or disable certain modules
 
 #define ENABLE_ONE_WIRE
+
+// Note that the SERVO module currently is not supported on ESP32. So either disable this or patch the library
 #define ENABLE_SERVO 
 #define ENABLE_ACCELSTEPPER
 #define ENABLE_BASIC_SCHEDULER
@@ -32,6 +42,14 @@ AnalogInputFirmata analogInput;
 #include <AnalogOutputFirmata.h>
 AnalogOutputFirmata analogOutput;
 #include <AnalogWrite.h>
+#endif
+
+
+#ifdef ENABLE_WIFI
+#include <WiFi.h>
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
+WiFiServerStream serverStream(NETWORK_PORT);
 #endif
 
 #ifdef ENABLE_I2C
@@ -86,7 +104,7 @@ void systemResetCallback()
     if (IS_PIN_ANALOG(i)) {
       Firmata.setPinMode(i, PIN_MODE_ANALOG);
     } else if (IS_PIN_DIGITAL(i)) {
-      Firmata.setPinMode(i, OUTPUT);
+      Firmata.setPinMode(i, PIN_MODE_OUTPUT);
     }
   }
   firmataExt.reset();
@@ -96,7 +114,23 @@ void initTransport()
 {
   // Uncomment to save a couple of seconds by disabling the startup blink sequence.
   // Firmata.disableBlinkVersion();
-    Firmata.begin(115200);
+#ifdef ENABLE_WIFI
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  pinMode(VERSION_BLINK_PIN, OUTPUT);
+  bool pinIsOn = false;
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(100);
+    pinIsOn = !pinIsOn;
+    digitalWrite(VERSION_BLINK_PIN, pinIsOn);
+  }
+  Firmata.begin(serverStream);
+  Firmata.blinkVersion(); // Because the above doesn't do it.
+#else 
+  Firmata.begin(115200);
+#endif
+    
 }
 
 void initFirmata()
@@ -173,4 +207,7 @@ void loop()
   }
 
   firmataExt.report(reporting.elapsed());
+#ifdef ENABLE_WIFI
+  serverStream.maintain();
+#endif
 }
