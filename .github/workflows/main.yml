@@ -34,10 +34,17 @@ jobs:
           arduino-cli lib install "Servo"
 
       - run: |
+          arduino-cli config init
+          arduino-cli config add board_manager.additional_urls https://dl.espressif.com/dl/package_esp32_index.json
           arduino-cli core update-index
           arduino-cli core install arduino:avr
           arduino-cli core install arduino:sam
 
+      - run: |
+          arduino-cli core install esp32:esp32
+
       - run: arduino-cli compile --fqbn arduino:avr:uno ./examples/ConfigurableFirmata --warnings more
 
       - run: arduino-cli compile --fqbn arduino:sam:arduino_due_x_dbg ./examples/ConfigurableFirmata --warnings more
+
+      - run: arduino-cli compile --fqbn esp32:esp32:esp32:PSRAM=disabled,PartitionScheme=default,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,DebugLevel=none ./examples/ConfigurableFirmata --warnings more
