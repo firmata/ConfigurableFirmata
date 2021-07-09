@@ -29,8 +29,8 @@ extern "C" {
 //******************************************************************************
 
 /**
- * Split a 16-bit byte into two 7-bit values and write each value.
- * @param value The 16-bit value to be split and written separately.
+ * Split a 14-bit byte into two 7-bit values and write each value.
+ * @param value The 14-bit value to be split and written separately.
  */
 void FirmataClass::sendValueAsTwo7bitBytes(int value)
 {
