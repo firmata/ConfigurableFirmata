@@ -17,7 +17,10 @@ const int NETWORK_PORT = 27016;
 #define ENABLE_ONE_WIRE
 
 // Note that the SERVO module currently is not supported on ESP32. So either disable this or patch the library
+#ifndef ESP32
 #define ENABLE_SERVO 
+#endif
+
 #define ENABLE_ACCELSTEPPER
 
 // This is rarely used
