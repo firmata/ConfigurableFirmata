@@ -694,6 +694,61 @@ int FirmataClass::getPinState(byte pin)
   return pinState[pin];
 }
 
+/// <summary>
+/// Decodes an uint 32 from 5 bytes
+/// </summary>
+uint32_t FirmataClass::decodePackedUInt32(byte* argv)
+{
+  uint32_t result = 0;
+  result = argv[0];
+  result |= ((uint32_t)argv[1]) << 7;
+  result |= ((uint32_t)argv[2]) << 14;
+  result |= ((uint32_t)argv[3]) << 21;
+  result |= ((uint32_t)argv[4]) << 28;
+  return result;
+}
+
+uint64_t FirmataClass::decodePackedUInt64(byte* argv)
+{
+  uint64_t result = 0;
+  result += decodePackedUInt32(argv);
+  result += static_cast<uint64_t>(decodePackedUInt32(argv + 5)) << 32;
+  return result;
+}
+
+/// <summary>
+/// Decode a uint14 from 2 x 7 bit
+/// </summary>
+uint16_t FirmataClass::decodePackedUInt14(byte* argv)
+{
+  uint32_t result = 0;
+  result = argv[0];
+  result |= ((uint32_t)argv[1]) << 7;
+  return (uint16_t)result;
+}
+
+void FirmataClass::sendPackedUInt32(uint32_t value)
+{
+  Firmata.write((byte)(value & 0x7F));
+  Firmata.write((byte)((value >> 7) & 0x7F));
+  Firmata.write((byte)((value >> 14) & 0x7F));
+  Firmata.write((byte)((value >> 21) & 0x7F));
+  Firmata.write((byte)((value >> 28) & 0x0F)); // only 4 bits left, and we don't care about the sign here
+}
+
+void FirmataClass::sendPackedUInt64(uint64_t value)
+{
+  sendPackedUInt32(value & 0xFFFFFFFF);
+  sendPackedUInt32(value >> 32);
+}
+
+void FirmataClass::sendPackedUInt14(uint16_t value)
+{
+  Firmata.write((byte)(value & 0x7F));
+  Firmata.write((byte)((value >> 7) & 0x7F));
+}
+
+
 /**
  * Set the pin state. The pin state of an output pin is the pin value. The state of an
  * input pin is 0, unless the pin has it's internal pull up resistor enabled, then the value is 1.

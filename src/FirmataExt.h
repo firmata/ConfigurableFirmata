@@ -20,7 +20,7 @@
 #include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 
-#define MAX_FEATURES TOTAL_PIN_MODES + 1
+#define MAX_FEATURES TOTAL_PIN_MODES + 5
 
 void handleSetPinModeCallback(byte pin, int mode);
 

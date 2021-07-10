@@ -31,7 +31,7 @@ const int NETWORK_PORT = 27016;
 #define ENABLE_ANALOG
 #define ENABLE_DIGITAL
 #define ENABLE_DHT
-
+#define ENABLE_FREQUENCY
 
 #ifdef ENABLE_DIGITAL
 #include <DigitalInputFirmata.h>
@@ -100,6 +100,11 @@ FirmataReporting reporting;
 #ifdef ENABLE_ACCELSTEPPER
 #include <AccelStepperFirmata.h>
 AccelStepperFirmata accelStepper;
+#endif
+
+#ifdef ENABLE_FREQUENCY
+#include <Frequency.h>
+Frequency frequency;
 #endif
 
 #ifdef ENABLE_BASIC_SCHEDULER
@@ -192,6 +197,10 @@ void initFirmata()
 	
 #ifdef ENABLE_DHT
   firmataExt.addFeature(dhtFirmata);
+#endif
+
+#ifdef ENABLE_FREQUENCY
+  firmataExt.addFeature(frequency);
 #endif
 
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
