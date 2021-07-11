@@ -44,6 +44,21 @@ boolean Frequency::handleSysex(byte command, byte argc, byte* argv)
   {
 	  return false;
   }
+  if (argc >= 2)
+  {
+	  byte frequencyCommand = argv[0];
+	  byte pin = argv[1];
+	  if (frequencyCommand == FREQUENCY_SUBCOMMAND_CLEAR)
+	  {
+		  if (_activePin == pin || (_activePin >= 0 && pin == 0x7F))
+		  {
+		  	// This cannot be -1 here
+			  uint8_t interrupt = (uint8_t)digitalPinToInterrupt(_activePin);
+			  detachInterrupt(interrupt);
+			  _activePin = -1;
+		  }
+	  }
+  }
   if (argc >= 5) // Expected: A command byte, a pin, the mode and a packed short
   {
 	  byte frequencyCommand = argv[0];
@@ -51,18 +66,8 @@ boolean Frequency::handleSysex(byte command, byte argc, byte* argv)
 	  int interrupt = digitalPinToInterrupt(pin);
 	  byte mode = argv[2]; // see below
 	  int32_t ms = (argv[4] << 7) | argv[3];
-	  // Clear
-	  if (frequencyCommand == FREQUENCY_SUBCOMMAND_CLEAR)
-	  {
-		  // This does not need a valid pin, so that it is possible to reset the interrupt even if the client doesn't know the state.
-		  if (_activePin >= 0)
-		  {
-			  detachInterrupt(interrupt);
-			  _activePin = -1;
-		  }
-	  }
 	  // Set or query
-	  else if (frequencyCommand == FREQUENCY_SUBCOMMAND_QUERY)
+	  if (frequencyCommand == FREQUENCY_SUBCOMMAND_QUERY)
 	  {
 		  if (pin >= TOTAL_PINS || interrupt < 0)
 		  {
