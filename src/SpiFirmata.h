@@ -19,6 +19,14 @@
 #include "FirmataFeature.h"
 #include "FirmataReporting.h"
 
+#define SPI_BEGIN               0x00 // Initialize the SPI bus for the given channel
+#define SPI_DEVICE_CONFIG       0x01
+#define SPI_TRANSFER            0x02
+#define SPI_WRITE               0x03
+#define SPI_READ                0x04
+#define SPI_REPLY               0x05
+#define SPI_END                 0x06
+
 #define SPI_MAX_DEVICES 8
 #define MAX_SPI_BUF_SIZE 32
 

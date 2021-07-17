@@ -62,6 +62,17 @@
 #define SERIAL_MESSAGE          0x60 // communicate with serial devices, including other boards
 #define ENCODER_DATA            0x61 // reply with encoders current positions
 #define ACCELSTEPPER_DATA       0x62 // control a stepper motor
+#define REPORT_DIGITAL_PIN      0x63 // (reserved)
+#define EXTENDED_REPORT_ANALOG  0x64 // (reserved)
+#define REPORT_FEATURES         0x65 // (reserved)
+#define SPI_DATA                0x68 // SPI Commands start with this byte
+#define ANALOG_MAPPING_QUERY    0x69 // ask for mapping of analog to pin numbers
+#define ANALOG_MAPPING_RESPONSE 0x6A // reply with mapping info
+#define CAPABILITY_QUERY        0x6B // ask for supported modes and resolution of all pins
+#define CAPABILITY_RESPONSE     0x6C // reply with supported modes and resolution
+#define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value
+#define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value
+#define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
 #define STEPPER_DATA            0x72 // control a stepper motor
@@ -71,25 +82,11 @@
 #define I2C_REQUEST             0x76 // send an I2C read/write request
 #define I2C_REPLY               0x77 // a reply to an I2C read request
 #define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins
-#define SPI_DATA                0x68 // SPI Commands start with this byte
-#define SPI_BEGIN               0x00 // Initialize the SPI bus for the given channel
-#define SPI_DEVICE_CONFIG       0x01
-#define SPI_TRANSFER            0x02
-#define SPI_WRITE               0x03
-#define SPI_READ                0x04
-#define SPI_REPLY               0x05
-#define SPI_END                 0x06
-#define FREQUENCY_COMMAND       0x63 // Command for the Frequency module
-#define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin
-#define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value
-#define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value
-#define CAPABILITY_QUERY        0x6B // ask for supported modes and resolution of all pins
-#define CAPABILITY_RESPONSE     0x6C // reply with supported modes and resolution
-#define ANALOG_MAPPING_QUERY    0x69 // ask for mapping of analog to pin numbers
-#define ANALOG_MAPPING_RESPONSE 0x6A // reply with mapping info
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware
 #define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop
 #define SCHEDULER_DATA          0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler
+#define ANALOG_CONFIG           0x7C // (reserved)
+#define FREQUENCY_COMMAND       0x7D // Command for the Frequency module
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
 
