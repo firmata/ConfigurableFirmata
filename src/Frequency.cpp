@@ -107,11 +107,7 @@ boolean Frequency::handleSysex(byte command, byte argc, byte* argv)
 			  }
 			  if (internalMode >= 0)
 			  {
-#if defined (TARGET_RP2040) || defined (TARGET_RASPBERRY_PI_PICO)
-				  attachInterrupt(digitalPinToInterrupt(pin), FrequencyIsr, (PinStatus) internalMode);
-#else
 				  attachInterrupt(digitalPinToInterrupt(pin), FrequencyIsr, internalMode);
-#endif
 				  _activePin = pin;
 			  }
 			  

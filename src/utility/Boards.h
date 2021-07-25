@@ -732,7 +732,14 @@ void analogWrite(uint8_t channel, uint32_t value, uint32_t valueMax = 255);
 // Raspberry Pi Pico
 // https://datasheets.raspberrypi.org/pico/Pico-R3-A4-Pinout.pdf
 #elif defined(TARGET_RP2040) || defined(TARGET_RASPBERRY_PI_PICO)
+
 #include <stdarg.h>
+
+static inline void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callback, int mode)
+{
+  attachInterrupt(interruptNumber, callback, (PinStatus) mode);
+}
+
 #define TOTAL_ANALOG_PINS       4
 #define TOTAL_PINS              30
 #define VERSION_BLINK_PIN       LED_BUILTIN
