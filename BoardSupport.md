@@ -1,3 +1,42 @@
+# Board support information
+
+This file gives additional information about the support for specific board types.
+
+## AVR Based Boards (Arduino Uno, Arduino Nano and clones)
+
+These are the most basic but also most used Arduino boards. Since their memory is limited, not all possible pin modes are supported at once. 
+However, most of the time, not everything is required for the same project at once. Some of the older boards (i.e first Generation Duemilanove with ATmega168) are even further limited, as they have only 16k of Flash and 1k of RAM. 
+
+The values given below are for the Arduino Uno, the most used board as of 2021.
+| Property  | Value |
+| ----------- | ------------------------------------ |
+| Number of Pins  | 20 |
+| Number of analog inputs | 6 |
+| Flash Memory | 32kb |
+| RAM | 2kb |
+| PWM capable pins | 3, 5, 6, 9, 10, 11 |
+| Built-in LED | Yes, pin 13 |
+| I2C, Bus 0 | Pin 18 SDA, Pin 19 SCL |
+| SPI, Bus 0 | Pin 10 CS, Pin 11 MISO, Pin 12 MOSI, Pin 13 SCK |
+
+## Arduino Due
+
+This board is not just a new revision of the Arduino Uno. It has a 32 Bit microcontroller and significantly more memory than the AVR based boards. This has enough pins for even the largest projects.
+
+Official pinout diagram is here: https://content.arduino.cc/assets/Pinout-Due_latest.pdf
+| Property  | Value |
+| ----------- | ------------------------------------ |
+| Number of Pins  | 77, including some that are not accessible. These will report as having no features enabled. |
+| Number of analog inputs | 12 |
+| Flash Memory | 512kb |
+| RAM | 96kb |
+| PWM capable pins | Pins 2-10 (The DAC pins are not currently supported by ConfigurableFirmata) |
+| Built-in LED | Yes, pin 13 |
+| I2C, Bus 0 | Pin 20 SDA, Pin 21 SCL |
+| I2C, Bus 1 | Not currently supported by ConfigurableFirmata |
+| SPI, Bus 0 | Pin 77 CS (This pin is not accessible), Pin 75 MOSI, Pin 74 MISO, Pin 76 SCK (the latter three are on the SPI header, just next to the microcontroller). For CS, you have to use a GPIO pin |
+
+
 # Notes on Specific Boards
 
 ## RP2040 / Raspberry Pi Pico
