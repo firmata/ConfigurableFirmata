@@ -22,6 +22,12 @@ The easiest way to use ConfigurableFirmata is with [firmatabuilder](http://firma
 
 Another way to use ConfigurableFirmata is by adding or removing various include statements in the [ConfigurableFirmata.ino](https://github.com/firmata/ConfigurableFirmata/blob/master/examples/ConfigurableFirmata/ConfigurableFirmata.ino) example file.
 
+## Supported boards
+
+ConfigurableFirmata is supported on a large variety of boards, both on 8-Bit microcontrollers such as the AVR-Based Arduinos as well as on 32-Bit microcontrollers such as the ESP32, Arduino Due or Raspberry Pi Pico.
+
+For details on particular boards see [this page](BoardSupport.md).
+
 ## Firmata Wrapper Libraries
 
 You can use the ConfigurableFirmata architecture to wrap 3rd party libraries to include
