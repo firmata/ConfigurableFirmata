@@ -29,6 +29,7 @@
 #define ERROR_TASK_REPLY        8
 #define QUERY_ALL_TASKS_REPLY   9
 #define QUERY_TASK_REPLY        10
+#define EXTENDED_SCHEDULER_COMMAND 0x7F /* Command for extended schedulers - ignored by FirmataScheduler*/
 
 #define firmata_task_len(a)(sizeof(firmata_task)+(a)->len)
 
