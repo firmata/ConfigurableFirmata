@@ -22,7 +22,7 @@
  * Query using the REPORT_VERSION message.
  */
 #define FIRMATA_PROTOCOL_MAJOR_VERSION  2 // for non-compatible changes
-#define FIRMATA_PROTOCOL_MINOR_VERSION  7 // for backwards compatible changes
+#define FIRMATA_PROTOCOL_MINOR_VERSION  8 // for backwards compatible changes
 #define FIRMATA_PROTOCOL_BUGFIX_VERSION 0 // for bugfix releases
 
 /*
@@ -32,8 +32,8 @@
  * Query using the REPORT_FIRMWARE message.
  */
 #define FIRMATA_FIRMWARE_MAJOR_VERSION  3 // for non-compatible changes
-#define FIRMATA_FIRMWARE_MINOR_VERSION  3 // for backwards compatible changes
-#define FIRMATA_FIRMWARE_BUGFIX_VERSION 1 // for bugfix releases
+#define FIRMATA_FIRMWARE_MINOR_VERSION  4 // for backwards compatible changes
+#define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
 #ifdef LARGE_MEM_DEVICE
 #define MAX_DATA_BYTES         252 // The ESP32 has enough RAM so we can reduce the number of packets, but the value must not exceed 2^8 - 1, because many methods use byte-indexing only
