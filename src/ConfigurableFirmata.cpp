@@ -260,6 +260,14 @@ void FirmataClass::processInput(void)
   }
 }
 
+void FirmataClass::resetParser()
+{
+    parsingSysex = false;
+    sysexBytesRead = 0;
+    waitForData = 0;
+    executeMultiByteCommand = 0;
+}
+
 /**
  * Parse data from the input stream.
  * @param inputData A single byte to be added to the parser.

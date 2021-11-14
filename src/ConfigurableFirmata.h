@@ -151,6 +151,7 @@ class FirmataClass
     int available(void);
     void processInput(void);
     void parse(byte inputData);
+    void resetParser();
     boolean isParsingMessage(void);
     boolean isResetting(void);
     /* serial send handling */
