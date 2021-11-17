@@ -47,7 +47,7 @@ A Firmata wrapper template library will be published soon along with instruction
 a wrapper library.
 
 ## Firmata Client Libraries
-Only a few Firmata client libraries currently support ConfigurableFirmata:
+Not all client libraries officially support ConfigurableFirmata, but the protocol implementation is the same as for StandardFirmata, so most libraries should work. These have been tested:
 
 * javascript
   * [https://github.com/jgautier/firmata]
@@ -55,6 +55,12 @@ Only a few Firmata client libraries currently support ConfigurableFirmata:
   * [http://breakoutjs.com]
 * perl
   * [https://github.com/ntruchsess/perl-firmata]
+
+* java
+  * [https://www.diozero.com/]
+
+* C# / .NET
+  * [https://github.com/dotnet/iot] - recommended
 
 *Additional Firmata client libraries may work as well. If you're a client library developer and have verified that you library works with ConfigurableFirmata, please [open an issue](https://github.com/firmata/ConfigurableFirmata/issues) with a request to add the link.*
 
