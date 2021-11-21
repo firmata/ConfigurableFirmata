@@ -194,7 +194,7 @@ class FirmataClass
   private:
     Stream *FirmataStream;
     /* firmware name and version */
-    char *firmwareVersionName;
+    const char *firmwareVersionName;
     byte firmwareVersionMajor;
     byte firmwareVersionMinor;
     /* input message handling */

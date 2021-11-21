@@ -67,7 +67,7 @@ FirmataClass::FirmataClass()
 {
   firmwareVersionMinor = 0;
   firmwareVersionMajor = 0;
-  firmwareVersionName = nullptr;
+  firmwareVersionName = "undefined";
   blinkVersionDisabled = false;
   systemReset();
 }
@@ -164,7 +164,7 @@ void FirmataClass::printFirmwareVersion(void)
 {
   byte i;
   int len;
-  if (firmwareVersionMajor != 0) { // make sure that the name has been set before reporting
+  if (firmwareVersionMajor != 0 && FirmataStream != nullptr) { // make sure that the name has been set before reporting
     startSysex();
     FirmataStream->write(REPORT_FIRMWARE);
     FirmataStream->write(firmwareVersionMajor); // major version number
@@ -187,7 +187,7 @@ void FirmataClass::printFirmwareVersion(void)
  */
 void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte minor)
 {
-  firmwareVersionName = (char*)name;
+  firmwareVersionName = name;
   firmwareVersionMajor = major;
   firmwareVersionMinor = minor;
 }
