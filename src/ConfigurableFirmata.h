@@ -139,7 +139,7 @@ class FirmataClass
     /* Arduino constructors */
     void begin();
     void begin(long);
-    void begin(Stream &s);
+    void begin(Stream &s, bool isConsole = true);
     /* querying functions */
     void printVersion(void);
     void blinkVersion(void);
@@ -210,6 +210,10 @@ class FirmataClass
     byte pinState[TOTAL_PINS];           // any value that has been written
 
     boolean resetting;
+
+    // True if the current stream is also the console, 
+    // if false, we log information messages separately to the console
+    boolean outputIsConsole;
 
     /* callback functions */
     callbackFunction currentAnalogCallback;
