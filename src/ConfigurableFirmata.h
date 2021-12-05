@@ -35,7 +35,11 @@
 #define FIRMATA_FIRMWARE_MINOR_VERSION  11 // for backwards compatible changes
 #define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
+#ifdef ESP32
+#define MAX_DATA_BYTES         255 // The ESP32 has enough RAM so we can reduce the number of packets, but the value must not exceed 2^8 - 1, because many methods use byte-indexing only
+#else
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
+#endif
 
 // Arduino 101 also defines SET_PIN_MODE as a macro in scss_registers.h
 #ifdef SET_PIN_MODE
