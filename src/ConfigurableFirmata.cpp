@@ -67,7 +67,7 @@ FirmataClass::FirmataClass()
 {
   firmwareVersionMinor = 0;
   firmwareVersionMajor = 0;
-  firmwareVersionName = "undefined";
+  firmwareVersionName = "";
   blinkVersionDisabled = false;
   systemReset();
 }
