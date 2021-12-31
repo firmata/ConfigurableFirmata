@@ -36,6 +36,22 @@ Official pinout diagram is here: https://content.arduino.cc/assets/Pinout-Due_la
 | I2C, Bus 1 | Not currently supported by ConfigurableFirmata |
 | SPI, Bus 0 | Pin 77 CS (This pin is not accessible), Pin 75 MOSI, Pin 74 MISO, Pin 76 SCK (the latter three are on the SPI header, just next to the microcontroller). For CS, you have to use a GPIO pin |
 
+## ESP32
+
+The ESP32 (available in different variants) is one of the most powerful microcontrollers available. Development boards are significantly cheaper than all types of Arduino boards, so it's the most price-effective choice currently available, if you do not need the large number of pins of an Arduino Due or an Arduino Mega. 
+
+Pinout diagrams differ by vendor. The ESP32 module is almost always sold with a carrier board, because the raw module does not come with pins and is very small. 
+
+| Property  | Value |
+| ----------- | ------------------------------------ |
+| Number of Pins  | 40 total, 26 typically available for user programs
+| Number of analog inputs | 15 |
+| Flash Memory | 4MB default, variants with more are available |
+| RAM | 320kb or more|
+| PWM capable pins | All, 16 Pins can use PWM at once |
+| Built-in LED | Usually pin 2, but not always present |
+| I2C, Bus 0 | Pins 21 and 22|
+| SPI, Bus 0 | Pins 18, 19 and 23 |
 
 ## RP2040 / Raspberry Pi Pico
 

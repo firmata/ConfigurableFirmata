@@ -35,7 +35,11 @@
 #define FIRMATA_FIRMWARE_MINOR_VERSION  11 // for backwards compatible changes
 #define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
+#ifdef ESP32
+#define MAX_DATA_BYTES         255 // The ESP32 has enough RAM so we can reduce the number of packets, but the value must not exceed 2^8 - 1, because many methods use byte-indexing only
+#else
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
+#endif
 
 // Arduino 101 also defines SET_PIN_MODE as a macro in scss_registers.h
 #ifdef SET_PIN_MODE
@@ -139,7 +143,7 @@ class FirmataClass
     /* Arduino constructors */
     void begin();
     void begin(long);
-    void begin(Stream &s);
+    void begin(Stream &s, bool isConsole = true);
     /* querying functions */
     void printVersion(void);
     void blinkVersion(void);
@@ -151,6 +155,7 @@ class FirmataClass
     int available(void);
     void processInput(void);
     void parse(byte inputData);
+    void resetParser();
     boolean isParsingMessage(void);
     boolean isResetting(void);
     /* serial send handling */
@@ -193,7 +198,7 @@ class FirmataClass
   private:
     Stream *FirmataStream;
     /* firmware name and version */
-    char *firmwareVersionName;
+    const char *firmwareVersionName;
     byte firmwareVersionMajor;
     byte firmwareVersionMinor;
     /* input message handling */
@@ -209,6 +214,10 @@ class FirmataClass
     byte pinState[TOTAL_PINS];           // any value that has been written
 
     boolean resetting;
+
+    // True if the current stream is also the console, 
+    // if false, we log information messages separately to the console
+    boolean outputIsConsole;
 
     /* callback functions */
     callbackFunction currentAnalogCallback;

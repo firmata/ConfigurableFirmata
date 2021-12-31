@@ -67,7 +67,7 @@ FirmataClass::FirmataClass()
 {
   firmwareVersionMinor = 0;
   firmwareVersionMajor = 0;
-  firmwareVersionName = nullptr;
+  firmwareVersionName = "";
   blinkVersionDisabled = false;
   systemReset();
 }
@@ -81,7 +81,8 @@ FirmataClass::FirmataClass()
  */
 void FirmataClass::begin(void)
 {
-  begin(57600);
+    begin(57600);
+    outputIsConsole = true;
 }
 
 /**
@@ -93,11 +94,12 @@ void FirmataClass::begin(void)
  */
 void FirmataClass::begin(long speed)
 {
-  Serial.begin(speed);
-  FirmataStream = &Serial;
-  blinkVersion();
-  printVersion();         // send the protocol version
-  printFirmwareVersion(); // send the firmware name and version
+    Serial.begin(speed);
+    FirmataStream = &Serial;
+    outputIsConsole = true;
+    blinkVersion();
+    printVersion();         // send the protocol version
+    printFirmwareVersion(); // send the firmware name and version
 }
 
 /**
@@ -106,13 +108,14 @@ void FirmataClass::begin(long speed)
  * transport that implements the Stream interface. Some examples include Ethernet, WiFi
  * and other UARTs on the board (Serial1, Serial2, etc).
  */
-void FirmataClass::begin(Stream &s)
+void FirmataClass::begin(Stream& s, bool isConsole)
 {
-  FirmataStream = &s;
-  // do not call blinkVersion() here because some hardware such as the
-  // Ethernet shield use pin 13
-  printVersion();         // send the protocol version
-  printFirmwareVersion(); // send the firmware name and version
+    FirmataStream = &s;
+    outputIsConsole = isConsole;
+    // do not call blinkVersion() here because some hardware such as the
+    // Ethernet shield use pin 13
+    printVersion();         // send the protocol version
+    printFirmwareVersion(); // send the firmware name and version
 }
 
 /**
@@ -152,7 +155,7 @@ void FirmataClass::blinkVersion(void)
  */
 void FirmataClass::disableBlinkVersion()
 {
-  blinkVersionDisabled = true;
+    blinkVersionDisabled = true;
 }
 
 /**
@@ -162,20 +165,18 @@ void FirmataClass::disableBlinkVersion()
  */
 void FirmataClass::printFirmwareVersion(void)
 {
-  byte i;
-  int len;
-  if (firmwareVersionMajor != 0) { // make sure that the name has been set before reporting
-    startSysex();
-    FirmataStream->write(REPORT_FIRMWARE);
-    FirmataStream->write(firmwareVersionMajor); // major version number
-    FirmataStream->write(firmwareVersionMinor); // minor version number
-	len = strlen(firmwareVersionName);
-    for (i = 0; i < len; ++i)
-	{ 
-      sendValueAsTwo7bitBytes(firmwareVersionName[i]);
+    if (firmwareVersionMajor != 0 && FirmataStream != nullptr) { // make sure that the name has been set before reporting
+        startSysex();
+        FirmataStream->write(REPORT_FIRMWARE);
+        FirmataStream->write(firmwareVersionMajor); // major version number
+        FirmataStream->write(firmwareVersionMinor); // minor version number
+        size_t len = strlen(firmwareVersionName);
+        for (size_t i = 0; i < len; ++i)
+        {
+            sendValueAsTwo7bitBytes(firmwareVersionName[i]);
+        }
+        endSysex();
     }
-    endSysex();
-  }
 }
 
 /**
@@ -187,7 +188,7 @@ void FirmataClass::printFirmwareVersion(void)
  */
 void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte minor)
 {
-  firmwareVersionName = (char*)name;
+  firmwareVersionName = name;
   firmwareVersionMajor = major;
   firmwareVersionMinor = minor;
 }
@@ -255,9 +256,18 @@ void FirmataClass::processSysexMessage(void)
 void FirmataClass::processInput(void)
 {
   int inputData = FirmataStream->read(); // this is 'int' to handle -1 when no data
-  if (inputData != -1) {
+  if (inputData != -1) 
+  {
     parse(inputData);
   }
+}
+
+void FirmataClass::resetParser()
+{
+    parsingSysex = false;
+    sysexBytesRead = 0;
+    waitForData = 0;
+    executeMultiByteCommand = 0;
 }
 
 /**
@@ -510,6 +520,11 @@ void FirmataClass::sendStringf(const FlashString* flashString, int sizeOfArgs, .
 	memset(bytesOutput, 0, sizeof(char) * maxSize);
 	
 	vsnprintf(bytesOutput, maxSize, bytesInput, va);
+    if (!outputIsConsole)
+    {
+        Serial.println(bytesOutput);
+    }
+
 	len = strlen(bytesOutput);
 	for (int i = 0; i < len; i++) 
 	{
@@ -522,38 +537,50 @@ void FirmataClass::sendStringf(const FlashString* flashString, int sizeOfArgs, .
 
 /**
  * Send a constant string to the Firmata host application.
- * @param string A pointer to the string in flash memory
+ * @param flashString A pointer to the string in flash memory
  */
 void FirmataClass::sendString(const FlashString* flashString)
 {
-  int len = strlen_P((const char*)flashString);
-  startSysex();
-  FirmataStream->write(STRING_DATA);
-  for (int i = 0; i < len; i++) {
-    sendValueAsTwo7bitBytes(pgm_read_byte(((const char*)flashString) + i));
-  }
-  endSysex();
+    int len = strlen_P((const char*)flashString);
+    if (!outputIsConsole)
+    {
+        Serial.println(flashString);
+    }
+    startSysex();
+    FirmataStream->write(STRING_DATA);
+    for (int i = 0; i < len; i++) 
+    {
+        sendValueAsTwo7bitBytes(pgm_read_byte(((const char*)flashString) + i));
+    }
+    endSysex();
 }
 
 /**
  * Send a constant string to the Firmata host application.
- * @param string A pointer to the string in flash memory
+ * @param flashString A pointer to the string in flash memory
  * @param errorData A number that is sent out with the string (i.e. error code, unrecognized command number)
  */
 void FirmataClass::sendString(const FlashString* flashString, uint32_t errorData)
 {
-  int len = strlen_P((const char*)flashString);
-  startSysex();
-  FirmataStream->write(STRING_DATA);
-  for (int i = 0; i < len; i++) {
-    sendValueAsTwo7bitBytes(pgm_read_byte(((const char*)flashString) + i));
-  }
-  String error = String(errorData, HEX);
-  for (unsigned int i = 0; i < error.length(); i++) {
-    sendValueAsTwo7bitBytes((byte)error.charAt(i));
-  }
-  
-  endSysex();
+    int len = strlen_P((const char*)flashString);
+#ifndef SIM
+    if (!outputIsConsole)
+    {
+        Serial.print(flashString);
+        Serial.println(errorData);
+    }
+#endif
+    startSysex();
+    FirmataStream->write(STRING_DATA);
+    for (int i = 0; i < len; i++) {
+        sendValueAsTwo7bitBytes(pgm_read_byte(((const char*)flashString) + i));
+    }
+    String error = String(errorData, HEX);
+    for (unsigned int i = 0; i < error.length(); i++) {
+        sendValueAsTwo7bitBytes((byte)error.charAt(i));
+    }
+
+    endSysex();
 }
 
 
@@ -790,7 +817,7 @@ void FirmataClass::setPinState(byte pin, byte state)
 void FirmataClass::systemReset(void)
 {
   resetting = true;
-  byte i;
+  int i;
 
   waitForData = 0; // this flag says the next serial input will be data
   executeMultiByteCommand = 0; // execute this after getting multi-byte data
