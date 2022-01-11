@@ -24,6 +24,7 @@ SerialFirmata::SerialFirmata()
 #endif
 
   serialIndex = -1;
+  reset();
 }
 
 boolean SerialFirmata::handlePinMode(byte pin, int mode)
@@ -235,6 +236,9 @@ void SerialFirmata::reset()
   serialIndex = -1;
   for (byte i = 0; i < SERIAL_READ_ARR_LEN; i++) {
     serialBytesToRead[i] = 0;
+    lastReceive[i] = 0;
+    maxCharDelay[i] = 0;
+    lastAvailableBytes[i] = 0;
   }
 }
 

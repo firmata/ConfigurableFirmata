@@ -10,9 +10,10 @@
 
 I2CFirmata::I2CFirmata()
 {
-  isI2CEnabled = false;
-  queryIndex = -1;
-  i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
+    isI2CEnabled = false;
+    queryIndex = -1;
+    i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
+    memset(i2cRxData, 0, 32);
 }
 
 void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes, byte stopTX, byte seqenceNo) {
@@ -95,6 +96,7 @@ boolean I2CFirmata::handleSysex(byte command, byte argc, byte* argv)
       handleI2CRequest(argc, argv);
       return true;
     }
+    break;
   case I2C_CONFIG:
     return handleI2CConfig(argc, argv);
   }
