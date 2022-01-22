@@ -10,12 +10,13 @@
 
 I2CFirmata::I2CFirmata()
 {
-  isI2CEnabled = false;
-  queryIndex = -1;
-  i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
+    isI2CEnabled = false;
+    queryIndex = -1;
+    i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
+    memset(i2cRxData, 0, 32);
 }
 
-void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes, byte stopTX) {
+void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes, byte stopTX, byte seqenceNo) {
   // allow I2C requests that don't require a register read
   // for example, some devices using an interrupt pin to signify new data available
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
@@ -44,15 +45,21 @@ void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes,
     numBytes = Wire.available();
   }
 
-  i2cRxData[0] = address;
-  i2cRxData[1] = theRegister;
+  i2cRxData[0] = (byte)theRegister;
 
   for (int i = 0; i < numBytes && Wire.available(); i++) {
-    i2cRxData[2 + i] = Wire.read();
+    i2cRxData[1 + i] = Wire.read();
   }
 
   // send slave address, register and received bytes
-  Firmata.sendSysex(SYSEX_I2C_REPLY, numBytes + 2, i2cRxData);
+  Firmata.startSysex();
+  Firmata.write(I2C_REPLY);
+  Firmata.write(address); // Slave address, LSB (always < 128 in 7 bit mode)
+  Firmata.write(seqenceNo); // Slave address, MSB. This is abused here, but a client that doesn't use the sequencing will always send 0 and be happy
+  for (int i = 0; i < numBytes + 1; i++) {
+      Firmata.sendValueAsTwo7bitBytes(i2cRxData[i]);
+  }
+  Firmata.endSysex();
 }
 
 boolean I2CFirmata::handlePinMode(byte pin, int mode)
@@ -89,6 +96,7 @@ boolean I2CFirmata::handleSysex(byte command, byte argc, byte* argv)
       handleI2CRequest(argc, argv);
       return true;
     }
+    break;
   case I2C_CONFIG:
     return handleI2CConfig(argc, argv);
   }
@@ -110,6 +118,8 @@ void I2CFirmata::handleI2CRequest(byte argc, byte* argv)
   else {
     slaveAddress = argv[0];
   }
+
+  byte sequenceNo = argv[1] & I2C_10BIT_ADDRESS_MASK;
 
   // need to invert the logic here since 0 will be default for client
   // libraries that have not updated to add support for restart tx
@@ -141,7 +151,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte* argv)
       slaveRegister = I2C_REGISTER_NOT_SPECIFIED;
       data = argv[2] + (argv[3] << 7);  // bytes to read
     }
-    readAndReportData(slaveAddress, (int)slaveRegister, data, stopTX);
+    readAndReportData(slaveAddress, (int)slaveRegister, data, stopTX, sequenceNo);
     break;
   case I2C_READ_CONTINUOUSLY:
     if ((queryIndex + 1) >= I2C_MAX_QUERIES) {
@@ -258,7 +268,7 @@ void I2CFirmata::report(bool elapsed)
   // report i2c data for all device with read continuous mode enabled
   if (queryIndex > -1) {
     for (byte i = 0; i < queryIndex + 1; i++) {
-      readAndReportData(query[i].addr, query[i].reg, query[i].bytes, query[i].stopTX);
+      readAndReportData(query[i].addr, query[i].reg, query[i].bytes, query[i].stopTX, 0);
     }
   }
 }

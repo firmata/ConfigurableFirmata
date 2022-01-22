@@ -14,7 +14,7 @@ const int NETWORK_PORT = 27016;
 
 // Use these defines to easily enable or disable certain modules
 
-#define ENABLE_ONE_WIRE
+// #define ENABLE_ONE_WIRE
 
 // Note that the SERVO module currently is not supported on ESP32. So either disable this or patch the library
 #ifndef ESP32

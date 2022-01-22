@@ -59,6 +59,11 @@ void DigitalInputFirmata::outputPort(byte portNumber, byte portValue, byte force
  * to the Serial output queue using Serial.print() */
 void DigitalInputFirmata::report(bool elapsed)
 {
+    if (!elapsed)
+    {
+        return;
+    }
+#ifdef ARDUINO_PINOUT_OPTIMIZE /* AVR type boards */
   /* Using non-looping code allows constants to be given to readPort().
    * The compiler will apply substantial optimizations if the inputs
    * to readPort() are compile-time constants. */
@@ -78,6 +83,16 @@ void DigitalInputFirmata::report(bool elapsed)
   if (TOTAL_PORTS > 13 && reportPINs[13]) outputPort(13, readPort(13, portConfigInputs[13]), false);
   if (TOTAL_PORTS > 14 && reportPINs[14]) outputPort(14, readPort(14, portConfigInputs[14]), false);
   if (TOTAL_PORTS > 15 && reportPINs[15]) outputPort(15, readPort(15, portConfigInputs[15]), false);
+#else
+    for (byte i = 0; i < TOTAL_PORTS; i++)
+    {
+        // Less compiler warnings. Performance shouldn't be an issue with the 32 bit boards here
+	    if (reportPINs[i])
+	    {
+            outputPort(i, readPort(i, portConfigInputs[i]), false);
+	    }
+    }
+#endif
 }
 
 void DigitalInputFirmata::reportDigital(byte port, int value)

@@ -246,7 +246,6 @@ boolean SpiFirmata::handleSpiConfig(byte argc, byte *argv)
   config[index].csPinOptions = argv[8];
   config[index].csPin = argv[9];
   config[index].used = true;
-  // Firmata.sendString(F("Configured settings for device Id "), deviceIdChannel >> 3);
   return true;
 }
 

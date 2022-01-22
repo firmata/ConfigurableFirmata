@@ -113,7 +113,7 @@ boolean Frequency::handleSysex(byte command, byte argc, byte* argv)
 			  
 			  pinMode(pin, INPUT);
 			  Firmata.setPinMode(pin, PIN_MODE_FREQUENCY);
-			  // Firmata.sendStringf(F("Frequency mode enabled with delay %ld on pin %ld"), 8, (int32_t)_reportDelay, (int32_t)pin);
+			  // Firmata.sendStringf(F("Frequency mode enabled with delay %ld on pin %ld"), (int32_t)_reportDelay, (int32_t)pin);
 		  }
 		  else if (_activePin != pin)
 		  {

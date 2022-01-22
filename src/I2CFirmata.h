@@ -33,6 +33,7 @@
 #define I2C_READ_WRITE_MODE_MASK    B00011000
 #define I2C_10BIT_ADDRESS_MODE_MASK B00100000
 #define I2C_END_TX_MASK             B01000000
+#define I2C_10BIT_ADDRESS_MASK      B00000111
 #define I2C_STOP_TX                 1
 #define I2C_RESTART_TX              0
 #define I2C_MAX_QUERIES             8
@@ -65,7 +66,7 @@ class I2CFirmata: public FirmataFeature
     signed char queryIndex;
     unsigned int i2cReadDelayTime;  // default delay time between i2c read request and Wire.requestFrom()
 
-    void readAndReportData(byte address, int theRegister, byte numBytes, byte stopTX);
+    void readAndReportData(byte address, int theRegister, byte numBytes, byte stopTX, byte seqenceNo);
     void handleI2CRequest(byte argc, byte *argv);
     boolean handleI2CConfig(byte argc, byte *argv);
     boolean enableI2CPins();

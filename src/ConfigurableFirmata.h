@@ -164,7 +164,7 @@ class FirmataClass
     void sendDigitalPort(byte portNumber, int portData);
     void sendString(const FlashString* flashString);
     void sendString(const FlashString* flashString, uint32_t errorData);
-    void sendStringf(const FlashString* fmt, int sizeOfArgs, ...);
+    void sendStringf(const FlashString* fmt, ...);
     void sendString(byte command, const char *string);
     void sendSysex(byte command, byte bytec, byte *bytev);
     void write(byte c);

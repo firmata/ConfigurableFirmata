@@ -55,14 +55,14 @@ void analogWrite(byte channel, uint32_t value)
 void AnalogOutputFirmata::analogWriteEsp32(uint8_t pin, uint32_t value) {
     // calculate duty, 8191 from 2 ^ 13 - 1
     uint32_t valueMax = (1 << DEFAULT_PWM_RESOLUTION) - 1;
-    // Firmata.sendStringf(F("Setting duty cycle to %d/%d"), 4, value, valueMax);
+    // Firmata.sendStringf(F("Setting duty cycle to %d/%d"), value, valueMax);
     uint32_t duty = min(value, valueMax);
     // write duty to matching channel number
     int channel = getChannelForPin(pin);
     if (channel != 255)
     {
         ledcWrite(channel, duty);
-        // Firmata.sendStringf(F("Channel %d has duty %d/%d"), 12, channel, duty, valueMax);
+        // Firmata.sendStringf(F("Channel %d has duty %d/%d"),  channel, duty, valueMax);
     }
 }
 
@@ -96,7 +96,7 @@ void AnalogOutputFirmata::setupPwmPin(byte pin) {
 
         if (i >= MAX_PWM_CHANNELS)
         {
-            Firmata.sendStringf(F("Unable to setup pin %d for PWM - no more channels."), 4, pin);
+            Firmata.sendStringf(F("Unable to setup pin %d for PWM - no more channels."), pin);
             return;
         }
     }

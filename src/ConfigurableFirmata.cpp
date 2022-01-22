@@ -301,7 +301,7 @@ void FirmataClass::parse(byte inputData)
       sysexBytesRead++;
 	  if (sysexBytesRead == MAX_DATA_BYTES)
 	  {
-		  Firmata.sendString(F("Discarding input message - exceeds buffer length"));
+		  Firmata.sendString(F("Discarding input message, out of buffer"));
 		  parsingSysex = false;
 		  sysexBytesRead = 0;
         waitForData = 0;
@@ -493,9 +493,8 @@ void FirmataClass::sendString(byte command, const char *string)
 /**
  * Send a string to the Firmata host application.
  * @param flashString A pointer to the char string
- * @param sizeOfArgs Total size of argument list, in bytes, for the AVR based boards (that is sizeof(int) == 2)
  */
-void FirmataClass::sendStringf(const FlashString* flashString, int sizeOfArgs, ...) 
+void FirmataClass::sendStringf(const FlashString* flashString, ...) 
 {
 	// The parameter "sizeOfArgs" is currently unused.
 	// 16 bit board?
@@ -507,7 +506,7 @@ void FirmataClass::sendStringf(const FlashString* flashString, int sizeOfArgs, .
 	// 32 bit boards. Note that sizeOfArgs may not be correct here (since all arguments are 32-bit padded)
 	int len = strlen_P((const char*)flashString);
 	va_list va;
-    va_start (va, sizeOfArgs);
+    va_start (va, flashString);
 	char bytesInput[maxSize];
 	char bytesOutput[maxSize];
 	startSysex();
