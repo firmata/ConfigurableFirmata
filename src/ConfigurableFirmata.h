@@ -168,6 +168,9 @@ class FirmataClass
     void sendString(byte command, const char *string);
     void sendSysex(byte command, byte bytec, byte *bytev);
     void write(byte c);
+
+    size_t write(byte* buf, size_t length);
+
     void sendPackedUInt14(uint16_t value);
     void sendPackedUInt32(uint32_t value);
     void sendPackedUInt64(uint64_t value);
