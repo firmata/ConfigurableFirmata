@@ -620,6 +620,11 @@ void FirmataClass::write(byte c)
   FirmataStream->write(c);
 }
 
+size_t FirmataClass::write(byte* buf, size_t length)
+{
+    return FirmataStream->write(buf, length);
+}
+
 
 /**
  * Attach a generic sysex callback function to a command (options are: ANALOG_MESSAGE,
