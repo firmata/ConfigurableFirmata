@@ -146,7 +146,7 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, boo
 		Firmata.sendString(F("SPI not enabled."));
 		return;
 	}
-	byte data[MAX_SPI_BUF_SIZE];
+	byte data[MAX_DATA_BYTES];
 	// Make sure we have enough data. No data bytes is only allowed in read-only mode
 	if (dummySend ? argc < 4 : argc < 6) {
 		Firmata.sendString(F("Not enough data in SPI message"));
@@ -245,7 +245,7 @@ boolean SpiFirmata::handleSpiConfig(byte argc, byte *argv)
   spi_device_config& cfg = config[index];
   cfg.deviceIdChannel = deviceIdChannel;
   cfg.dataModeBitOrder = argv[1];
-  // Max speed ignored for now
+  uint speed = Firmata.decodePackedUInt32(argv + 2);
   cfg.csPinOptions = argv[8];
   cfg.csPin = argv[9];
   cfg.used = true;
@@ -259,7 +259,12 @@ boolean SpiFirmata::handleSpiConfig(byte argc, byte *argv)
 	  pinMode(cfg.csPin, OUTPUT);
   }
 
-  // Firmata.sendStringf(F("New SPI device %d allocated with index %d and CS %d"), deviceIdChannel, index, config[index].csPin);
+  if (speed > 0)
+  {
+	  SPI.setFrequency(speed);
+  }
+
+  Firmata.sendStringf(F("New SPI device %d allocated with index %d and CS %d, clock speed %d Hz"), deviceIdChannel, index, config[index].csPin, speed);
   return true;
 }
 
@@ -288,7 +293,6 @@ boolean SpiFirmata::handleSpiBegin(byte argc, byte *argv)
 		return false;
   	}
 
-	Firmata.sendString(F("SPI.begin()"));
 	SPI.begin();
 
   }
@@ -326,7 +330,6 @@ boolean SpiFirmata::enableSpiPins()
 void SpiFirmata::disableSpiPins()
 {
   isSpiEnabled = false;
-  Firmata.sendString(F("SPI.end()"));
   SPI.end();
 }
 
