@@ -170,6 +170,8 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, boo
           data[j++] = argv[i] + (argv[i + 1] << 7);
 	  }
 	}
+
+	if (config[index].csPin != -1 )
 	digitalWrite(config[index].csPin, LOW);
 	SPI.transfer(data, j); 
 	if (argv[2] != 0)
@@ -240,12 +242,24 @@ boolean SpiFirmata::handleSpiConfig(byte argc, byte *argv)
 	  return false;
   }
   
-  config[index].deviceIdChannel = deviceIdChannel;
-  config[index].dataModeBitOrder = argv[1];
+  spi_device_config& cfg = config[index];
+  cfg.deviceIdChannel = deviceIdChannel;
+  cfg.dataModeBitOrder = argv[1];
   // Max speed ignored for now
-  config[index].csPinOptions = argv[8];
-  config[index].csPin = argv[9];
-  config[index].used = true;
+  cfg.csPinOptions = argv[8];
+  cfg.csPin = argv[9];
+  cfg.used = true;
+  if (cfg.csPinOptions & 0x1 == 0)
+  {
+	  cfg.csPin = -1;
+  }
+  else
+  {
+	  Firmata.setPinMode(cfg.csPin, PIN_MODE_OUTPUT);
+	  pinMode(cfg.csPin, OUTPUT);
+  }
+
+  // Firmata.sendStringf(F("New SPI device %d allocated with index %d and CS %d"), deviceIdChannel, index, config[index].csPin);
   return true;
 }
 
@@ -267,7 +281,14 @@ boolean SpiFirmata::handleSpiBegin(byte argc, byte *argv)
 		Firmata.sendString(F("SPI_BEGIN: Only channel 0 supported"));
 		return false;
 	}
-    enableSpiPins();
+
+  	if (!enableSpiPins())
+  	{
+		Firmata.sendString(F("Error enabling SPI mode"));
+		return false;
+  	}
+
+	Firmata.sendString(F("SPI.begin()"));
 	SPI.begin();
 
   }
@@ -305,6 +326,7 @@ boolean SpiFirmata::enableSpiPins()
 void SpiFirmata::disableSpiPins()
 {
   isSpiEnabled = false;
+  Firmata.sendString(F("SPI.end()"));
   SPI.end();
 }
 
