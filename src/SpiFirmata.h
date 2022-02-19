@@ -26,6 +26,11 @@
 #define SPI_READ                0x04
 #define SPI_REPLY               0x05
 #define SPI_END                 0x06
+#define SPI_WRITE_ACK           0x07
+
+#define SPI_SEND_NO_REPLY 0
+#define SPI_SEND_NORMAL_REPLY 1
+#define SPI_SEND_EMPTY_REPLY 2
 
 #define SPI_MAX_DEVICES 8
 #define MAX_SPI_BUF_SIZE 32
@@ -54,7 +59,7 @@ class SpiFirmata: public FirmataFeature
 	boolean handleSpiBegin(byte argc, byte *argv);
     boolean handleSpiConfig(byte argc, byte *argv);
     boolean enableSpiPins();
-	void handleSpiTransfer(byte argc, byte *argv, boolean dummySend, boolean sendReply);
+	void handleSpiTransfer(byte argc, byte *argv, boolean dummySend, int sendReply);
     void disableSpiPins();
 	int getConfigIndexForDevice(byte deviceIdChannel);
 	
@@ -125,13 +130,16 @@ void SpiFirmata::handleSpiRequest(byte command, byte argc, byte *argv)
 	    disableSpiPins();
 		break;
 	  case SPI_READ:
-	    handleSpiTransfer(argc, argv, true, true);
+	    handleSpiTransfer(argc, argv, true, SPI_SEND_NORMAL_REPLY);
 		break;
 	  case SPI_WRITE:
-	    handleSpiTransfer(argc, argv, false, false);
+	    handleSpiTransfer(argc, argv, false, SPI_SEND_NO_REPLY);
 		break;
+	  case SPI_WRITE_ACK:
+		  handleSpiTransfer(argc, argv, false, SPI_SEND_EMPTY_REPLY);
+		  break;
 	  case SPI_TRANSFER:
-	    handleSpiTransfer(argc, argv, false, true);
+	    handleSpiTransfer(argc, argv, false, SPI_SEND_NORMAL_REPLY);
 		break;
 	  default:
 	    Firmata.sendString(F("Unknown SPI command: "), command);
@@ -139,7 +147,7 @@ void SpiFirmata::handleSpiRequest(byte command, byte argc, byte *argv)
   }
 }
 
-void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, boolean sendReply)
+void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, int sendReply)
 {
 	if (!isSpiEnabled)
 	{
@@ -162,9 +170,7 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, boo
 	int j = 0;
 	// In read-only mode set buffer to 0, otherwise fill buffer from request
 	if (dummySend) {
-		for (byte i = 0; i < argv[3]; i += 1) {
-          data[j++] = 0;
-	  }
+		memset(data, 0, argv[3]);
 	} else {
 	  for (byte i = 4; i < argc; i += 2) {
           data[j++] = argv[i] + (argv[i + 1] << 7);
@@ -179,7 +185,7 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, boo
 		// Default is deselect, so only skip this if the value is 0
 		digitalWrite(config[index].csPin, HIGH);
 	}
-	if (sendReply) {
+	if (sendReply == SPI_SEND_NORMAL_REPLY) {
 	  Firmata.startSysex();
 	  Firmata.write(SPI_DATA);
 	  Firmata.write(SPI_REPLY);
@@ -191,6 +197,16 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, boo
 		  Firmata.sendValueAsTwo7bitBytes(data[i]);
 	  }
 	  Firmata.endSysex();
+	}
+	else if (sendReply == SPI_SEND_EMPTY_REPLY)
+	{
+		Firmata.startSysex();
+		Firmata.write(SPI_DATA);
+		Firmata.write(SPI_REPLY);
+		Firmata.write(argv[0]);
+		Firmata.write(argv[1]);
+		Firmata.write(0);
+		Firmata.endSysex();
 	}
 }
 
