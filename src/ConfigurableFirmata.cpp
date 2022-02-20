@@ -69,6 +69,10 @@ FirmataClass::FirmataClass()
   firmwareVersionMajor = 0;
   firmwareVersionName = "";
   blinkVersionDisabled = false;
+#ifdef LARGE_MEM_DEVICE
+  readCachePos = 0;
+  writeCachePos = 0;
+#endif
   systemReset();
 }
 
@@ -95,6 +99,7 @@ void FirmataClass::begin(void)
 void FirmataClass::begin(long speed)
 {
     Serial.begin(speed);
+    Serial.setTimeout(0);
     FirmataStream = &Serial;
     outputIsConsole = true;
     blinkVersion();
@@ -255,11 +260,25 @@ void FirmataClass::processSysexMessage(void)
  */
 void FirmataClass::processInput(void)
 {
-  int inputData = FirmataStream->read(); // this is 'int' to handle -1 when no data
-  if (inputData != -1) 
-  {
-    parse(inputData);
-  }
+#ifdef LARGE_MEM_DEVICE
+    if (writeCachePos == readCachePos)
+    {
+        writeCachePos = readCachePos = 0;
+        writeCachePos = FirmataStream->readBytes(readCache, MAX_DATA_BYTES);
+    }
+    while (writeCachePos > readCachePos)
+    {
+        int inputData = readCache[readCachePos];
+        readCachePos++;
+        parse(inputData);
+    }
+#else
+    int inputData = FirmataStream->read();
+    if (inputData != -1)
+    {
+        parse(inputData);
+    }
+#endif
 }
 
 void FirmataClass::resetParser()
@@ -268,6 +287,9 @@ void FirmataClass::resetParser()
     sysexBytesRead = 0;
     waitForData = 0;
     executeMultiByteCommand = 0;
+#ifdef LARGE_MEM_DEVICE
+    writeCachePos = readCachePos = 0;
+#endif
 }
 
 /**
@@ -279,6 +301,8 @@ void FirmataClass::parse(byte inputData)
   int command;
 
   // TODO make sure it handles -1 properly
+
+  // Firmata.sendStringf(F("Received byte 0x%x"), (int)inputData);
 
   if (inputData == SYSTEM_RESET)
   {
@@ -503,8 +527,11 @@ void FirmataClass::sendStringf(const FlashString* flashString, ...)
 #else
     const int maxSize = 255;
 #endif
-	// 32 bit boards. Note that sizeOfArgs may not be correct here (since all arguments are 32-bit padded)
 	int len = strlen_P((const char*)flashString);
+    if (len >= maxSize)
+    {
+        return;
+    }
 	va_list va;
     va_start (va, flashString);
 	char bytesInput[maxSize];
