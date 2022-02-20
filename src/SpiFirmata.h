@@ -38,9 +38,9 @@
 /* Spi data */
 struct spi_device_config {
   byte deviceIdChannel;
-  byte dataModeBitOrder;
   byte csPinOptions;
   byte csPin;
+  SPISettings spi_settings;
   boolean used;
 };
 
@@ -172,6 +172,7 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, int
 	if (dummySend) {
 		memset(data, 0, argv[3]);
 	} else {
+		
 	  for (byte i = 4; i < argc; i += 2) {
           data[j++] = argv[i] + (argv[i + 1] << 7);
 	  }
@@ -179,7 +180,9 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, int
 
 	if (config[index].csPin != -1 )
 	digitalWrite(config[index].csPin, LOW);
-	SPI.transfer(data, j); 
+	SPI.beginTransaction(config[index].spi_settings);
+	SPI.transfer(data, j);
+	SPI.endTransaction();
 	if (argv[2] != 0)
 	{
 		// Default is deselect, so only skip this if the value is 0
@@ -252,20 +255,20 @@ boolean SpiFirmata::handleSpiConfig(byte argc, byte *argv)
 	  return false;
   }
   
-  if (argv[1] != 1)
-  {
-	  Firmata.sendString(F("Only BitOrder = 1 and dataMode = 0 supported"));
-	  return false;
-  }
-  
   spi_device_config& cfg = config[index];
   cfg.deviceIdChannel = deviceIdChannel;
-  cfg.dataModeBitOrder = argv[1];
-  uint speed = Firmata.decodePackedUInt32(argv + 2);
+  int bitOrder = argv[1] & 0x1;
+  int dataMode = argv[1] >> 1;
+  uint32_t speed = Firmata.decodePackedUInt32(argv + 2);
   cfg.csPinOptions = argv[8];
   cfg.csPin = argv[9];
   cfg.used = true;
-  if (cfg.csPinOptions & 0x1 == 0)
+	if (speed == 0)
+	{
+		speed = 5000000;
+	}
+  cfg.spi_settings = SPISettings(speed, bitOrder == 1 ? MSBFIRST : LSBFIRST, dataMode);
+  if ((cfg.csPinOptions & 0x1) == 0)
   {
 	  cfg.csPin = -1;
   }
@@ -273,11 +276,6 @@ boolean SpiFirmata::handleSpiConfig(byte argc, byte *argv)
   {
 	  Firmata.setPinMode(cfg.csPin, PIN_MODE_OUTPUT);
 	  pinMode(cfg.csPin, OUTPUT);
-  }
-
-  if (speed > 0)
-  {
-	  SPI.setFrequency(speed);
   }
 
   Firmata.sendStringf(F("New SPI device %d allocated with index %d and CS %d, clock speed %d Hz"), deviceIdChannel, index, config[index].csPin, speed);
