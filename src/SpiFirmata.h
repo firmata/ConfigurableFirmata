@@ -18,6 +18,7 @@
 #include <SPI.h>
 #include "FirmataFeature.h"
 #include "FirmataReporting.h"
+#include "Encoder7Bit.h"
 
 #define SPI_BEGIN               0x00 // Initialize the SPI bus for the given channel
 #define SPI_DEVICE_CONFIG       0x01
@@ -167,21 +168,50 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, int
 		return;
 	}
 	
-	int j = 0;
+	int bytesToSend = 0;
 	// In read-only mode set buffer to 0, otherwise fill buffer from request
 	if (dummySend) {
 		memset(data, 0, argv[3]);
+		bytesToSend = argv[3];
 	} else {
-		
-	  for (byte i = 4; i < argc; i += 2) {
-          data[j++] = argv[i] + (argv[i + 1] << 7);
-	  }
+		bytesToSend = num7BitOutbytes(argc - 4);
+		if (bytesToSend > MAX_DATA_BYTES)
+		{
+			Firmata.sendString(F("SPI_TRANSFER: Send buffer not large enough"));
+			return;
+		}
+		Encoder7Bit.readBinary(bytesToSend, argv + 4, data);
+		// Firmata.sendStringf(F("Decoded %d bytes of data, 0x%x, 0x%x, 0x%x, 0x%x"), bytesToSend, data[0], data[1], data[2], data[3]);
 	}
 
-	if (config[index].csPin != -1 )
-	digitalWrite(config[index].csPin, LOW);
+	// If we just need to send a confirmation message, we can do so now, as we have already copied the input buffer (and we're running synchronously, anyway)
+	if (sendReply == SPI_SEND_EMPTY_REPLY)
+	{
+		byte reply[7];
+		reply[0] = START_SYSEX;
+		reply[1] = SPI_DATA;
+		reply[2] = SPI_REPLY;
+		reply[3] = argv[0];
+		reply[4] = argv[1];
+		reply[5] = 0;
+		reply[6] = END_SYSEX;
+		Firmata.write(reply, 7);
+		/*Firmata.startSysex();
+		Firmata.write(SPI_DATA);
+		Firmata.write(SPI_REPLY);
+		Firmata.write(argv[0]);
+		Firmata.write(argv[1]);
+		Firmata.write(0);
+		Firmata.endSysex();*/
+	}
+
+	if (config[index].csPin != -1)
+	{
+		digitalWrite(config[index].csPin, LOW);
+	}
+
 	SPI.beginTransaction(config[index].spi_settings);
-	SPI.transfer(data, j);
+	SPI.transfer(data, bytesToSend);
 	SPI.endTransaction();
 	if (argv[2] != 0)
 	{
@@ -194,22 +224,12 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, int
 	  Firmata.write(SPI_REPLY);
 	  Firmata.write(argv[0]);
 	  Firmata.write(argv[1]);
-	  Firmata.write(j);
-	  for (int i = 0; i < j; i++)
+	  Firmata.write((byte)bytesToSend); // the bytes received is always equal to the bytes sent for SPI
+	  for (int i = 0; i < bytesToSend; i++)
 	  {
 		  Firmata.sendValueAsTwo7bitBytes(data[i]);
 	  }
 	  Firmata.endSysex();
-	}
-	else if (sendReply == SPI_SEND_EMPTY_REPLY)
-	{
-		Firmata.startSysex();
-		Firmata.write(SPI_DATA);
-		Firmata.write(SPI_REPLY);
-		Firmata.write(argv[0]);
-		Firmata.write(argv[1]);
-		Firmata.write(0);
-		Firmata.endSysex();
 	}
 }
 
@@ -308,7 +328,7 @@ boolean SpiFirmata::handleSpiBegin(byte argc, byte *argv)
   	}
 
 	SPI.begin();
-
+	Firmata.sendString(F("SPI.begin()"));
   }
   return isSpiEnabled;
 }
@@ -345,6 +365,7 @@ void SpiFirmata::disableSpiPins()
 {
   isSpiEnabled = false;
   SPI.end();
+  Firmata.sendString(F("SPI.end()"));
 }
 
 void SpiFirmata::reset()
