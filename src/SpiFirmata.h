@@ -41,6 +41,7 @@ struct spi_device_config {
   byte deviceIdChannel;
   byte csPinOptions;
   byte csPin;
+  boolean packedData;
   SPISettings spi_settings;
   boolean used;
 };
@@ -76,6 +77,7 @@ SpiFirmata::SpiFirmata()
     config[i].deviceIdChannel = -1;
 	config[i].csPin = -1;
     config[i].used = false;
+	config[i].packedData = false;
   }
 }
 
@@ -173,15 +175,25 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, int
 	if (dummySend) {
 		memset(data, 0, argv[3]);
 		bytesToSend = argv[3];
-	} else {
-		bytesToSend = num7BitOutbytes(argc - 4);
-		if (bytesToSend > MAX_DATA_BYTES)
+	} else 
+	{
+		if (config[index].packedData)
 		{
-			Firmata.sendString(F("SPI_TRANSFER: Send buffer not large enough"));
-			return;
+			bytesToSend = num7BitOutbytes(argc - 4);
+			if (bytesToSend > MAX_DATA_BYTES)
+			{
+				Firmata.sendString(F("SPI_TRANSFER: Send buffer not large enough"));
+				return;
+			}
+			Encoder7BitClass::readBinary(bytesToSend, argv + 4, data);
 		}
-		Encoder7Bit.readBinary(bytesToSend, argv + 4, data);
-		// Firmata.sendStringf(F("Decoded %d bytes of data, 0x%x, 0x%x, 0x%x, 0x%x"), bytesToSend, data[0], data[1], data[2], data[3]);
+		else
+		{
+			for (byte i = 4; i < argc; i += 2) 
+			{
+				data[bytesToSend++] = argv[i] + (argv[i + 1] << 7);
+			}
+		}
 	}
 
 	// If we just need to send a confirmation message, we can do so now, as we have already copied the input buffer (and we're running synchronously, anyway)
@@ -196,13 +208,6 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, int
 		reply[5] = 0;
 		reply[6] = END_SYSEX;
 		Firmata.write(reply, 7);
-		/*Firmata.startSysex();
-		Firmata.write(SPI_DATA);
-		Firmata.write(SPI_REPLY);
-		Firmata.write(argv[0]);
-		Firmata.write(argv[1]);
-		Firmata.write(0);
-		Firmata.endSysex();*/
 	}
 
 	if (config[index].csPin != -1)
@@ -225,81 +230,95 @@ void SpiFirmata::handleSpiTransfer(byte argc, byte *argv, boolean dummySend, int
 	  Firmata.write(argv[0]);
 	  Firmata.write(argv[1]);
 	  Firmata.write((byte)bytesToSend); // the bytes received is always equal to the bytes sent for SPI
-	  for (int i = 0; i < bytesToSend; i++)
-	  {
-		  Firmata.sendValueAsTwo7bitBytes(data[i]);
-	  }
+		if (config[index].packedData)
+		{
+			Encoder7BitClass encoder;
+			encoder.startBinaryWrite();
+			for (int i = 0; i < bytesToSend; i++) 
+			{
+				encoder.writeBinary(data[i]);
+			}
+			encoder.endBinaryWrite();
+		}
+		else
+		{
+			for (int i = 0; i < bytesToSend; i++)
+			{
+				Firmata.sendValueAsTwo7bitBytes(data[i]);
+			}
+		}
 	  Firmata.endSysex();
 	}
 }
 
-boolean SpiFirmata::handleSpiConfig(byte argc, byte *argv)
+boolean SpiFirmata::handleSpiConfig(byte argc, byte* argv)
 {
 	if (argc < 10) {
 		Firmata.sendString(F("Not enough data in SPI_DEVICE_CONFIG message"));
 		return false;
 	}
-	
-  int index = -1; // the index where the new device will be added
-  for (int i = 0; i < SPI_MAX_DEVICES; i++) {
-    if (config[i].deviceIdChannel == argv[0]) {
-		index = i; // This device exists already
-	}
-  }
-  
-  if (index == -1)
-  {
-	  for (int i = 0; i < SPI_MAX_DEVICES; i++) {
-		if (config[i].used == false) {
-			index = i;
+
+	int index = -1; // the index where the new device will be added
+	for (int i = 0; i < SPI_MAX_DEVICES; i++) {
+		if (config[i].deviceIdChannel == argv[0]) {
+			index = i; // This device exists already
 		}
-	  }
-  }
-  if (index == -1)
-  {
-	  Firmata.sendString(F("SPI_DEVICE_CONFIG: Max number of devices exceeded"));
-	  return false;
-  }
-  
-  // Check word size. Must be 0 (default) or 8.
-  if (argv[7] != 0 && argv[7] != 8)
-  {
-	  Firmata.sendString(F("SPI_DEVICE_CONFIG: Only 8 bit words supported"));
-	  return false;
-  }
-  
-  byte deviceIdChannel = argv[0];
-  if ((deviceIdChannel & 0x3) != 0)
-  {
-	  Firmata.sendString(F("SPI_DEVICE_CONFIG: Only channel 0 supported: "), deviceIdChannel);
-	  return false;
-  }
-  
-  spi_device_config& cfg = config[index];
-  cfg.deviceIdChannel = deviceIdChannel;
-  int bitOrder = argv[1] & 0x1;
-  int dataMode = argv[1] >> 1;
-  uint32_t speed = Firmata.decodePackedUInt32(argv + 2);
-  cfg.csPinOptions = argv[8];
-  cfg.csPin = argv[9];
-  cfg.used = true;
+	}
+
+	if (index == -1)
+	{
+		for (int i = 0; i < SPI_MAX_DEVICES; i++) {
+			if (config[i].used == false) {
+				index = i;
+			}
+		}
+	}
+	if (index == -1)
+	{
+		Firmata.sendString(F("SPI_DEVICE_CONFIG: Max number of devices exceeded"));
+		return false;
+	}
+
+	// Check word size. Must be 0 (default) or 8.
+	if (argv[7] != 0 && argv[7] != 8)
+	{
+		Firmata.sendString(F("SPI_DEVICE_CONFIG: Only 8 bit words supported"));
+		return false;
+	}
+
+	byte deviceIdChannel = argv[0];
+	if ((deviceIdChannel & 0x3) != 0)
+	{
+		Firmata.sendString(F("SPI_DEVICE_CONFIG: Only channel 0 supported: "), deviceIdChannel);
+		return false;
+	}
+
+	spi_device_config& cfg = config[index];
+	cfg.deviceIdChannel = deviceIdChannel;
+	int bitOrder = argv[1] & 0x1;
+	int dataMode = (argv[1] >> 1) & 0x3;
+	cfg.packedData = (argv[1] >> 3) & 0x1; // this is only supported for the default word length, but we're not supporting anything else anyway
+	uint32_t speed = Firmata.decodePackedUInt32(argv + 2);
+	cfg.csPinOptions = argv[8];
+	cfg.csPin = argv[9];
+	cfg.used = true;
 	if (speed == 0)
 	{
 		speed = 5000000;
 	}
-  cfg.spi_settings = SPISettings(speed, bitOrder == 1 ? MSBFIRST : LSBFIRST, dataMode);
-  if ((cfg.csPinOptions & 0x1) == 0)
-  {
-	  cfg.csPin = -1;
-  }
-  else
-  {
-	  Firmata.setPinMode(cfg.csPin, PIN_MODE_OUTPUT);
-	  pinMode(cfg.csPin, OUTPUT);
-  }
+	cfg.spi_settings = SPISettings(speed, bitOrder == 1 ? MSBFIRST : LSBFIRST, dataMode);
+	if ((cfg.csPinOptions & 0x1) == 0)
+	{
+		cfg.csPin = -1;
+	}
+	else
+	{
+		Firmata.setPinMode(cfg.csPin, PIN_MODE_OUTPUT);
+		pinMode(cfg.csPin, OUTPUT);
+	}
 
-  Firmata.sendStringf(F("New SPI device %d allocated with index %d and CS %d, clock speed %d Hz"), deviceIdChannel, index, config[index].csPin, speed);
-  return true;
+	Firmata.sendStringf(F("New SPI device %d allocated with index %d and CS %d, clock speed %d Hz"), deviceIdChannel, index, config[index].csPin, speed);
+	return true;
 }
 
 int SpiFirmata::getConfigIndexForDevice(byte deviceIdChannel)
