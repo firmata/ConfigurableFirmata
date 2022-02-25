@@ -64,7 +64,7 @@ boolean FirmataScheduler::handleSysex(byte command, byte argc, byte* argv)
           {
             if (argc > 2) {
               int len = num7BitOutbytes(argc - 2);
-              Encoder7Bit.readBinary(len, argv + 2, argv + 2); //decode inplace
+              Encoder7BitClass::readBinary(len, argv + 2, argv + 2); //decode inplace
               addToTask(argv[1], len, argv + 2); //addToTask copies data...
             }
             break;
@@ -73,7 +73,7 @@ boolean FirmataScheduler::handleSysex(byte command, byte argc, byte* argv)
           {
             if (argc == 6) {
               argv++;
-              Encoder7Bit.readBinary(4, argv, argv); //decode inplace
+              Encoder7BitClass::readBinary(4, argv, argv); //decode inplace
               delayTask(*(long*)((byte*)argv));
             }
             break;
@@ -81,7 +81,7 @@ boolean FirmataScheduler::handleSysex(byte command, byte argc, byte* argv)
         case SCHEDULE_FIRMATA_TASK:
           {
             if (argc == 7) { //one byte taskid, 5 bytes to encode 4 bytes of long
-              Encoder7Bit.readBinary(4, argv + 2, argv + 2); //decode inplace
+                Encoder7BitClass::readBinary(4, argv + 2, argv + 2); //decode inplace
               schedule(argv[1], *(long*)((byte*)argv + 2)); //argv[1] | argv[2]<<8 | argv[3]<<16 | argv[4]<<24
             }
             break;
@@ -208,24 +208,26 @@ void FirmataScheduler::queryTask(byte id)
   reportTask(id, task, false);
 }
 
-void FirmataScheduler::reportTask(byte id, firmata_task *task, boolean error)
+void FirmataScheduler::reportTask(byte id, firmata_task* task, boolean error)
 {
-  Firmata.write(START_SYSEX);
-  Firmata.write(SCHEDULER_DATA);
-  if (error) {
-    Firmata.write(ERROR_TASK_REPLY);
-  } else {
-    Firmata.write(QUERY_TASK_REPLY);
-  }
-  Firmata.write(id);
-  if (task) {
-    Encoder7Bit.startBinaryWrite();
-    for (unsigned int i = 3; i < firmata_task_len(task); i++) {
-      Encoder7Bit.writeBinary(((byte *)task)[i]); //don't write first 3 bytes (firmata_task*, byte); makes use of AVR byteorder (LSB first)
+    Encoder7BitClass encoder;
+    Firmata.write(START_SYSEX);
+    Firmata.write(SCHEDULER_DATA);
+    if (error) {
+        Firmata.write(ERROR_TASK_REPLY);
     }
-    Encoder7Bit.endBinaryWrite();
-  }
-  Firmata.write(END_SYSEX);
+    else {
+        Firmata.write(QUERY_TASK_REPLY);
+    }
+    Firmata.write(id);
+    if (task) {
+        encoder.startBinaryWrite();
+        for (unsigned int i = 3; i < firmata_task_len(task); i++) {
+            encoder.writeBinary(((byte*)task)[i]); //don't write first 3 bytes (firmata_task*, byte); makes use of AVR byteorder (LSB first)
+        }
+        encoder.endBinaryWrite();
+    }
+    Firmata.write(END_SYSEX);
 };
 
 void FirmataScheduler::report(bool elapsed)
