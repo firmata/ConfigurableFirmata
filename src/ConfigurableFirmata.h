@@ -36,7 +36,7 @@
 #define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
 #ifdef LARGE_MEM_DEVICE
-#define MAX_DATA_BYTES         255 // The ESP32 has enough RAM so we can reduce the number of packets, but the value must not exceed 2^8 - 1, because many methods use byte-indexing only
+#define MAX_DATA_BYTES         252 // The ESP32 has enough RAM so we can reduce the number of packets, but the value must not exceed 2^8 - 1, because many methods use byte-indexing only
 #else
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 #endif
