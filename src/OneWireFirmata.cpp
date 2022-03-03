@@ -54,6 +54,7 @@ void OneWireFirmata::oneWireConfig(byte pin, boolean power)
 boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   if (command == ONEWIRE_DATA) {
+    Encoder7BitClass encoder;
     if (argc > 1) {
       byte subcommand = argv[0];
       byte pin = argv[1];
@@ -70,14 +71,14 @@ boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
               boolean isAlarmSearch = (subcommand == ONEWIRE_SEARCH_ALARMS_REQUEST);
               Firmata.write(isAlarmSearch ? (byte)ONEWIRE_SEARCH_ALARMS_REPLY : (byte)ONEWIRE_SEARCH_REPLY);
               Firmata.write(pin);
-              Encoder7Bit.startBinaryWrite();
+              encoder.startBinaryWrite();
               byte addrArray[8];
               while (isAlarmSearch ? device->search(addrArray, false) : device->search(addrArray)) {
                 for (int i = 0; i < 8; i++) {
-                  Encoder7Bit.writeBinary(addrArray[i]);
+                  encoder.writeBinary(addrArray[i]);
                 }
               }
-              Encoder7Bit.endBinaryWrite();
+              encoder.endBinaryWrite();
               Firmata.write(END_SYSEX);
               break;
             }
@@ -104,7 +105,7 @@ boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
                 int numReadBytes = 0;
                 int correlationId;
                 argv += 2;
-                Encoder7Bit.readBinary(numBytes, argv, argv); //decode inplace
+                Encoder7BitClass::readBinary(numBytes, argv, argv); //decode inplace
 
                 if (subcommand & ONEWIRE_SELECT_REQUEST_BIT) {
                   if (numBytes < 8) break;
@@ -140,13 +141,13 @@ boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
                   Firmata.write(ONEWIRE_DATA);
                   Firmata.write(ONEWIRE_READ_REPLY);
                   Firmata.write(pin);
-                  Encoder7Bit.startBinaryWrite();
-                  Encoder7Bit.writeBinary(correlationId & 0xFF);
-                  Encoder7Bit.writeBinary((correlationId >> 8) & 0xFF);
+                  encoder.startBinaryWrite();
+                  encoder.writeBinary(correlationId & 0xFF);
+                  encoder.writeBinary((correlationId >> 8) & 0xFF);
                   for (int i = 0; i < numReadBytes; i++) {
-                    Encoder7Bit.writeBinary(device->read());
+                    encoder.writeBinary(device->read());
                   }
-                  Encoder7Bit.endBinaryWrite();
+                  encoder.endBinaryWrite();
                   Firmata.write(END_SYSEX);
                 }
               }
