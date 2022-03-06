@@ -69,10 +69,6 @@ FirmataClass::FirmataClass()
   firmwareVersionMajor = 0;
   firmwareVersionName = "";
   blinkVersionDisabled = false;
-#ifdef LARGE_MEM_DEVICE
-  readCachePos = 0;
-  writeCachePos = 0;
-#endif
   systemReset();
 }
 
@@ -261,17 +257,29 @@ void FirmataClass::processSysexMessage(void)
 void FirmataClass::processInput(void)
 {
 #ifdef LARGE_MEM_DEVICE
-    if (writeCachePos == readCachePos)
+    int readCachePos = 0;
+    const int writeCachePos = FirmataStream->readBytes(readCache, LARGE_MEM_RCV_BUF_SIZE);
+    
+    while (parsingSysex && writeCachePos > readCachePos + 4)
     {
-        writeCachePos = readCachePos = 0;
-        writeCachePos = FirmataStream->readBytes(readCache, MAX_DATA_BYTES);
+        uint32_t nextWord = *(uint32_t*)(readCache + readCachePos);
+        // Any special character in the current word?
+        if (nextWord & 0x80808080)
+        {
+            break; // And don't increment (we read the bytes again)
+        }
+        readCachePos += 4;
+        *(uint32_t*)(storedInputData + sysexBytesRead) = nextWord;
+        sysexBytesRead += 4;
     }
+
     while (writeCachePos > readCachePos)
     {
-        int inputData = readCache[readCachePos];
+        const byte inputData = readCache[readCachePos];
         readCachePos++;
         parse(inputData);
     }
+
 #else
     int inputData = FirmataStream->read();
     if (inputData != -1)
@@ -287,9 +295,6 @@ void FirmataClass::resetParser()
     sysexBytesRead = 0;
     waitForData = 0;
     executeMultiByteCommand = 0;
-#ifdef LARGE_MEM_DEVICE
-    writeCachePos = readCachePos = 0;
-#endif
 }
 
 /**

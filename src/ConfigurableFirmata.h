@@ -40,6 +40,7 @@
 #else
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 #endif
+#define LARGE_MEM_RCV_BUF_SIZE 4096 // Size of the wifi receive buffer for large mem devices. If this is smaller than 1024, heavy transactions are significantly slower
 
 // Arduino 101 also defines SET_PIN_MODE as a macro in scss_registers.h
 #ifdef SET_PIN_MODE
@@ -241,9 +242,7 @@ class FirmataClass
     void systemReset(void);
     void strobeBlinkPin(byte pin, int count, int onInterval, int offInterval);
 #ifdef LARGE_MEM_DEVICE
-    byte readCache[MAX_DATA_BYTES];
-    int readCachePos;
-    int writeCachePos;
+    byte readCache[LARGE_MEM_RCV_BUF_SIZE];
 #endif
 };
 
