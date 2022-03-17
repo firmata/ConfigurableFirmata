@@ -482,9 +482,11 @@ void FirmataClass::sendDigital(byte pin, int value)
  */
 void FirmataClass::sendDigitalPort(byte portNumber, int portData)
 {
-  FirmataStream->write(DIGITAL_MESSAGE | (portNumber & 0xF));
-  FirmataStream->write((byte)portData % 128); // Tx bits 0-6
-  FirmataStream->write(portData >> 7);  // Tx bits 7-13
+    byte msg[3];
+    msg[0] = (DIGITAL_MESSAGE | (portNumber & 0xF));
+    msg[1] = ((byte)portData % 128); // Tx bits 0-6
+    msg[2] = (portData >> 7);  // Tx bits 7-13
+    FirmataStream->write(msg, 3);
 }
 
 /**
