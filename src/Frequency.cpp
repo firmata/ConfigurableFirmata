@@ -83,7 +83,8 @@ boolean Frequency::handleSysex(byte command, byte argc, byte* argv)
 		  if (_activePin == -1)
 		  {
 			  // not yet enabled on this pin
-			  int internalMode = LOW;
+			  // Must use "auto" here, because the value uses an enum type on newer boards.
+			  auto internalMode = LOW;
 			  switch (mode)
 			  {
 				  case INTERRUPT_MODE_LOW:
@@ -100,9 +101,6 @@ boolean Frequency::handleSysex(byte command, byte argc, byte* argv)
 				  break;
 				  case INTERRUPT_MODE_CHANGE:
 				  internalMode = CHANGE;
-				  break;
-				  default:
-				  internalMode = -1;
 				  break;
 			  }
 			  if (internalMode >= 0)
