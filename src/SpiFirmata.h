@@ -44,6 +44,16 @@ struct spi_device_config {
   boolean packedData;
   SPISettings spi_settings;
   boolean used;
+public:
+	spi_device_config()
+		: spi_settings()
+	{
+		deviceIdChannel = 0;
+		csPinOptions = 0;
+		csPin = -1;
+		packedData = false;
+		used = false;
+	}
 };
 
 class SpiFirmata: public FirmataFeature
