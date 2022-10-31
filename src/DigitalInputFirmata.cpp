@@ -118,7 +118,7 @@ boolean DigitalInputFirmata::handlePinMode(byte pin, int mode)
     if (mode == PIN_MODE_INPUT || mode == PIN_MODE_PULLUP) {
       portConfigInputs[pin / 8] |= (1 << (pin & 7));
       if (mode == PIN_MODE_INPUT) {
-        pinMode(PIN_TO_DIGITAL(pin), PIN_MODE_INPUT);
+        pinMode(PIN_TO_DIGITAL(pin), INPUT);
       } else {
         pinMode(PIN_TO_DIGITAL(pin), INPUT_PULLUP);
         Firmata.setPinState(pin, 1);
