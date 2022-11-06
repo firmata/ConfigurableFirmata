@@ -166,6 +166,7 @@ uint8_t OneWire::reset(void)
 	r = !DIRECT_READ(reg, mask);
 	interrupts();
 	delayMicroseconds(410);
+	reg = reg; // Avoid Warning on unused variable when compiling in compatibility mode
 	return r;
 }
 
@@ -195,6 +196,7 @@ void OneWire::write_bit(uint8_t v)
 		interrupts();
 		delayMicroseconds(5);
 	}
+	reg = reg; // Avoid Warning on unused variable when compiling in compatibility mode
 }
 
 //
@@ -216,6 +218,7 @@ uint8_t OneWire::read_bit(void)
 	r = DIRECT_READ(reg, mask);
 	interrupts();
 	delayMicroseconds(53);
+	reg = reg; // Avoid Warning on unused variable when compiling in compatibility mode
 	return r;
 }
 
