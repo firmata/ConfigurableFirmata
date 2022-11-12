@@ -102,7 +102,7 @@
 #define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
 
 // pin modes
-#define PIN_MODE_INPUT          0x00 // INPUT is defined in Arduino.h, but may conflict with other uses
+#define PIN_MODE_INPUT          0x00 // INPUT is defined in Arduino.h, but may not be the same as this one
 #define PIN_MODE_OUTPUT         0x01 // OUTPUT is defined in Arduino.h. Careful: OUTPUT is defined as 2 on ESP32!
                                      // therefore OUTPUT and PIN_MODE_OUTPUT are not the same!
 #define PIN_MODE_ANALOG         0x02 // analog pin in analogInput mode
