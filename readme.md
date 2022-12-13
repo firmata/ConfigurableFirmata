@@ -4,21 +4,21 @@
 
 Firmata is a protocol for communicating with microcontrollers from software on a host computer. The [protocol](https://github.com/firmata/protocol) can be implemented in firmware on any microcontroller architecture as well as software on any host computer software package. The arduino repository described here is a Firmata library for Arduino and Arduino-compatible devices. If you would like to contribute to Firmata, please see the [Contributing](#contributing) section below.
 
-## Important NOTE
-
-Updates to ConfigurableFirmata are being laid out at the moment. The master branch will get new features added and existing features updated. In some cases, this may break clients or cause regressions. The last stable 2.xx release is available under [this branch](https://github.com/firmata/ConfigurableFirmata/tree/releases/v2.xx). So if you check out the repository manually (see below), be sure to switch to that branch if you need the stable version. Feedback on the current development version is welcome, of course.
-
 ## Installation
 
 - **If you are using Arduino IDE version 1.6.4 or higher** go to `Sketch > Include Library > Manage Libraries` and then search for "ConfigurableFirmata" and click on `Install` after tapping on the ConfigurableFirmata item in the filtered results. You can also use this same method to update ConfigurableFirmata in the future.
 - **If you are using an older version of the Arduino IDE**, download or clone ConfigurableFirmata to your Arduino sketchbook library folder. This is typically `/Documents/Arduino/libraries/` on Mac or Linux or `\My Documents\Arduino\libraries\` on Windows.
 - **If you want to edit things yourself or help in development**, clone this repo to `\My Documents\Arduino\libraries\ConfigurableFirmata` and start hacking. Just delete the folder if it exists already.
 
+## Release 3.0
+
+ConfigurableFirmata 3.0 contains some internal breaking changes for external modules. If you need to use a particular module (such as FirmataEncoder), either use a 2.xx version or ask the maintainer to update the module to work with V3.0.
+
 ## Usage
 
-ConfigurableFirmata is a version of Firmata that breaks features such as Digital Input, Digital Output, Analog Input, Analog Output, I2C, etc into [individual classes](https://github.com/firmata/ConfigurableFirmata/tree/master/src) making it easier to mix and match standard features with custom features.
+ConfigurableFirmata is a version of Firmata that breaks features such as Digital Input, Digital Output, Analog Input, Analog Output, I2C, etc into [individual classes](https://github.com/firmata/ConfigurableFirmata/tree/master/src) making it easier to mix and match standard features with custom features. To start, open the "ConfigurableFirmata.ino" file found in the examples subfolder (or the examples menu of the Arduino IDE). A bunch of `#define` statements at the beginning of the file let you select the modules to include. 
 
-The easiest way to use ConfigurableFirmata is with [firmatabuilder](http://firmatabuilder.com) which is a simple web application that generates an Arduino sketch based on a selection of Firmata features. Download the generated sketch, compile and upload it to your board.
+An alternative way to generate the list of included features with ConfigurableFirmata is with [firmatabuilder](http://firmatabuilder.com) which is a simple web application that generates an Arduino sketch based on a selection of Firmata features. Download the generated sketch, compile and upload it to your board.
 
 Another way to use ConfigurableFirmata is by adding or removing various include statements in the [ConfigurableFirmata.ino](https://github.com/firmata/ConfigurableFirmata/blob/master/examples/ConfigurableFirmata/ConfigurableFirmata.ino) example file.
 
@@ -31,9 +31,7 @@ For details on particular boards see [this page](BoardSupport.md).
 ## Firmata Wrapper Libraries
 
 You can use the ConfigurableFirmata architecture to wrap 3rd party libraries to include
-functionality not included in the base ConfigurableFirmata.ino example. See [FirmataEncoder](https://github.com/firmata/FirmataEncoder) for an example of a Firmata wrapper. To include a Firmata wrapper your
-ino file, you must install both the sketch and the 3rd party library into your `/Arduino/libraries/`
-directory (where all 3rd party libraries are installed).
+functionality not included in the base ConfigurableFirmata.ino example. See [FirmataEncoder](https://github.com/firmata/FirmataEncoder) for an example of a Firmata wrapper. To include a Firmata wrapper in your sketch, you must install both ConfigurableFirmata and the 3rd party library into your `/Arduino/libraries/` directory (where all 3rd party libraries are installed).
 
 When creating a new Firmata wrapper library, you generally should not include the 3rd party
 library it wraps. For example, the Encoder library that FirmataEncoder wraps is not included with
@@ -42,9 +40,6 @@ the FirmataEncoder library.
 If you create a wrapper library, prepend the name with 'Firmata'. Hence 'FirmataEncoder' in the
 referenced example. This will keep the wrapper libraries together in the user's Arduino libraries
 directory.
-
-A Firmata wrapper template library will be published soon along with instructions for creating
-a wrapper library.
 
 ## Firmata Client Libraries
 Not all client libraries officially support ConfigurableFirmata, but the protocol implementation is the same as for StandardFirmata, so most libraries should work. These have been tested:
