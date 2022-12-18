@@ -98,14 +98,19 @@ void AnalogOutputFirmata::setupPwmPin(byte pin) {
             Firmata.sendStringf(F("Unable to setup pin %d for PWM - no more channels."), pin);
             return;
         }
+        
+		Firmata.sendStringf(F("Assigning channel %d to pin %d"), channel, pin);
+        _pwmChannelMap[channel] = pin;
+        pinMode(pin, OUTPUT);
+        ledcSetup(channel, LEDC_BASE_FREQ, DEFAULT_PWM_RESOLUTION);
+        ledcAttachPin(pin, channel);
+        analogWrite(pin, 0);
+		return;
     }
-
-    // Firmata.sendStringf(F("Channel %d mapped to pin %d"), 4, channel, pin);
-    _pwmChannelMap[channel] = pin;
-    pinMode(pin, OUTPUT);
-    ledcSetup(channel, LEDC_BASE_FREQ, DEFAULT_PWM_RESOLUTION); // 13 is the resolution here
-    ledcAttachPin(pin, channel);
-    analogWrite(pin, 0);
+	
+	Firmata.sendStringf(F("Warning: Pin %d already assigned to channel %d"), pin, channel);
+	// Already attached
+	analogWrite(pin, 0);
 }
 
 void AnalogOutputFirmata::internalReset()
@@ -130,10 +135,11 @@ boolean AnalogOutputFirmata::handlePinMode(byte pin, int mode)
     // Unlink the channel for this pin
     if (mode != PIN_MODE_PWM && (channel = getChannelForPin(pin)) != 255)
     {
+		Firmata.sendStringf(F("Detaching pin %d"), pin);
         ledcDetachPin(pin);
         _pwmChannelMap[channel] = 255;
     }
-  return false;
+    return false;
 }
 
 void AnalogOutputFirmata::handleCapability(byte pin)
