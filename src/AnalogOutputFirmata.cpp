@@ -72,3 +72,25 @@ boolean AnalogOutputFirmata::handleSysex(byte command, byte argc, byte* argv)
 }
 
 #endif /* NOT ESP32 */
+
+void analogWriteCallback(byte pin, int value)
+{
+  if (pin < TOTAL_PINS) {
+    switch (Firmata.getPinMode(pin)) {
+#ifdef ENABLE_SERVO
+      case PIN_MODE_SERVO:
+        if (IS_PIN_SERVO(pin)) {
+          servoAnalogWrite(pin, value);
+          Firmata.setPinState(pin, PIN_MODE_SERVO);
+        }
+        break;
+#endif
+      case PIN_MODE_PWM:
+        if (IS_PIN_PWM(pin)) {
+          analogWrite(PIN_TO_PWM(pin), value);
+          Firmata.setPinState(pin, PIN_MODE_PWM);
+        }
+        break;
+    }
+  }
+}

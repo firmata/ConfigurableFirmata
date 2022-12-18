@@ -19,7 +19,6 @@
 #include <ConfigurableFirmata.h>
 #include "AnalogFirmata.h"
 #include "AnalogOutputFirmata.h"
-
 #ifdef ESP32
 
 #define LEDC_BASE_FREQ 5000
