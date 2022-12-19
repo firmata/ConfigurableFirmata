@@ -17,7 +17,6 @@
 */
 
 #include <ConfigurableFirmata.h>
-#include "AnalogFirmata.h"
 #include "AnalogInputFirmata.h"
 
 AnalogInputFirmata *AnalogInputFirmataInstance;
@@ -85,7 +84,16 @@ void AnalogInputFirmata::handleCapability(byte pin)
 
 boolean AnalogInputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
-  return handleAnalogFirmataSysex(command, argc, argv);
+  if (command == ANALOG_MAPPING_QUERY) {
+    Firmata.write(START_SYSEX);
+    Firmata.write(ANALOG_MAPPING_RESPONSE);
+    for (byte pin = 0; pin < TOTAL_PINS; pin++) {
+      Firmata.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
+    }
+    Firmata.write(END_SYSEX);
+    return true;
+  }
+  return false;
 }
 
 void AnalogInputFirmata::reset()

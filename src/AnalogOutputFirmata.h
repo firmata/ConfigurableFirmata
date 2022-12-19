@@ -22,23 +22,41 @@
 
 class AnalogOutputFirmata: public FirmataFeature
 {
-    friend void analogWrite(byte pin, uint32_t value);
   public:
     AnalogOutputFirmata();
     void handleCapability(byte pin);
     boolean handlePinMode(byte pin, int mode);
-    boolean handleSysex(byte command, byte argc, byte* argv);
     void reset();
+    void analogWriteInternal(byte pin, uint32_t value);
   private:
       void setupPwmPin(byte pin);
 #if ESP32
       int getChannelForPin(byte pin);
       void internalReset();
-      void analogWriteEsp32(byte pin, uint32_t value);
       // This gives the active pin for each pwm channel. -1 if unused
     byte _pwmChannelMap[16];
 #endif
+	boolean handleSysex(byte command, byte argc, byte* argv)
+	{
+		if (command == EXTENDED_ANALOG) 
+		{
+			if (argc > 1)
+			{
+				byte pin = argv[0];
+				int val = argv[1];
+				if (argc > 2) val |= (argv[2] << 7);
+				if (argc > 3) val |= (argv[3] << 14);
+				byte mode = Firmata.getPinMode(pin);
+				if (mode == PIN_MODE_ANALOG || mode == PIN_MODE_PWM)
+				{
+					analogWriteInternal(argv[0], val);
+				}
+				return true;
+			}
+		}
+
+	  return false;
+	}
 };
 
-void analogWriteCallback(byte pin, int value);
 #endif

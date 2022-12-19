@@ -17,14 +17,12 @@
 */
 
 #include <ConfigurableFirmata.h>
-#include "AnalogFirmata.h"
 #include "AnalogOutputFirmata.h"
 
 #ifndef ESP32
 
 AnalogOutputFirmata::AnalogOutputFirmata()
 {
-    Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
 }
 
 void AnalogOutputFirmata::reset()
@@ -55,42 +53,11 @@ void AnalogOutputFirmata::handleCapability(byte pin)
   }
 }
 
-boolean AnalogOutputFirmata::handleSysex(byte command, byte argc, byte* argv)
+void AnalogOutputFirmata::analogWriteInternal(byte pin, uint32_t value)
 {
-  if (command == EXTENDED_ANALOG) {
-    if (argc > 1) {
-      int val = argv[1];
-      if (argc > 2) val |= (argv[2] << 7);
-      if (argc > 3) val |= (argv[3] << 14);
-      analogWriteCallback(argv[0], val);
-      return true;
-    }
-    return false;
-  } else {
-    return handleAnalogFirmataSysex(command, argc, argv);
-  }
+    analogWrite(pin, value);
 }
+
 
 #endif /* NOT ESP32 */
 
-void analogWriteCallback(byte pin, int value)
-{
-  if (pin < TOTAL_PINS) {
-    switch (Firmata.getPinMode(pin)) {
-#ifdef ENABLE_SERVO
-      case PIN_MODE_SERVO:
-        if (IS_PIN_SERVO(pin)) {
-          servoAnalogWrite(pin, value);
-          Firmata.setPinState(pin, PIN_MODE_SERVO);
-        }
-        break;
-#endif
-      case PIN_MODE_PWM:
-        if (IS_PIN_PWM(pin)) {
-          analogWrite(PIN_TO_PWM(pin), value);
-          Firmata.setPinState(pin, PIN_MODE_PWM);
-        }
-        break;
-    }
-  }
-}

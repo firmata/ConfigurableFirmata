@@ -726,9 +726,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define DEFAULT_ADC_RESOLUTION  12
 #define LARGE_MEM_DEVICE        320
 
-// Defined in AnalogOutputFirmata.cpp
-void analogWrite(uint8_t channel, uint32_t value);
-
 // Adafruit Bluefruit nRF52 boards
 #elif defined(ARDUINO_NRF52_ADAFRUIT)
 #define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS

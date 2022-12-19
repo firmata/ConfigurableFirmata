@@ -342,7 +342,7 @@ void FirmataClass::parse(byte inputData)
     if ( (waitForData == 0) && executeMultiByteCommand ) { // got the whole message
       switch (executeMultiByteCommand) {
         case ANALOG_MESSAGE:
-          if (currentAnalogCallback) {
+		  if (currentAnalogCallback) {
             (*currentAnalogCallback)(multiByteChannel,
                                      (storedInputData[0] << 7)
                                      + storedInputData[1]);
