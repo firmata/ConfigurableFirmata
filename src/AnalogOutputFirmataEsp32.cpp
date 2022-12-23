@@ -89,7 +89,7 @@ void AnalogOutputFirmata::setupPwmPin(byte pin) {
             return;
         }
         
-		Firmata.sendStringf(F("Assigning channel %d to pin %d"), channel, pin);
+		// Firmata.sendStringf(F("Assigning channel %d to pin %d"), channel, pin);
         _pwmChannelMap[channel] = pin;
         pinMode(pin, OUTPUT);
         ledcSetup(channel, LEDC_BASE_FREQ, DEFAULT_PWM_RESOLUTION);
@@ -124,7 +124,7 @@ boolean AnalogOutputFirmata::handlePinMode(byte pin, int mode)
     // Unlink the channel for this pin
     if (mode != PIN_MODE_PWM && (channel = getChannelForPin(pin)) != 255)
     {
-		Firmata.sendStringf(F("Detaching pin %d"), pin);
+        // Firmata.sendStringf(F("Detaching pin %d"), pin);
         ledcDetachPin(pin);
         _pwmChannelMap[channel] = 255;
     }

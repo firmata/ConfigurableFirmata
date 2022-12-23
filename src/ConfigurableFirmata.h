@@ -27,7 +27,7 @@
 
 /*
  * Version numbers for the Firmata library.
- * ConfigurableFirmata 2.10.1 implements version 2.6.0 of the Firmata protocol.
+ * ConfigurableFirmata 3.0 implements version 2.6.0 of the Firmata protocol.
  * The firmware version will not always equal the protocol version going forward.
  * Query using the REPORT_FIRMWARE message.
  */
