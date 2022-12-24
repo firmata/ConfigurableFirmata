@@ -55,7 +55,7 @@ void AnalogOutputFirmata::handleCapability(byte pin)
 
 void AnalogOutputFirmata::analogWriteInternal(byte pin, uint32_t value)
 {
-    analogWrite(pin, value);
+    analogWrite(pin, (int)value);
 }
 
 

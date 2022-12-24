@@ -224,7 +224,6 @@ class FirmataClass
     boolean outputIsConsole;
 
     /* callback functions */
-    callbackFunction currentAnalogCallback;
     callbackFunction currentDigitalCallback;
     callbackFunction currentReportAnalogCallback;
     callbackFunction currentReportDigitalCallback;
