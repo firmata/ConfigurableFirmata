@@ -31,8 +31,8 @@
  * The firmware version will not always equal the protocol version going forward.
  * Query using the REPORT_FIRMWARE message.
  */
-#define FIRMATA_FIRMWARE_MAJOR_VERSION  2 // for non-compatible changes
-#define FIRMATA_FIRMWARE_MINOR_VERSION  12 // for backwards compatible changes
+#define FIRMATA_FIRMWARE_MAJOR_VERSION  3 // for non-compatible changes
+#define FIRMATA_FIRMWARE_MINOR_VERSION  0 // for backwards compatible changes
 #define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
 #ifdef LARGE_MEM_DEVICE
