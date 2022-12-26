@@ -722,12 +722,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 // The ESP32 supports PWM on almost all pins, but only 16 pins can use pwm at once.
 #define PIN_TO_PWM(p)           (p)
 #define PIN_TO_SERVO(p)         (p)
-#define DEFAULT_PWM_RESOLUTION  13
+#define DEFAULT_PWM_RESOLUTION  8
 #define DEFAULT_ADC_RESOLUTION  12
 #define LARGE_MEM_DEVICE        320
-
-// Defined in AnalogOutputFirmata.cpp
-void analogWrite(uint8_t channel, uint32_t value);
 
 // Adafruit Bluefruit nRF52 boards
 #elif defined(ARDUINO_NRF52_ADAFRUIT)

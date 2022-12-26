@@ -338,15 +338,22 @@ void FirmataClass::parse(byte inputData)
 	  }
   } else if ( (waitForData > 0) && (inputData < 128) ) {
     waitForData--;
-    storedInputData[waitForData] = inputData;
+    storedInputData[waitForData] = inputData; // this inverses the order: element 0 is the MSB of the argument!
     if ( (waitForData == 0) && executeMultiByteCommand ) { // got the whole message
       switch (executeMultiByteCommand) {
         case ANALOG_MESSAGE:
-          if (currentAnalogCallback) {
-            (*currentAnalogCallback)(multiByteChannel,
-                                     (storedInputData[0] << 7)
-                                     + storedInputData[1]);
-          }
+        {
+            // Repack analog message as EXTENDED_ANALOG sysex message
+            byte b0 = storedInputData[0];
+            byte b1 = storedInputData[1];
+            storedInputData[0] = EXTENDED_ANALOG;
+            storedInputData[1] = multiByteChannel;
+            storedInputData[2] = b1;
+            storedInputData[3] = b0;
+            storedInputData[4] = END_SYSEX;
+            sysexBytesRead = 4; // Not including the END_SYSEX byte
+            processSysexMessage();
+        }
           break;
         case DIGITAL_MESSAGE:
           if (currentDigitalCallback) {
@@ -642,7 +649,6 @@ size_t FirmataClass::write(byte* buf, size_t length)
 void FirmataClass::attach(byte command, callbackFunction newFunction)
 {
   switch (command) {
-    case ANALOG_MESSAGE: currentAnalogCallback = newFunction; break;
     case DIGITAL_MESSAGE: currentDigitalCallback = newFunction; break;
     case REPORT_ANALOG: currentReportAnalogCallback = newFunction; break;
     case REPORT_DIGITAL: currentReportDigitalCallback = newFunction; break;

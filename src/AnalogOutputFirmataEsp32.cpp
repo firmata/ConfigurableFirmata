@@ -17,20 +17,15 @@
 */
 
 #include <ConfigurableFirmata.h>
-#include "AnalogFirmata.h"
 #include "AnalogOutputFirmata.h"
-
 #ifdef ESP32
 
 #define LEDC_BASE_FREQ 5000
 #define MAX_PWM_CHANNELS 16
 
-AnalogOutputFirmata* AnalogOutputFirmataInstance;
 
 AnalogOutputFirmata::AnalogOutputFirmata()
 {
-    AnalogOutputFirmataInstance = this;
-    Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
     for (int i = 0; i < MAX_PWM_CHANNELS; i++)
     {
         _pwmChannelMap[i] = 255;
@@ -43,19 +38,9 @@ void AnalogOutputFirmata::reset()
 }
 
 
-// Arduino like analogWrite
-// value has to be between 0 and DEFAULT_PWM_RESOLUTION
-
-// Because we use a global redirect with the analogWriteCallback, we need to get back to the instance again using a global variable
-void analogWrite(byte channel, uint32_t value)
-{
-    AnalogOutputFirmataInstance->analogWriteEsp32(channel, value);
-}
-
-void AnalogOutputFirmata::analogWriteEsp32(uint8_t pin, uint32_t value) {
+void AnalogOutputFirmata::analogWriteInternal(uint8_t pin, uint32_t value) {
     // calculate duty, 8191 from 2 ^ 13 - 1
     uint32_t valueMax = (1 << DEFAULT_PWM_RESOLUTION) - 1;
-    // Firmata.sendStringf(F("Setting duty cycle to %d/%d"), value, valueMax);
     uint32_t duty = min(value, valueMax);
     // write duty to matching channel number
     int channel = getChannelForPin(pin);
@@ -64,6 +49,10 @@ void AnalogOutputFirmata::analogWriteEsp32(uint8_t pin, uint32_t value) {
         ledcWrite(channel, duty);
         // Firmata.sendStringf(F("Channel %d has duty %d/%d"),  channel, duty, valueMax);
     }
+    else
+	{
+		Firmata.sendStringf(F("Error: Pin %d is not set to PWM"), pin);
+	}
 }
 
 int AnalogOutputFirmata::getChannelForPin(byte pin)
@@ -99,14 +88,18 @@ void AnalogOutputFirmata::setupPwmPin(byte pin) {
             Firmata.sendStringf(F("Unable to setup pin %d for PWM - no more channels."), pin);
             return;
         }
+        
+		// Firmata.sendStringf(F("Assigning channel %d to pin %d"), channel, pin);
+        _pwmChannelMap[channel] = pin;
+        pinMode(pin, OUTPUT);
+        ledcSetup(channel, LEDC_BASE_FREQ, DEFAULT_PWM_RESOLUTION);
+        ledcAttachPin(pin, channel);
+        ledcWrite(pin, 0);
+		return;
     }
-
-    // Firmata.sendStringf(F("Channel %d mapped to pin %d"), 4, channel, pin);
-    _pwmChannelMap[channel] = pin;
-    pinMode(pin, OUTPUT);
-    ledcSetup(channel, LEDC_BASE_FREQ, DEFAULT_PWM_RESOLUTION); // 13 is the resolution here
-    ledcAttachPin(pin, channel);
-    analogWrite(pin, 0);
+	
+	Firmata.sendStringf(F("Warning: Pin %d already assigned to channel %d"), pin, channel);
+	ledcWrite(pin, 0);
 }
 
 void AnalogOutputFirmata::internalReset()
@@ -131,10 +124,11 @@ boolean AnalogOutputFirmata::handlePinMode(byte pin, int mode)
     // Unlink the channel for this pin
     if (mode != PIN_MODE_PWM && (channel = getChannelForPin(pin)) != 255)
     {
+        // Firmata.sendStringf(F("Detaching pin %d"), pin);
         ledcDetachPin(pin);
         _pwmChannelMap[channel] = 255;
     }
-  return false;
+    return false;
 }
 
 void AnalogOutputFirmata::handleCapability(byte pin)
@@ -145,19 +139,4 @@ void AnalogOutputFirmata::handleCapability(byte pin)
   }
 }
 
-boolean AnalogOutputFirmata::handleSysex(byte command, byte argc, byte* argv)
-{
-  if (command == EXTENDED_ANALOG) {
-    if (argc > 1) {
-      int val = argv[1];
-      if (argc > 2) val |= (argv[2] << 7);
-      if (argc > 3) val |= (argv[3] << 14);
-      analogWriteCallback(argv[0], val);
-      return true;
-    }
-    return false;
-  } else {
-    return handleAnalogFirmataSysex(command, argc, argv);
-  }
-}
 #endif
