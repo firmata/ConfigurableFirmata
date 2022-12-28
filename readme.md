@@ -12,7 +12,28 @@ Firmata is a protocol for communicating with microcontrollers from software on a
 
 ## Release 3.0
 
-ConfigurableFirmata 3.0 contains some internal breaking changes for external modules. If you need to use a particular module (such as FirmataEncoder), either use a 2.xx version or ask the maintainer to update the module to work with V3.0.
+ConfigurableFirmata 3.0 contains some internal breaking changes for external modules. If you need to use a particular module (such as FirmataEncoder), either use a 2.xx version or ask the maintainer to update the module to work with V3.0. 
+
+If you have a sketch prepared for an older version of ConfigurableFirmata (< v3.0), you should either restart with the basic example (from the examples directory) or perform the following steps to adjust your sketch to the new library version:
+
+- Remove the line `#include <AnalogWrite.h>`
+- Replace the `loop()` function with this snippet:
+
+```cpp
+void loop()
+{
+  while(Firmata.available()) {
+    Firmata.processInput();
+    if (!Firmata.isParsingMessage()) {
+      break;
+    }
+  }
+
+  firmataExt.report(reporting.elapsed());
+}
+```
+
+It's no longer necessary to call `update()` for every module that requires polling. That is now handled by the above call to `report`. 
 
 ## Usage
 
