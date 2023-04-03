@@ -755,6 +755,14 @@ static inline void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callb
   attachInterrupt(interruptNumber, callback, (PinStatus) mode);
 }
 
+// Newer versions of the RP2040 SDK don't define the "standard" PIN_SPI_xxx macros, so reintroduce them here
+#ifndef PIN_SPI_SCK
+#define PIN_SPI_SCK PIN_SPI0_SCK
+#define PIN_SPI_MISO PIN_SPI0_MISO
+#define PIN_SPI_MOSI PIN_SPI0_MOSI
+#define PIN_SPI_SS PIN_SPI0_SS
+#endif
+
 #define TOTAL_ANALOG_PINS       4
 #define TOTAL_PINS              30
 #define VERSION_BLINK_PIN       LED_BUILTIN
@@ -767,6 +775,13 @@ static inline void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callb
 //#define WIRE_HOWMANY	(1)
 //#define PIN_WIRE_SDA            (6u)
 //#define PIN_WIRE_SCL            (7u)
+
+// Newer SDKs don't define these at all
+#ifndef PIN_WIRE_SDA
+#define PIN_WIRE_SDA PIN_WIRE0_SDA
+#define PIN_WIRE_SCL PIN_WIRE0_SCL
+#endif
+
 #define IS_PIN_I2C(p)           ((p) == PIN_WIRE_SDA || (p) == PIN_WIRE_SCL)
 // SPI-0 defaults to GP 16 (RX / MISO), 17 (CSn), 18 (SCK) & 19 (TX / MOSI) (physical pins 21, 22, 24, 25)
 #define IS_PIN_SPI(p)           ((p) == PIN_SPI_SCK || (p) == PIN_SPI_MOSI || (p) == PIN_SPI_MISO || (p) == PIN_SPI_SS)

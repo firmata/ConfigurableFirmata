@@ -129,6 +129,12 @@ void initTransport()
 {
   // Uncomment to save a couple of seconds by disabling the startup blink sequence.
   // Firmata.disableBlinkVersion();
+  
+#ifdef ESP8266
+  // need to ignore pins 1 and 3 when using an ESP8266 board. These are used for the serial communication.
+  Firmata.setPinMode(1, PIN_MODE_IGNORE);
+  Firmata.setPinMode(3, PIN_MODE_IGNORE);
+#endif
 #ifdef ENABLE_WIFI
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
