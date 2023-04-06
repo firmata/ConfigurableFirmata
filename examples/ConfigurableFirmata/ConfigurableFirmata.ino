@@ -213,9 +213,9 @@ void initFirmata()
 
 void setup()
 {
+	initFirmata();
 	initTransport();
 	Firmata.sendString(F("Booting device. Stand by..."));
-	initFirmata();
 
 	Firmata.parse(SYSTEM_RESET);
 
