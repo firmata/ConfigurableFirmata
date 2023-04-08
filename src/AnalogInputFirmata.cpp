@@ -85,6 +85,13 @@ void AnalogInputFirmata::handleCapability(byte pin)
 boolean AnalogInputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   if (command == ANALOG_MAPPING_QUERY) {
+	for (byte pin = 0; pin < TOTAL_PINS; pin++) {
+	  int mapped = PIN_TO_ANALOG(pin);
+	  if (mapped >= 0 && IS_PIN_ANALOG(pin))
+	  {
+		Firmata.sendStringf(F("Pin %d is mapped to analog channel A%d"), (int)pin, mapped);
+	  }
+    }
     Firmata.write(START_SYSEX);
     Firmata.write(ANALOG_MAPPING_RESPONSE);
     for (byte pin = 0; pin < TOTAL_PINS; pin++) {
