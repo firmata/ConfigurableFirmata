@@ -446,8 +446,6 @@ boolean FirmataClass::isResetting(void)
  */
 void FirmataClass::sendAnalog(byte analogPin, int value)
 {
-    Firmata.sendStringf(F("Reporting analog channel %d, raw value %d"), (int)analogPin, value);
-
     if (analogPin <= 15)
     {
         // pin can only be 0-15, so chop higher bits

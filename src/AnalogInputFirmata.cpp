@@ -59,8 +59,7 @@ void AnalogInputFirmata::reportAnalog(byte analogPin, bool enable, byte physical
 	else 
 	{
         analogInputsToReport = analogInputsToReport | (1 << analogPin);
-		Firmata.sendStringf(F("Enabling reporting on analog channel %d, physical pin %d, reports 0x%x"), analogPin, physicalPin, analogInputsToReport);
-        // prevent during system reset or all analog pin values will be reported
+		// prevent during system reset or all analog pin values will be reported
         // which may report noise for unconnected analog pins
         if (!Firmata.isResetting()) 
 		{
@@ -132,11 +131,6 @@ void AnalogInputFirmata::report(bool elapsed)
   }
 
   byte pin, analogPin;
-  if (analogInputsToReport)
-  {
-      Firmata.sendStringf(F("Attempting to report a change to pins 0x%x"), analogInputsToReport);
-  }
-
   /* ANALOGREAD - do all analogReads() at the configured sampling interval */
   for (pin = 0; pin < TOTAL_PINS; pin++) {
     if (IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == PIN_MODE_ANALOG) {
