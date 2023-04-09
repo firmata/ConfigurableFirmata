@@ -32,7 +32,7 @@
  * Query using the REPORT_FIRMWARE message.
  */
 #define FIRMATA_FIRMWARE_MAJOR_VERSION  3 // for non-compatible changes
-#define FIRMATA_FIRMWARE_MINOR_VERSION  0 // for backwards compatible changes
+#define FIRMATA_FIRMWARE_MINOR_VERSION  1 // for backwards compatible changes
 #define FIRMATA_FIRMWARE_BUGFIX_VERSION 0 // for bugfix releases
 
 #ifdef LARGE_MEM_DEVICE
@@ -48,7 +48,7 @@
 #endif
 
 // message command bytes (128-255/0x80-0xFF)
-#define DIGITAL_MESSAGE         0x90 // send data for a digital pin
+#define DIGITAL_MESSAGE         0x90 // send data for a digital port (8 bits)
 #define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM)
 #define REPORT_ANALOG           0xC0 // enable analog input by pin #
 #define REPORT_DIGITAL          0xD0 // enable digital input by port pair
@@ -68,7 +68,7 @@
 #define ENCODER_DATA            0x61 // reply with encoders current positions
 #define ACCELSTEPPER_DATA       0x62 // control a stepper motor
 #define REPORT_DIGITAL_PIN      0x63 // (reserved)
-#define EXTENDED_REPORT_ANALOG  0x64 // (reserved)
+#define EXTENDED_REPORT_ANALOG  0x64 // Enable reporting analog channels > 15. Supported with v3.1 or later.
 #define REPORT_FEATURES         0x65 // (reserved)
 #define SPI_DATA                0x68 // SPI Commands start with this byte
 #define ANALOG_MAPPING_QUERY    0x69 // ask for mapping of analog to pin numbers

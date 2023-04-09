@@ -27,7 +27,7 @@ class AnalogInputFirmata: public FirmataFeature
 {
   public:
     AnalogInputFirmata();
-    void reportAnalog(byte analogPin, int value);
+    void reportAnalog(byte analogPin, bool enable, byte physicalPin);
     void handleCapability(byte pin);
     boolean handlePinMode(byte pin, int mode);
     boolean handleSysex(byte command, byte argc, byte* argv);

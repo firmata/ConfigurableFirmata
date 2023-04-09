@@ -21,9 +21,22 @@
 
 AnalogInputFirmata *AnalogInputFirmataInstance;
 
+static int AnalogToPin(int analogChannel)
+{
+    for (byte pin = 0; pin < TOTAL_PINS; pin++)
+    {
+        if (analogChannel == PIN_TO_ANALOG(pin))
+        {
+            return pin;
+        }
+    }
+
+    return 0;
+}
+
 void reportAnalogInputCallback(byte analogPin, int value)
 {
-  AnalogInputFirmataInstance->reportAnalog(analogPin, value);
+  AnalogInputFirmataInstance->reportAnalog(analogPin, value == 1, (byte)AnalogToPin(analogPin));
 }
 
 AnalogInputFirmata::AnalogInputFirmata()
@@ -36,23 +49,25 @@ AnalogInputFirmata::AnalogInputFirmata()
 // -----------------------------------------------------------------------------
 /* sets bits in a bit array (int) to toggle the reporting of the analogIns
  */
-//void FirmataClass::setAnalogPinReporting(byte pin, byte state) {
-//}
-void AnalogInputFirmata::reportAnalog(byte analogPin, int value)
+void AnalogInputFirmata::reportAnalog(byte analogPin, bool enable, byte physicalPin)
 {
   if (analogPin < TOTAL_ANALOG_PINS) {
-    if (value == 0) {
-      analogInputsToReport = analogInputsToReport & ~ (1 << analogPin);
-    } else {
-      analogInputsToReport = analogInputsToReport | (1 << analogPin);
-      // prevent during system reset or all analog pin values will be reported
-      // which may report noise for unconnected analog pins
-      if (!Firmata.isResetting()) {
-        // Send pin value immediately. This is helpful when connected via
-        // ethernet, wi-fi or bluetooth so pin states can be known upon
-        // reconnecting.
-        Firmata.sendAnalog(analogPin, analogRead(analogPin));
-      }
+    if (enable == false)
+	{
+        analogInputsToReport = analogInputsToReport & ~ (1 << analogPin);
+    } 
+	else 
+	{
+        analogInputsToReport = analogInputsToReport | (1 << analogPin);
+        // prevent during system reset or all analog pin values will be reported
+        // which may report noise for unconnected analog pins
+        if (!Firmata.isResetting()) 
+		{
+            // Send pin value immediately. This is helpful when connected via
+            // ethernet, wi-fi or bluetooth so pin states can be known upon
+            // reconnecting.
+		    Firmata.sendAnalog(analogPin, analogRead(physicalPin));
+        }
     }
   }
   // TODO: save status to EEPROM here, if changed
@@ -62,13 +77,13 @@ boolean AnalogInputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_ANALOG(pin)) {
     if (mode == PIN_MODE_ANALOG) {
-      reportAnalog(PIN_TO_ANALOG(pin), 1); // turn on reporting
+      reportAnalog(PIN_TO_ANALOG(pin), true, pin); // turn on reporting
       if (IS_PIN_DIGITAL(pin)) {
         pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
       }
       return true;
     } else {
-      reportAnalog(PIN_TO_ANALOG(pin), 0); // turn off reporting
+      reportAnalog(PIN_TO_ANALOG(pin), false, pin); // turn off reporting
     }
   }
   return false;
@@ -85,13 +100,6 @@ void AnalogInputFirmata::handleCapability(byte pin)
 boolean AnalogInputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   if (command == ANALOG_MAPPING_QUERY) {
-	for (byte pin = 0; pin < TOTAL_PINS; pin++) {
-	  int mapped = PIN_TO_ANALOG(pin);
-	  if (mapped >= 0 && IS_PIN_ANALOG(pin))
-	  {
-		Firmata.sendStringf(F("Pin %d is mapped to analog channel A%d"), (int)pin, mapped);
-	  }
-    }
     Firmata.write(START_SYSEX);
     Firmata.write(ANALOG_MAPPING_RESPONSE);
     for (byte pin = 0; pin < TOTAL_PINS; pin++) {
@@ -99,6 +107,12 @@ boolean AnalogInputFirmata::handleSysex(byte command, byte argc, byte* argv)
     }
     Firmata.write(END_SYSEX);
     return true;
+  }
+  if (command == EXTENDED_REPORT_ANALOG && argc >= 2)
+  {
+  	byte analogChannel = argv[0];
+  	reportAnalog(analogChannel, argv[1] == 1, (byte)AnalogToPin(analogChannel));
+	return true;
   }
   return false;
 }
@@ -122,7 +136,7 @@ void AnalogInputFirmata::report(bool elapsed)
     if (IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == PIN_MODE_ANALOG) {
       analogPin = PIN_TO_ANALOG(pin);
       if (analogInputsToReport & (1 << analogPin)) {
-        Firmata.sendAnalog(analogPin, analogRead(analogPin));
+        Firmata.sendAnalog(analogPin, analogRead(pin));
       }
     }
   }
