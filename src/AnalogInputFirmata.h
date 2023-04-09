@@ -35,7 +35,7 @@ class AnalogInputFirmata: public FirmataFeature
     void report(bool elapsed) override;
   private:
     /* analog inputs */
-    int analogInputsToReport; // bitwise array to store pin reporting
+    int analogInputsToReport; // bitwise array to store pin reporting (bit0 = A0, bit1 = A1, etc.)
 };
 
 #endif

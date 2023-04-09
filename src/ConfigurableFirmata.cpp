@@ -446,10 +446,22 @@ boolean FirmataClass::isResetting(void)
  */
 void FirmataClass::sendAnalog(byte analogPin, int value)
 {
-  // pin can only be 0-15, so chop higher bits
-  Firmata.sendStringf(F("Reporting analog channel %d, raw value %d"), (int)analogPin, value);
-  FirmataStream->write(ANALOG_MESSAGE | (analogPin & 0xF));
-  sendValueAsTwo7bitBytes(value);
+    Firmata.sendStringf(F("Reporting analog channel %d, raw value %d"), (int)analogPin, value);
+
+    if (analogPin <= 15)
+    {
+        // pin can only be 0-15, so chop higher bits
+        FirmataStream->write(ANALOG_MESSAGE | (analogPin & 0xF));
+        sendValueAsTwo7bitBytes(value);
+    }
+    else
+    {
+        startSysex();
+        FirmataStream->write(EXTENDED_ANALOG);
+        FirmataStream->write(analogPin);
+        sendValueAsTwo7bitBytes(value);
+        endSysex();
+    }
 }
 
 /* (intentionally left out asterix here)

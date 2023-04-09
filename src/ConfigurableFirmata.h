@@ -77,7 +77,7 @@
 #define CAPABILITY_RESPONSE     0x6C // reply with supported modes and resolution
 #define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value
 #define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value
-#define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin
+#define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin or analog input from a pin > 15
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
 #define STEPPER_DATA            0x72 // control a stepper motor
