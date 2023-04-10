@@ -22,12 +22,12 @@
  * Query using the REPORT_VERSION message.
  */
 #define FIRMATA_PROTOCOL_MAJOR_VERSION  2 // for non-compatible changes
-#define FIRMATA_PROTOCOL_MINOR_VERSION  6 // for backwards compatible changes
+#define FIRMATA_PROTOCOL_MINOR_VERSION  7 // for backwards compatible changes
 #define FIRMATA_PROTOCOL_BUGFIX_VERSION 0 // for bugfix releases
 
 /*
  * Version numbers for the Firmata library.
- * ConfigurableFirmata 3.0 implements version 2.6.0 of the Firmata protocol.
+ * ConfigurableFirmata 3.1 implements version 2.7.0 of the Firmata protocol.
  * The firmware version will not always equal the protocol version going forward.
  * Query using the REPORT_FIRMWARE message.
  */
