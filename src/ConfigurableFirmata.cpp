@@ -333,7 +333,7 @@ void FirmataClass::parse(byte inputData)
 		  Firmata.sendString(F("Discarding input message, out of buffer"));
 		  parsingSysex = false;
 		  sysexBytesRead = 0;
-        waitForData = 0;
+		  waitForData = 0;
       }
 	  }
   } else if ( (waitForData > 0) && (inputData < 128) ) {

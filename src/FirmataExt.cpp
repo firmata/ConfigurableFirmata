@@ -95,6 +95,38 @@ boolean FirmataExt::handleSysex(byte command, byte argc, byte* argv)
       }
       Firmata.write(END_SYSEX);
       return true;
+    case SYSTEM_VARIABLE:
+	    {
+		    if (argc < 13)
+		    {
+                Firmata.sendString(F("Not enough bytes in SYSTEM_VARIABLE message"));
+                return false;
+		    }
+            bool write = argv[0];
+            SystemVariableDataType data_type = (SystemVariableDataType)argv[1];
+
+            SystemVariableError status = SystemVariableError::UnknownVariable; // Input value is irrelevant, so set to default reply value
+            int variable_id = Firmata.decodePackedUInt14(argv + 3);
+            byte pin = argv[5];
+            int value = (int)Firmata.decodePackedUInt32(argv + 6);
+            for (byte i = 0; i < numFeatures; i++) {
+                if (features[i]->handleSystemVariableQuery(write, &data_type, variable_id, pin, &status, &value))
+                {
+                    break;
+                }
+            }
+
+            Firmata.write(START_SYSEX);
+            Firmata.write(SYSTEM_VARIABLE);
+            Firmata.write((byte)write);
+            Firmata.write((byte)data_type);
+            Firmata.write((byte)status);
+            Firmata.sendPackedUInt14(variable_id);
+            Firmata.write(pin);
+            Firmata.sendPackedUInt32(value);
+            Firmata.write(END_SYSEX);
+	    }
+        return true;
     default:
       for (byte i = 0; i < numFeatures; i++) {
         if (features[i]->handleSysex(command, argc, argv)) {
