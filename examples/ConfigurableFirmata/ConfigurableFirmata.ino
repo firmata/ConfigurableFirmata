@@ -21,7 +21,7 @@ const int NETWORK_PORT = 27016;
 #define ENABLE_SERVO 
 #endif
 
-#define ENABLE_ACCELSTEPPER
+// #define ENABLE_ACCELSTEPPER
 
 // This is rarely used
 // #define ENABLE_BASIC_SCHEDULER
@@ -111,6 +111,13 @@ Frequency frequency;
 // When running dotnet/iot on the client side, prefer using the FirmataIlExecutor module instead
 #include <FirmataScheduler.h>
 FirmataScheduler scheduler;
+#endif
+
+#ifdef ESP32
+#include "EspSleep.h"
+// This module (for ESP deep sleep mode) must be configured according to the hardware (reset pin and polarity)
+// These values are valid for M5STACK Core2 integrated platforms
+EspSleep espSleeper(39, 0);
 #endif
 
 void systemResetCallback()
@@ -207,6 +214,10 @@ void initFirmata()
 
 #ifdef ENABLE_FREQUENCY
 	firmataExt.addFeature(frequency);
+#endif
+
+#ifdef ESP32
+	firmataExt.addFeature(EspSleep);
 #endif
 
 	Firmata.attach(SYSTEM_RESET, systemResetCallback);

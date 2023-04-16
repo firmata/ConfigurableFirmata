@@ -38,7 +38,7 @@ class FirmataFeature
     }
     virtual ~FirmataFeature() = default;
 
-    bool handleSystemVariableQuery(bool write, SystemVariableDataType* data_type, int variable_id, byte pin, SystemVariableError* status, int* value);
+    virtual bool handleSystemVariableQuery(bool write, SystemVariableDataType* data_type, int variable_id, byte pin, SystemVariableError* status, int* value);
 };
 
 #endif
