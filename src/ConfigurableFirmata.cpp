@@ -440,15 +440,26 @@ boolean FirmataClass::isResetting(void)
  * when using the ANALOG_MESSAGE. The maximum value of the ANALOG_MESSAGE is limited to 14 bits
  * (16384). To increase the pin range or value, see the documentation for the EXTENDED_ANALOG
  * message.
- * @param pin The analog pin to send the value of (limited to pins 0 - 15).
+ * @param analogChannel The analog pin to send the value of (limited to pins 0 - 15).
  * @param value The value of the analog pin (0 - 1024 for 10-bit analog, 0 - 4096 for 12-bit, etc).
  * The maximum value is 14-bits (16384).
  */
-void FirmataClass::sendAnalog(byte pin, int value)
+void FirmataClass::sendAnalog(byte analogPin, int value)
 {
-  // pin can only be 0-15, so chop higher bits
-  FirmataStream->write(ANALOG_MESSAGE | (pin & 0xF));
-  sendValueAsTwo7bitBytes(value);
+    if (analogPin <= 15)
+    {
+        // pin can only be 0-15, so chop higher bits
+        FirmataStream->write(ANALOG_MESSAGE | (analogPin & 0xF));
+        sendValueAsTwo7bitBytes(value);
+    }
+    else
+    {
+        startSysex();
+        FirmataStream->write(EXTENDED_ANALOG);
+        FirmataStream->write(analogPin);
+        sendValueAsTwo7bitBytes(value);
+        endSysex();
+    }
 }
 
 /* (intentionally left out asterix here)

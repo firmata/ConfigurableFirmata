@@ -27,7 +27,7 @@ class AnalogInputFirmata: public FirmataFeature
 {
   public:
     AnalogInputFirmata();
-    void reportAnalog(byte analogPin, int value);
+    void reportAnalog(byte analogPin, bool enable, byte physicalPin);
     void handleCapability(byte pin);
     boolean handlePinMode(byte pin, int mode);
     boolean handleSysex(byte command, byte argc, byte* argv);
@@ -35,7 +35,7 @@ class AnalogInputFirmata: public FirmataFeature
     void report(bool elapsed) override;
   private:
     /* analog inputs */
-    int analogInputsToReport; // bitwise array to store pin reporting
+    int analogInputsToReport; // bitwise array to store pin reporting (bit0 = A0, bit1 = A1, etc.)
 };
 
 #endif
