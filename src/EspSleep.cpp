@@ -49,7 +49,7 @@ bool EspSleep::handleSystemVariableQuery(bool write, SystemVariableDataType* dat
 		_sleepTimeout = 1000 * 60 * value; // Timeout in minutes, converted to ms
 		if (_goToSleepAfterDisconnect)
 		{
-			Firmata.sendStringf(F("Sleep mode activated after %d ms"), _sleepTimeout);
+			Firmata.sendStringf(F("Sleep mode will be activated after %d ms"), _sleepTimeout);
 			_messageReceived = millis();
 		}
 		return true;

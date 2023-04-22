@@ -97,7 +97,7 @@ boolean FirmataExt::handleSysex(byte command, byte argc, byte* argv)
       return true;
     case SYSTEM_VARIABLE:
 	    {
-		    if (argc < 13)
+		    if (argc < 11)
 		    {
                 Firmata.sendString(F("Not enough bytes in SYSTEM_VARIABLE message"));
                 return false;

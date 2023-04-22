@@ -335,7 +335,7 @@ void FirmataClass::parse(byte inputData)
 		  sysexBytesRead = 0;
 		  waitForData = 0;
       }
-	  }
+	}
   } else if ( (waitForData > 0) && (inputData < 128) ) {
     waitForData--;
     storedInputData[waitForData] = inputData; // this inverses the order: element 0 is the MSB of the argument!
