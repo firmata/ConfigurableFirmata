@@ -1,20 +1,20 @@
-// EspSleep.h
+// ArduinoSleep.h
 
 #pragma once
 #include <ConfigurableFirmata.h>
 #include "FirmataFeature.h"
 
-class EspSleep : public FirmataFeature
+class ArduinoSleep : public FirmataFeature
 {
 private:
 	bool _goToSleepAfterDisconnect;
 	uint32_t _sleepTimeout;
 	uint32_t _messageReceived;
-	short _wakeupPin;
+	byte _wakeupPin;
 	byte _triggerValue;
 
 public:
-	EspSleep(short wakeupPin, byte triggerValue)
+	ArduinoSleep(short wakeupPin, byte triggerValue)
 		: FirmataFeature()
 	{
 		_wakeupPin = wakeupPin;

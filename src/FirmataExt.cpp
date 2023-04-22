@@ -109,12 +109,18 @@ boolean FirmataExt::handleSysex(byte command, byte argc, byte* argv)
             int variable_id = Firmata.decodePackedUInt14(argv + 3);
             byte pin = argv[5];
             int value = (int)Firmata.decodePackedUInt32(argv + 6);
-            for (byte i = 0; i < numFeatures; i++) {
-                if (features[i]->handleSystemVariableQuery(write, &data_type, variable_id, pin, &status, &value))
-                {
-                    break;
-                }
-            }
+            
+			// Test basic variables first (implemented on ourselves)
+			if (!handleSystemVariableQuery(write, &data_type, variable_id, pin, &status, &value))
+			{
+				for (byte i = 0; i < numFeatures; i++) 
+				{
+					if (features[i]->handleSystemVariableQuery(write, &data_type, variable_id, pin, &status, &value))
+					{
+						break;
+					}
+				}
+			}
 
             Firmata.write(START_SYSEX);
             Firmata.write(SYSTEM_VARIABLE);
@@ -158,3 +164,25 @@ void FirmataExt::report(bool elapsed)
     features[i]->report(elapsed);
   }
 }
+
+bool FirmataExt::handleSystemVariableQuery(bool write, SystemVariableDataType* data_type, int variable_id, byte pin, SystemVariableError* status, int* value)
+{
+	// This handles the basic variables that are system and component independent
+	if (variable_id == 0)
+	{
+		*value = 1;
+		*data_type = SystemVariableDataType::Int;
+		*status = SystemVariableError::NoError;
+		return true;
+	}
+	if (variable_id == 1)
+	{
+		*value = MAX_DATA_BYTES;
+		*data_type = SystemVariableDataType::Int;
+		*status = SystemVariableError::NoError;
+		return true;
+	}
+
+	return false;
+}
+

@@ -38,7 +38,10 @@ class FirmataFeature
     }
     virtual ~FirmataFeature() = default;
 
-    virtual bool handleSystemVariableQuery(bool write, SystemVariableDataType* data_type, int variable_id, byte pin, SystemVariableError* status, int* value);
+    virtual bool handleSystemVariableQuery(bool write, SystemVariableDataType* data_type, int variable_id, byte pin, SystemVariableError* status, int* value)
+    {
+        // Empty base implementation (standard messages handled in FirmataExt.cpp)
+    }
 };
 
 #endif

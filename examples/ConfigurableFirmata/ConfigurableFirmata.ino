@@ -32,6 +32,8 @@ const int NETWORK_PORT = 27016;
 #define ENABLE_DIGITAL
 #define ENABLE_DHT
 #define ENABLE_FREQUENCY
+// Currently supported for AVR and ESP32
+#define ENABLE_SLEEP
 
 #ifdef ENABLE_DIGITAL
 #include <DigitalInputFirmata.h>
@@ -39,6 +41,11 @@ DigitalInputFirmata digitalInput;
 
 #include <DigitalOutputFirmata.h>
 DigitalOutputFirmata digitalOutput;
+#endif
+
+#ifdef ENABLE_SLEEP
+#include "ArduinoSleep.h"
+ArduinoSleep sleeper(39, 0);
 #endif
 
 #ifdef ENABLE_ANALOG
@@ -111,13 +118,6 @@ Frequency frequency;
 // When running dotnet/iot on the client side, prefer using the FirmataIlExecutor module instead
 #include <FirmataScheduler.h>
 FirmataScheduler scheduler;
-#endif
-
-#ifdef ESP32
-#include "EspSleep.h"
-// This module (for ESP deep sleep mode) must be configured according to the hardware (reset pin and polarity)
-// These values are valid for M5STACK Core2 integrated platforms
-EspSleep espSleeper(39, 0);
 #endif
 
 void systemResetCallback()
@@ -216,8 +216,8 @@ void initFirmata()
 	firmataExt.addFeature(frequency);
 #endif
 
-#ifdef ESP32
-	firmataExt.addFeature(EspSleep);
+#ifdef ENABLE_SLEEP
+	firmataExt.addFeature(sleeper);
 #endif
 
 	Firmata.attach(SYSTEM_RESET, systemResetCallback);
