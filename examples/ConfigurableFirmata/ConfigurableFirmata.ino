@@ -32,8 +32,11 @@ const int NETWORK_PORT = 27016;
 #define ENABLE_DIGITAL
 #define ENABLE_DHT
 #define ENABLE_FREQUENCY
+
 // Currently supported for AVR and ESP32
+#if defined (ESP32) || defined (ARDUINO_ARCH_AVR)
 #define ENABLE_SLEEP
+#endif
 
 #ifdef ENABLE_DIGITAL
 #include <DigitalInputFirmata.h>

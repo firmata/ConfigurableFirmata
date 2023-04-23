@@ -9,7 +9,7 @@ void ArduinoSleep::reset()
 }
 
 // Code can only be used on ESP32 (others would need a very different implementation for similar features)
-#ifdef ESP32
+#if defined(ESP32)
 void ArduinoSleep::EnterSleepMode()
 {
 	esp_sleep_enable_ext0_wakeup((gpio_num_t)_wakeupPin, _triggerValue); //1 = High, 0 = Low
@@ -22,7 +22,7 @@ void ArduinoSleep::EnterSleepMode()
 	// The ESP32 will perform a boot when woken up from sleep.
 	Serial.println("This will never be printed");
 }
-#elsif ARCH_AVR
+#else
 
 #include <avr/sleep.h>
 static void WakeUpInterrupt()
@@ -40,7 +40,10 @@ void ArduinoSleep::EnterSleepMode()
 	delay(100);
 	sleep_cpu();
 	delay(10);
+	sleep_disable();
+	Serial.println("CPU waking from deep sleep mode.");
 	detachInterrupt(interruptChannel);
+	_goToSleepAfterDisconnect = false;
 }
 #endif
 
@@ -66,6 +69,7 @@ void ArduinoSleep::report(bool elapsed)
 
 bool ArduinoSleep::handleSystemVariableQuery(bool write, SystemVariableDataType* data_type, int variable_id, byte pin, SystemVariableError* status, int* value)
 {
+	Firmata.sendStringf(F("Handling variable id now %d"), variable_id);
 	if (variable_id == 102)
 	{
 		int v = *value;
@@ -76,6 +80,7 @@ bool ArduinoSleep::handleSystemVariableQuery(bool write, SystemVariableDataType*
 			Firmata.sendStringf(F("Sleep mode will be activated after %d ms"), _sleepTimeout);
 			_messageReceived = millis();
 		}
+		*status = SystemVariableError::NoError;
 		return true;
 	}
 	if (variable_id == 103)
@@ -91,6 +96,7 @@ bool ArduinoSleep::handleSystemVariableQuery(bool write, SystemVariableDataType*
 		{
 			_wakeupPin = pin;
 			_triggerValue = *value;
+			*status = SystemVariableError::NoError;
 			Firmata.sendStringf(F("Configured wakeup on pin %d"), _wakeupPin);
 		}
 		else
