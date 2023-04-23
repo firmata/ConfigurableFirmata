@@ -36,12 +36,12 @@ void ArduinoSleep::EnterSleepMode()
 	byte interruptChannel = digitalPinToInterrupt(_wakeupPin);
 	attachInterrupt(interruptChannel, WakeUpInterrupt, _triggerValue ? HIGH : LOW);
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-	Serial.println("CPU entering deep sleep mode.");
+	// Serial.println("CPU entering deep sleep mode.");
 	delay(100);
 	sleep_cpu();
 	delay(10);
 	sleep_disable();
-	Serial.println("CPU waking from deep sleep mode.");
+	// Serial.println("CPU waking from deep sleep mode.");
 	detachInterrupt(interruptChannel);
 	_goToSleepAfterDisconnect = false;
 }
@@ -69,7 +69,6 @@ void ArduinoSleep::report(bool elapsed)
 
 bool ArduinoSleep::handleSystemVariableQuery(bool write, SystemVariableDataType* data_type, int variable_id, byte pin, SystemVariableError* status, int* value)
 {
-	Firmata.sendStringf(F("Handling variable id now %d"), variable_id);
 	if (variable_id == 102)
 	{
 		int v = *value;
@@ -97,7 +96,6 @@ bool ArduinoSleep::handleSystemVariableQuery(bool write, SystemVariableDataType*
 			_wakeupPin = pin;
 			_triggerValue = *value;
 			*status = SystemVariableError::NoError;
-			Firmata.sendStringf(F("Configured wakeup on pin %d"), _wakeupPin);
 		}
 		else
 		{
