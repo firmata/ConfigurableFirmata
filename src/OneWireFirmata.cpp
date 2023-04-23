@@ -116,11 +116,11 @@ boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
 
                 if (subcommand & ONEWIRE_READ_REQUEST_BIT) {
                   if (numBytes < 4) break;
-                  numReadBytes = *((int*)argv);
-                  argv += 2;
-                  correlationId = *((int*)argv);
-                  argv += 2;
-                  numBytes -= 4;
+                  numReadBytes = *((int16_t*)argv);
+                  argv += sizeof(int16_t);
+                  correlationId = *((int16_t*)argv);
+                  argv += sizeof(int16_t);
+                  numBytes -= 2 * sizeof(int16_t);
                 }
 
                 if (subcommand & ONEWIRE_DELAY_REQUEST_BIT) {
