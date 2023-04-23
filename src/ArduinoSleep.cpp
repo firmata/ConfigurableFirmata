@@ -22,7 +22,7 @@ void ArduinoSleep::EnterSleepMode()
 	// The ESP32 will perform a boot when woken up from sleep.
 	Serial.println("This will never be printed");
 }
-#else
+#elif defined(ARDUINO_ARCH_AVR)
 
 #include <avr/sleep.h>
 static void WakeUpInterrupt()
@@ -45,6 +45,15 @@ void ArduinoSleep::EnterSleepMode()
 	detachInterrupt(interruptChannel);
 	_goToSleepAfterDisconnect = false;
 }
+#elif defined(SIM)
+
+#include "SimulatorImpl.h"
+void ArduinoSleep::EnterSleepMode()
+{
+	Firmata.sendStringf(F("Simulating sleep"));
+	Sleep(5000);
+}
+
 #endif
 
 void ArduinoSleep::report(bool elapsed)

@@ -14,7 +14,7 @@ private:
 	byte _triggerValue;
 
 public:
-	ArduinoSleep(short wakeupPin, byte triggerValue)
+	ArduinoSleep(byte wakeupPin, byte triggerValue)
 		: FirmataFeature()
 	{
 		_wakeupPin = wakeupPin;
@@ -27,11 +27,12 @@ public:
 	virtual boolean handleSysex(byte command, byte argc, byte* argv) override
 	{
 		// Empty
+		return false;
 	}
 
 	void reset() override;
 
-	void report(bool elapsed);
+	void report(bool elapsed) override;
 
 	void handleCapability(byte pin) override
 	{
@@ -41,6 +42,7 @@ public:
 	boolean handlePinMode(byte pin, int mode) override
 	{
 		// Empty
+		return false;
 	}
 	
 	bool handleSystemVariableQuery(bool write, SystemVariableDataType* data_type, int variable_id, byte pin, SystemVariableError* status, int* value) override;
