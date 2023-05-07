@@ -182,6 +182,17 @@ bool FirmataExt::handleSystemVariableQuery(bool write, SystemVariableDataType* d
 		*status = SystemVariableError::NoError;
 		return true;
 	}
+    if (variable_id == 2)
+    {
+#if defined(LARGE_MEM_DEVICE)
+        *value = LARGE_MEM_RCV_BUF_SIZE;
+#else
+        *value = MAX_DATA_BYTES;
+#endif
+        *data_type = SystemVariableDataType::Int;
+        *status = SystemVariableError::NoError;
+        return true;
+    }
 
 	return false;
 }
