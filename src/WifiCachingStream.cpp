@@ -60,34 +60,9 @@ bool WifiCachingStream::Connect()
 
 int WifiCachingStream::read()
 {
-	if (_connection_sd < 0)
-	{
-		return -1;
-	}
-
-	if (!recvBufferEmpty())
-	{
-		// Serial.printf("Buffer not empty, next is %x at index %d\r\n", _recvBuffer[_recvBufferReadIndex], _recvBufferReadIndex);
-		return _recvBuffer[_recvBufferReadIndex++];
-	}
-
-	// Buffer is empty, so make sure we start again at the front
-	_recvBufferReadIndex = _recvBufferEnd = 0;
-	int received = 0;
-	auto result = network_recv_non_blocking(_connection_sd, (char*)_recvBuffer, RecvBufferSize, &received);
-	if (received >= 1)
-	{
-		_recvBufferEnd = received;
-		return _recvBuffer[_recvBufferReadIndex++];
-	}
-	if (result == E_NETWORK_RESULT_FAILED)
-	{
-		network_close_socket(&_connection_sd);
-		Serial.println(F("Connection dropped in read"));
-		Firmata.resetParser();
-	}
-
-	return -1;
+	// This method is unimplemented, as we only need readBytes with this class, for better performance.
+	ESP_LOGE("[NET]", "FATAL: WifiCachingStream::read not implemented");
+	throw "NOTIMPLEMENTED"; // Just crash.
 }
 
 int WifiCachingStream::available()
@@ -96,11 +71,6 @@ int WifiCachingStream::available()
 	if (_connection_sd < 0)
 	{
 		return 0;
-	}
-
-	if (!recvBufferEmpty())
-	{
-		return 1;
 	}
 
 	int p = network_poll(&_connection_sd);
@@ -117,13 +87,6 @@ int WifiCachingStream::available()
 
 int WifiCachingStream::peek()
 {
-	// We currently do not use this function, so this simple implementation is ok.
-	// If this was used instead of available(), we would need to fill the buffer as well.
-	if (!recvBufferEmpty())
-	{
-		return _recvBuffer[_recvBufferReadIndex];
-	}
-
 	return -1;
 }
 

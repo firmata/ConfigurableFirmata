@@ -13,7 +13,6 @@ class WifiCachingStream : public Stream
 {
 private:
 	static constexpr int SendBufferSize = 500;
-	static constexpr int RecvBufferSize = 128;
 	int _sd;
 	int _port;
 
@@ -21,10 +20,6 @@ private:
 
 	byte _sendBuffer[SendBufferSize];
 	int _sendBufferIndex;
-
-	byte _recvBuffer[RecvBufferSize];
-	int _recvBufferEnd;
-	int _recvBufferReadIndex;
 
 	bool _inSysex;
 public:
@@ -35,8 +30,6 @@ public:
 		_connection_sd = -1;
 		_sendBufferIndex = 0;
 		_inSysex = false;
-		_recvBufferEnd = 0;
-		_recvBufferReadIndex = 0;
 	}
 
 	void Init();
@@ -62,12 +55,6 @@ public:
 	bool isConnected() const
 	{
 		return _connection_sd > 0;
-	}
-
-private:
-	bool recvBufferEmpty()
-	{
-		return _recvBufferEnd == _recvBufferReadIndex;
 	}
 };
 #endif
