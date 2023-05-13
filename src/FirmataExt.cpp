@@ -170,6 +170,7 @@ bool FirmataExt::handleSystemVariableQuery(bool write, SystemVariableDataType* d
 	// This handles the basic variables that are system and component independent
 	if (variable_id == 0)
 	{
+        // System variable availability check: This always returns 1
 		*value = 1;
 		*data_type = SystemVariableDataType::Int;
 		*status = SystemVariableError::NoError;
@@ -177,6 +178,7 @@ bool FirmataExt::handleSystemVariableQuery(bool write, SystemVariableDataType* d
 	}
 	if (variable_id == 1)
 	{
+        // Max Sysex messae size
 		*value = MAX_DATA_BYTES;
 		*data_type = SystemVariableDataType::Int;
 		*status = SystemVariableError::NoError;
@@ -184,6 +186,7 @@ bool FirmataExt::handleSystemVariableQuery(bool write, SystemVariableDataType* d
 	}
     if (variable_id == 2)
     {
+        // Input buffer size
 #if defined(LARGE_MEM_DEVICE)
         *value = LARGE_MEM_RCV_BUF_SIZE;
 #else
