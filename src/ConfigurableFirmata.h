@@ -70,6 +70,7 @@
 #define REPORT_DIGITAL_PIN      0x63 // (reserved)
 #define EXTENDED_REPORT_ANALOG  0x64 // Enable reporting analog channels > 15. Supported with v3.1 or later.
 #define REPORT_FEATURES         0x65 // (reserved)
+#define SYSTEM_VARIABLE         0x66 // System Variable Set/Query (in testing, from protocol version 2.7)
 #define SPI_DATA                0x68 // SPI Commands start with this byte
 #define ANALOG_MAPPING_QUERY    0x69 // ask for mapping of analog to pin numbers
 #define ANALOG_MAPPING_RESPONSE 0x6A // reply with mapping info
@@ -124,6 +125,24 @@
 
 #define PIN_MODE_IGNORE         0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
 #define TOTAL_PIN_MODES         16
+
+// Constants used for SYSTEM_VARIABLE messages
+enum class SystemVariableError
+{
+	NoError = 0,
+    Readonly = 1,
+    WriteOnly = 2,
+    InvalidDataType = 3,
+    UnknownVariable = 4,
+    Error = 5
+};
+
+enum class SystemVariableDataType
+{
+	Undefined = 0,
+    Int = 1,
+};
+
 
 extern "C" {
   // callback function types

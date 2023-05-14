@@ -36,6 +36,8 @@ class FirmataExt: public FirmataFeature
     void addFeature(FirmataFeature &capability);
     void reset();
     void report(bool elapsed) override;
+	bool handleSystemVariableQuery(bool write, SystemVariableDataType* data_type, int variable_id, byte pin, SystemVariableError* status, int* value) override;
+
   private:
     FirmataFeature *features[MAX_FEATURES];
     byte numFeatures;

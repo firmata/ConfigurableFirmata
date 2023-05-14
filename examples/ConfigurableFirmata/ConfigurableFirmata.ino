@@ -21,7 +21,7 @@ const int NETWORK_PORT = 27016;
 #define ENABLE_SERVO 
 #endif
 
-#define ENABLE_ACCELSTEPPER
+// #define ENABLE_ACCELSTEPPER
 
 // This is rarely used
 // #define ENABLE_BASIC_SCHEDULER
@@ -33,12 +33,22 @@ const int NETWORK_PORT = 27016;
 #define ENABLE_DHT
 #define ENABLE_FREQUENCY
 
+// Currently supported for AVR and ESP32
+#if defined (ESP32) || defined (ARDUINO_ARCH_AVR)
+#define ENABLE_SLEEP
+#endif
+
 #ifdef ENABLE_DIGITAL
 #include <DigitalInputFirmata.h>
 DigitalInputFirmata digitalInput;
 
 #include <DigitalOutputFirmata.h>
 DigitalOutputFirmata digitalOutput;
+#endif
+
+#ifdef ENABLE_SLEEP
+#include "ArduinoSleep.h"
+ArduinoSleep sleeper(39, 0);
 #endif
 
 #ifdef ENABLE_ANALOG
@@ -207,6 +217,10 @@ void initFirmata()
 
 #ifdef ENABLE_FREQUENCY
 	firmataExt.addFeature(frequency);
+#endif
+
+#ifdef ENABLE_SLEEP
+	firmataExt.addFeature(sleeper);
 #endif
 
 	Firmata.attach(SYSTEM_RESET, systemResetCallback);

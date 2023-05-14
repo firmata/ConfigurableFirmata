@@ -325,17 +325,19 @@ void FirmataClass::parse(byte inputData)
       //fire off handler function
       processSysexMessage();
     } else {
-      //normal data byte - add to buffer
-      storedInputData[sysexBytesRead] = inputData;
-      sysexBytesRead++;
-	  if (sysexBytesRead == MAX_DATA_BYTES)
-	  {
-		  Firmata.sendString(F("Discarding input message, out of buffer"));
-		  parsingSysex = false;
-		  sysexBytesRead = 0;
-        waitForData = 0;
+      if (sysexBytesRead == MAX_DATA_BYTES)
+      {
+          Firmata.sendString(F("Discarding input message, out of buffer"));
+          parsingSysex = false;
+          sysexBytesRead = 0;
+          waitForData = 0;
       }
-	  }
+      else {
+          // normal data byte - add to buffer (done after the above, so sysex messages can actually have a total length of MAX_DATA_BYTES + 2
+          storedInputData[sysexBytesRead] = inputData;
+          sysexBytesRead++;
+      }
+	}
   } else if ( (waitForData > 0) && (inputData < 128) ) {
     waitForData--;
     storedInputData[waitForData] = inputData; // this inverses the order: element 0 is the MSB of the argument!

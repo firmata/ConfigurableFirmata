@@ -95,6 +95,44 @@ boolean FirmataExt::handleSysex(byte command, byte argc, byte* argv)
       }
       Firmata.write(END_SYSEX);
       return true;
+    case SYSTEM_VARIABLE:
+	    {
+		    if (argc < 11)
+		    {
+                Firmata.sendString(F("Not enough bytes in SYSTEM_VARIABLE message"));
+                return false;
+		    }
+            bool write = argv[0];
+            SystemVariableDataType data_type = (SystemVariableDataType)argv[1];
+
+            SystemVariableError status = SystemVariableError::UnknownVariable; // Input value is irrelevant, so set to default reply value
+            int variable_id = Firmata.decodePackedUInt14(argv + 3);
+            byte pin = argv[5];
+            int value = (int)Firmata.decodePackedUInt32(argv + 6);
+            
+			// Test basic variables first (implemented on ourselves)
+			if (!handleSystemVariableQuery(write, &data_type, variable_id, pin, &status, &value))
+			{
+				for (byte i = 0; i < numFeatures; i++) 
+				{
+					if (features[i]->handleSystemVariableQuery(write, &data_type, variable_id, pin, &status, &value))
+					{
+						break;
+					}
+				}
+			}
+
+            Firmata.write(START_SYSEX);
+            Firmata.write(SYSTEM_VARIABLE);
+            Firmata.write((byte)write);
+            Firmata.write((byte)data_type);
+            Firmata.write((byte)status);
+            Firmata.sendPackedUInt14(variable_id);
+            Firmata.write(pin);
+            Firmata.sendPackedUInt32(value);
+            Firmata.write(END_SYSEX);
+	    }
+        return true;
     default:
       for (byte i = 0; i < numFeatures; i++) {
         if (features[i]->handleSysex(command, argc, argv)) {
@@ -126,3 +164,39 @@ void FirmataExt::report(bool elapsed)
     features[i]->report(elapsed);
   }
 }
+
+bool FirmataExt::handleSystemVariableQuery(bool write, SystemVariableDataType* data_type, int variable_id, byte pin, SystemVariableError* status, int* value)
+{
+	// This handles the basic variables that are system and component independent
+	if (variable_id == 0)
+	{
+        // System variable availability check: This always returns 1
+		*value = 1;
+		*data_type = SystemVariableDataType::Int;
+		*status = SystemVariableError::NoError;
+		return true;
+	}
+	if (variable_id == 1)
+	{
+        // Max Sysex messae size
+		*value = MAX_DATA_BYTES;
+		*data_type = SystemVariableDataType::Int;
+		*status = SystemVariableError::NoError;
+		return true;
+	}
+    if (variable_id == 2)
+    {
+        // Input buffer size
+#if defined(LARGE_MEM_DEVICE)
+        *value = LARGE_MEM_RCV_BUF_SIZE;
+#else
+        *value = MAX_DATA_BYTES;
+#endif
+        *data_type = SystemVariableDataType::Int;
+        *status = SystemVariableError::NoError;
+        return true;
+    }
+
+	return false;
+}
+

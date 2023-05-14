@@ -102,6 +102,11 @@ public:
     _connected = false;
   }
 
+  void init()
+  {
+	  // Nothing to do here
+  }
+
 };
 
 #endif //WIFI_SERVER_STREAM_H
