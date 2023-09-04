@@ -40,7 +40,7 @@
 struct spi_device_config {
   byte deviceIdChannel;
   byte csPinOptions;
-  byte csPin;
+  char csPin;
   boolean packedData;
   SPISettings spi_settings;
   boolean used;
