@@ -213,6 +213,10 @@ int FirmataClass::available(void)
  */
 void FirmataClass::processSysexMessage(void)
 {
+  if (sysexBytesRead == 0) {
+    return;
+  }
+
   switch (storedInputData[0]) { //first byte in buffer is command
     case REPORT_FIRMWARE:
       printFirmwareVersion();
