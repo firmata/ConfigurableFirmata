@@ -10,9 +10,6 @@
 #include "esp_wifi.h"
 #include <WiFi.h>
 
-
-tcpip_adapter_if_t tcpip_if[MAX_ACTIVE_INTERFACES] = { TCPIP_ADAPTER_IF_MAX };
-
 const char* NETWORK_TAG = "[NET]";
 /// <summary>
 /// Checks whether there's data on the socket
@@ -80,46 +77,6 @@ network_result_t network_send(int32_t socket, byte b, bool isLast)
 network_result_t network_send(int32_t socket, const byte* data, size_t length)
 {
 	return (network_result_t)send(socket, data, length, 0);
-}
-
-
-int network_get_active_interfaces()
-{
-	int n_if = 0;
-
-	for (int i = 0; i < MAX_ACTIVE_INTERFACES; i++) {
-		tcpip_if[i] = TCPIP_ADAPTER_IF_MAX;
-	}
-	//if ((wifi_network_state == WIFI_STATE_STARTED) && (wifi_is_started())) {
-	wifi_mode_t mode;
-	esp_err_t ret = esp_wifi_get_mode(&mode);
-	if (ret == ESP_OK) {
-		if (mode == WIFI_MODE_STA) {
-			n_if = 1;
-			tcpip_if[0] = TCPIP_ADAPTER_IF_STA;
-		}
-		else if (mode == WIFI_MODE_AP) {
-			n_if = 1;
-			tcpip_if[0] = TCPIP_ADAPTER_IF_AP;
-		}
-		else if (mode == WIFI_MODE_APSTA) {
-			n_if = 2;
-			tcpip_if[0] = TCPIP_ADAPTER_IF_STA;
-			tcpip_if[1] = TCPIP_ADAPTER_IF_AP;
-		}
-	}
-	//}
-
-#if 0
-#ifdef CONFIG_MICROPY_USE_ETHERNET
-	if (lan_eth_active) {
-		n_if++;
-		tcpip_if[n_if - 1] = TCPIP_ADAPTER_IF_ETH;
-	}
-#endif
-#endif
-
-	return n_if;
 }
 
 //--------------------------------------------------------------------------------------------
