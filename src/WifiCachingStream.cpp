@@ -99,8 +99,8 @@ void WifiCachingStream::flush()
 
 size_t WifiCachingStream::readBytes(char* buffer, size_t length)
 {
-	int received = 0;
-	auto result = network_recv_non_blocking(_connection_sd, buffer, (int)length, &received);
+	int32_t received = 0;
+	auto result = network_recv_non_blocking(_connection_sd, buffer, (int32_t)length, &received);
 	if (received >= 1)
 	{
 		return received;

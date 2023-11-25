@@ -10,6 +10,8 @@ Firmata is a protocol for communicating with microcontrollers from software on a
 - **If you are using an older version of the Arduino IDE**, download or clone ConfigurableFirmata to your Arduino sketchbook library folder. This is typically `/Documents/Arduino/libraries/` on Mac or Linux or `\My Documents\Arduino\libraries\` on Windows.
 - **If you want to edit things yourself or help in development**, clone this repo to `\My Documents\Arduino\libraries\ConfigurableFirmata` and start hacking. Just delete the folder if it exists already.
 
+The library has, by default, a dependency on "DHT Sensor library". From version 3.3, it is installed automatically, but with IDE versions prior to 1.8 or for a development installation, it needs to be installed manually using the library manager. Other dependencies, such as Wire or Servo, are usually part of the default toolkit installation.
+
 ## Release 3.0
 
 ConfigurableFirmata 3.0 contains some internal breaking changes for external modules. If you need to use a particular module (such as FirmataEncoder), either use a 2.xx version or ask the maintainer to update the module to work with V3.0. 

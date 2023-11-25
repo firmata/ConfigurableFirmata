@@ -26,10 +26,6 @@
 
 AnalogOutputFirmata::AnalogOutputFirmata()
 {
-    for (int i = 0; i < MAX_PWM_CHANNELS; i++)
-    {
-        _pwmChannelMap[i] = 255;
-    }
 }
 
 void AnalogOutputFirmata::reset()
@@ -42,75 +38,26 @@ void AnalogOutputFirmata::analogWriteInternal(uint8_t pin, uint32_t value) {
     // calculate duty, 8191 from 2 ^ 13 - 1
     uint32_t valueMax = (1 << DEFAULT_PWM_RESOLUTION) - 1;
     uint32_t duty = min(value, valueMax);
-    // write duty to matching channel number
-    int channel = getChannelForPin(pin);
-    if (channel != 255)
-    {
-        ledcWrite(channel, duty);
-        // Firmata.sendStringf(F("Channel %d has duty %d/%d"),  channel, duty, valueMax);
-    }
-    else
-	{
-		Firmata.sendStringf(F("Error: Pin %d is not set to PWM"), pin);
-	}
-}
-
-int AnalogOutputFirmata::getChannelForPin(byte pin)
-{
-    for (int i = 0; i < MAX_PWM_CHANNELS; i++)
-    {
-        if (_pwmChannelMap[i] == pin)
-        {
-            return i;
-        }
-    }
-
-    return 255;
+    ledcWrite(pin, duty);
 }
 
 void AnalogOutputFirmata::setupPwmPin(byte pin) {
-  // Setup timer and attach timer to a led pin
-    int channel = getChannelForPin(pin);
-    if (channel == 255) // pin already assigned to a channel?
-    {
-        int i;
-        for (i = 0; i < MAX_PWM_CHANNELS; i++)
-        {
-            if (_pwmChannelMap[i] == 255)
-            {
-                channel = i;
-                break;
-            }
-        }
 
-        if (i >= MAX_PWM_CHANNELS)
-        {
-            Firmata.sendStringf(F("Unable to setup pin %d for PWM - no more channels."), pin);
-            return;
-        }
-        
-		// Firmata.sendStringf(F("Assigning channel %d to pin %d"), channel, pin);
-        _pwmChannelMap[channel] = pin;
-        pinMode(pin, OUTPUT);
-        ledcSetup(channel, LEDC_BASE_FREQ, DEFAULT_PWM_RESOLUTION);
-        ledcAttachPin(pin, channel);
-        ledcWrite(pin, 0);
-		return;
+    if (!ledcAttach(pin, LEDC_BASE_FREQ, DEFAULT_PWM_RESOLUTION))
+    {
+        Firmata.sendStringf(F("Warning: Pin %d could not be configured for PWM (too many channels?)"), pin);
     }
-	
-	Firmata.sendStringf(F("Warning: Pin %d already assigned to channel %d"), pin, channel);
 	ledcWrite(pin, 0);
 }
 
 void AnalogOutputFirmata::internalReset()
 {
-    for (int i = 0; i < MAX_PWM_CHANNELS; i++)
+    for (int i = 0; i < TOTAL_PINS; i++)
     {
-        if (_pwmChannelMap[i] != 255)
+        if (Firmata.getPinMode(i) == PIN_MODE_PWM)
         {
-            ledcDetachPin(_pwmChannelMap[i]);
+            ledcDetach(i);
         }
-        _pwmChannelMap[i] = 255;
     }
 }
 
@@ -120,13 +67,12 @@ boolean AnalogOutputFirmata::handlePinMode(byte pin, int mode)
         setupPwmPin(pin);
         return true;
     }
-    int channel = 255;
+   
     // Unlink the channel for this pin
-    if (mode != PIN_MODE_PWM && (channel = getChannelForPin(pin)) != 255)
+    if (mode != PIN_MODE_PWM && Firmata.getPinMode(pin) == PIN_MODE_PWM)
     {
         // Firmata.sendStringf(F("Detaching pin %d"), pin);
-        ledcDetachPin(pin);
-        _pwmChannelMap[channel] = 255;
+        ledcDetach(pin);
     }
     return false;
 }

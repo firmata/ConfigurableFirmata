@@ -31,10 +31,7 @@ class AnalogOutputFirmata: public FirmataFeature
   private:
       void setupPwmPin(byte pin);
 #if ESP32
-      int getChannelForPin(byte pin);
       void internalReset();
-      // This gives the active pin for each pwm channel. -1 if unused
-      byte _pwmChannelMap[16];
 #endif
 	boolean handleSysex(byte command, byte argc, byte* argv)
 	{

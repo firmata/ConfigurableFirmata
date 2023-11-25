@@ -8,9 +8,7 @@
 #include <sys/poll.h>
 
 #include "esp_wifi.h"
-
-
-tcpip_adapter_if_t tcpip_if[MAX_ACTIVE_INTERFACES] = { TCPIP_ADAPTER_IF_MAX };
+#include <WiFi.h>
 
 const char* NETWORK_TAG = "[NET]";
 /// <summary>
@@ -81,46 +79,6 @@ network_result_t network_send(int32_t socket, const byte* data, size_t length)
 	return (network_result_t)send(socket, data, length, 0);
 }
 
-
-int network_get_active_interfaces()
-{
-	int n_if = 0;
-
-	for (int i = 0; i < MAX_ACTIVE_INTERFACES; i++) {
-		tcpip_if[i] = TCPIP_ADAPTER_IF_MAX;
-	}
-	//if ((wifi_network_state == WIFI_STATE_STARTED) && (wifi_is_started())) {
-	wifi_mode_t mode;
-	esp_err_t ret = esp_wifi_get_mode(&mode);
-	if (ret == ESP_OK) {
-		if (mode == WIFI_MODE_STA) {
-			n_if = 1;
-			tcpip_if[0] = TCPIP_ADAPTER_IF_STA;
-		}
-		else if (mode == WIFI_MODE_AP) {
-			n_if = 1;
-			tcpip_if[0] = TCPIP_ADAPTER_IF_AP;
-		}
-		else if (mode == WIFI_MODE_APSTA) {
-			n_if = 2;
-			tcpip_if[0] = TCPIP_ADAPTER_IF_STA;
-			tcpip_if[1] = TCPIP_ADAPTER_IF_AP;
-		}
-	}
-	//}
-
-#if 0
-#ifdef CONFIG_MICROPY_USE_ETHERNET
-	if (lan_eth_active) {
-		n_if++;
-		tcpip_if[n_if - 1] = TCPIP_ADAPTER_IF_ETH;
-	}
-#endif
-#endif
-
-	return n_if;
-}
-
 //--------------------------------------------------------------------------------------------
 network_result_t network_wait_for_connection(int32_t listeningSocket, int32_t* connectionSocket, uint32_t* ip_addr, bool nonblocking)
 {
@@ -137,34 +95,8 @@ network_result_t network_wait_for_connection(int32_t listeningSocket, int32_t* c
 		// error
 		return E_NETWORK_RESULT_FAILED;
 	}
-
 	if (ip_addr) {
-		// check on which network interface the client was connected and save the IP address
-		tcpip_adapter_ip_info_t ip_info = { 0 };
-		int n_if = network_get_active_interfaces();
-
-		if (n_if > 0) {
-			struct sockaddr_in clientAddr;
-			in_addrSize = sizeof(struct sockaddr_in);
-			getpeername(_sd, (struct sockaddr*)&clientAddr, (socklen_t*)&in_addrSize);
-			ESP_LOGI(NETWORK_TAG, "Client IP: %08x", clientAddr.sin_addr.s_addr);
-			*ip_addr = 0;
-			for (int i = 0; i < n_if; i++) {
-				tcpip_adapter_get_ip_info(tcpip_if[i], &ip_info);
-				ESP_LOGI(NETWORK_TAG, "Adapter: %08x, %08x", ip_info.ip.addr, ip_info.netmask.addr);
-				if ((ip_info.ip.addr & ip_info.netmask.addr) == (ip_info.netmask.addr & clientAddr.sin_addr.s_addr)) {
-					*ip_addr = ip_info.ip.addr;
-					ESP_LOGI(NETWORK_TAG, "Client connected on interface %d", tcpip_if[i]);
-					break;
-				}
-			}
-			if (*ip_addr == 0) {
-				ESP_LOGE(NETWORK_TAG, "No IP address detected (?!)");
-			}
-		}
-		else {
-			ESP_LOGE(NETWORK_TAG, "No active interface (?!)");
-		}
+		*ip_addr = WiFi.localIP();
 	}
 
 	// enable non-blocking mode if not data channel connection

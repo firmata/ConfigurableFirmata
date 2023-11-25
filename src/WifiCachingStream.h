@@ -13,10 +13,10 @@ class WifiCachingStream : public Stream
 {
 private:
 	static constexpr int SendBufferSize = 500;
-	int _sd;
-	int _port;
+	int32_t _sd;
+	int32_t _port;
 
-	int _connection_sd;
+	int32_t _connection_sd;
 
 	byte _sendBuffer[SendBufferSize];
 	int _sendBufferIndex;
