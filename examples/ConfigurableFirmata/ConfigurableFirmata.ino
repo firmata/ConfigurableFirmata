@@ -137,6 +137,8 @@ void systemResetCallback()
 		else if (IS_PIN_DIGITAL(i)) 
 		{
 			Firmata.setPinMode(i, PIN_MODE_OUTPUT);
+// Uncomment following line, if you want to start the board at HIGH output state on powering up:
+//			digitalWrite(pin, HIGH);
 		}
 	}
 #endif
