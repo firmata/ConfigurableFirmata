@@ -75,7 +75,7 @@ void AnalogInputFirmata::reportAnalog(byte analogPin, bool enable, byte physical
 
 boolean AnalogInputFirmata::handlePinMode(byte pin, int mode)
 {
-  if (IS_PIN_ANALOG(pin)) {
+  if (FIRMATA_IS_PIN_ANALOG(pin)) {
     if (mode == PIN_MODE_ANALOG) {
       reportAnalog(PIN_TO_ANALOG(pin), true, pin); // turn on reporting
       if (IS_PIN_DIGITAL(pin)) {
@@ -91,7 +91,7 @@ boolean AnalogInputFirmata::handlePinMode(byte pin, int mode)
 
 void AnalogInputFirmata::handleCapability(byte pin)
 {
-  if (IS_PIN_ANALOG(pin)) {
+  if (FIRMATA_IS_PIN_ANALOG(pin)) {
     Firmata.write(PIN_MODE_ANALOG);
     Firmata.write(DEFAULT_ADC_RESOLUTION); // Defaults to 10-bit resolution
   }
@@ -103,7 +103,7 @@ boolean AnalogInputFirmata::handleSysex(byte command, byte argc, byte* argv)
     Firmata.write(START_SYSEX);
     Firmata.write(ANALOG_MAPPING_RESPONSE);
     for (byte pin = 0; pin < TOTAL_PINS; pin++) {
-      Firmata.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
+      Firmata.write(FIRMATA_IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
     }
     Firmata.write(END_SYSEX);
     return true;
@@ -133,7 +133,7 @@ void AnalogInputFirmata::report(bool elapsed)
   byte pin, analogPin;
   /* ANALOGREAD - do all analogReads() at the configured sampling interval */
   for (pin = 0; pin < TOTAL_PINS; pin++) {
-    if (IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == PIN_MODE_ANALOG) {
+    if (FIRMATA_IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == PIN_MODE_ANALOG) {
       analogPin = PIN_TO_ANALOG(pin);
       if (analogInputsToReport & (1 << analogPin)) {
         Firmata.sendAnalog(analogPin, analogRead(pin));
