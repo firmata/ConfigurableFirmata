@@ -39,6 +39,7 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install arduino:avr
           arduino-cli core install arduino:sam
+          arduino-cli core install arduino:renesas_uno
 
       - run: |
           arduino-cli core install esp32:esp32
@@ -46,5 +47,7 @@ jobs:
       - run: arduino-cli compile --fqbn arduino:avr:uno ./examples/ConfigurableFirmata --warnings more
 
       - run: arduino-cli compile --fqbn arduino:sam:arduino_due_x_dbg ./examples/ConfigurableFirmata --warnings more
+
+      - run: arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi ./examples/ConfigurableFirmata --warnings more
 
       - run: arduino-cli compile --fqbn esp32:esp32:esp32:PSRAM=disabled,PartitionScheme=default,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,DebugLevel=none ./examples/ConfigurableFirmata --warnings more

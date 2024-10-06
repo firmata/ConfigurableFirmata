@@ -218,7 +218,7 @@ void systemResetCallback()
   // pins with analog capability default to analog input
   // otherwise, pins default to digital output
   for (byte i = 0; i < TOTAL_PINS; i++) {
-    if (IS_PIN_ANALOG(i)) {
+    if (FIRMATA_IS_PIN_ANALOG(i)) {
 #ifdef AnalogInputFirmata_h
       // turns off pull-up, configures everything
       Firmata.setPinMode(i, PIN_MODE_ANALOG);

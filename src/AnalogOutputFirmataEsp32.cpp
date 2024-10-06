@@ -63,7 +63,7 @@ void AnalogOutputFirmata::internalReset()
 
 boolean AnalogOutputFirmata::handlePinMode(byte pin, int mode)
 {
-    if (mode == PIN_MODE_PWM && IS_PIN_PWM(pin)) {
+    if (mode == PIN_MODE_PWM && FIRMATA_IS_PIN_PWM(pin)) {
         setupPwmPin(pin);
         return true;
     }
@@ -79,7 +79,7 @@ boolean AnalogOutputFirmata::handlePinMode(byte pin, int mode)
 
 void AnalogOutputFirmata::handleCapability(byte pin)
 {
-  if (IS_PIN_PWM(pin)) {
+  if (FIRMATA_IS_PIN_PWM(pin)) {
     Firmata.write(PIN_MODE_PWM);
     Firmata.write(DEFAULT_PWM_RESOLUTION);
   }

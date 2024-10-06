@@ -130,16 +130,13 @@ void systemResetCallback()
 #ifndef ESP32 
 	for (byte i = 0; i < TOTAL_PINS; i++) 
 	{
-		if (IS_PIN_ANALOG(i)) 
+		if (FIRMATA_IS_PIN_ANALOG(i)) 
 		{
 			Firmata.setPinMode(i, PIN_MODE_ANALOG);
 		} 
 		else if (IS_PIN_DIGITAL(i)) 
 		{
 			Firmata.setPinMode  (i, PIN_MODE_OUTPUT);
-// Uncomment following 2 lines, if you want to start the board at HIGH output state on powering up:
-//			Firmata.digitalWrite(i, HIGH);
-//			Firmata.setPinState (i, HIGH);
 		}
 	}
 #endif
