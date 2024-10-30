@@ -30,7 +30,13 @@ AnalogOutputFirmata::AnalogOutputFirmata()
 
 void AnalogOutputFirmata::reset()
 {
-    internalReset();
+    for (int i = 0; i < TOTAL_PINS; i++)
+    {
+        if (Firmata.getPinMode(i) == PIN_MODE_PWM)
+        {
+            ledcDetach(i);
+        }
+    }
 }
 
 
@@ -48,17 +54,6 @@ void AnalogOutputFirmata::setupPwmPin(byte pin) {
         Firmata.sendStringf(F("Warning: Pin %d could not be configured for PWM (too many channels?)"), pin);
     }
 	ledcWrite(pin, 0);
-}
-
-void AnalogOutputFirmata::internalReset()
-{
-    for (int i = 0; i < TOTAL_PINS; i++)
-    {
-        if (Firmata.getPinMode(i) == PIN_MODE_PWM)
-        {
-            ledcDetach(i);
-        }
-    }
 }
 
 boolean AnalogOutputFirmata::handlePinMode(byte pin, int mode)

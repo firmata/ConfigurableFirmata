@@ -30,9 +30,6 @@ class AnalogOutputFirmata: public FirmataFeature
     void analogWriteInternal(byte pin, uint32_t value);
   private:
       void setupPwmPin(byte pin);
-#if ESP32
-      void internalReset();
-#endif
 	boolean handleSysex(byte command, byte argc, byte* argv)
 	{
 		if (command == EXTENDED_ANALOG) 
