@@ -9,6 +9,7 @@
 #include "I2CFirmata.h"
 
 I2CFirmata::I2CFirmata()
+	: query()
 {
     isI2CEnabled = false;
     queryIndex = -1;
