@@ -702,7 +702,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #elif defined(ESP32)
 #define TOTAL_ANALOG_PINS       20 /* Must be the largest Axx number, not NUM_ANALOG_INPUTS*/
 #define TOTAL_PINS              NUM_DIGITAL_PINS
-#ifdef ARDUINO_M5STACK_Core2
+#if defined (ARDUINO_M5STACK_Core2) || defined (ARDUINO_M5STACK_TOUGH)
 // Use an external pin - pin 2 is connected to the speaker
 #define VERSION_BLINK_PIN       27
 #else
