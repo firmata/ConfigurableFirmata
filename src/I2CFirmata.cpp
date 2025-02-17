@@ -9,6 +9,7 @@
 #include "I2CFirmata.h"
 
 I2CFirmata::I2CFirmata()
+	: query()
 {
     isI2CEnabled = false;
     queryIndex = -1;
@@ -243,7 +244,7 @@ boolean I2CFirmata::enableI2CPins()
   isI2CEnabled = true;
 
   Wire.end();
-#ifdef ARDUINO_M5STACK_Core2
+#if defined(ARDUINO_M5STACK_Core2) || defined (ARDUINO_M5STACK_TOUGH)
     // For the M5Stack, we explicitly choose the pins, because we want to use the internal I2C bus by default
     // It has the on-board devices attached: touchscreen, RTC, power controller and IMU (Core2 only)
   Wire.begin(21, 22);
