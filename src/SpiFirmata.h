@@ -64,7 +64,7 @@ class SpiFirmata: public FirmataFeature
     void handleCapability(byte pin);
     boolean handleSysex(byte command, byte argc, byte* argv);
     void reset();
-    void report();
+    void report(bool elapsed) override;
 
   private:
     void handleSpiRequest(byte command, byte argc, byte *argv);
@@ -404,7 +404,7 @@ void SpiFirmata::reset()
   }
 }
 
-void SpiFirmata::report()
+void SpiFirmata::report(bool elapsed)
 {
 }
 
