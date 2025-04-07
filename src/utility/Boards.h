@@ -134,8 +134,12 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define digitalPinHasPWM(p)     IS_PIN_DIGITAL(p)
 #endif
 
+#ifndef NOT_AN_INTERRUPT
+#define NOT_AN_INTERRUPT        (-1)
+#endif
+
 #undef IS_PIN_INTERRUPT
-#if defined(digitalPinToInterrupt) && defined(NOT_AN_INTERRUPT)
+#if (defined(digitalPinToInterrupt) || defined(ARDUINO_ARCH_RENESAS)) && defined(NOT_AN_INTERRUPT)
 #define IS_PIN_INTERRUPT(p)     (digitalPinToInterrupt(p) > NOT_AN_INTERRUPT)
 #else
 #define IS_PIN_INTERRUPT(p)     (0)
