@@ -59,10 +59,6 @@ void DigitalInputFirmata::outputPort(byte portNumber, byte portValue, byte force
  * to the Serial output queue using Serial.print() */
 void DigitalInputFirmata::report(bool elapsed)
 {
-    if (!elapsed)
-    {
-        return;
-    }
 #ifdef ARDUINO_PINOUT_OPTIMIZE /* AVR type boards */
   /* Using non-looping code allows constants to be given to readPort().
    * The compiler will apply substantial optimizations if the inputs

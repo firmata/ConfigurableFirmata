@@ -274,6 +274,10 @@ void I2CFirmata::reset()
 void I2CFirmata::report(bool elapsed)
 {
   // report i2c data for all device with read continuous mode enabled
+  if (!elapsed)
+  {
+    return;
+  }
   if (queryIndex > -1) {
     for (byte i = 0; i < queryIndex + 1; i++) {
       readAndReportData(query[i].addr, query[i].reg, query[i].bytes, query[i].stopTX, 0);
