@@ -130,6 +130,10 @@ void ServoFirmata::attach(byte pin, int minPulse, int maxPulse)
 
 void ServoFirmata::detach(byte pin)
 {
+  // Servo not available for this pin?
+  if (PIN_TO_SERVO(pin) >= sizeof(servos) / sizeof(servos[0])) {
+    return;
+  }
   Servo *servo = servos[PIN_TO_SERVO(pin)];
   if (servo) {
     if (servo->attached())
