@@ -115,6 +115,7 @@ boolean ServoFirmata::handleSysex(byte command, byte argc, byte* argv)
 
 void ServoFirmata::attach(byte pin, int minPulse, int maxPulse)
 {
+  if (! IS_PIN_SERVO(pin)) {return;}
   Servo *servo = servos[PIN_TO_SERVO(pin)];
   if (!servo) {
     servo = new Servo();
@@ -130,6 +131,7 @@ void ServoFirmata::attach(byte pin, int minPulse, int maxPulse)
 
 void ServoFirmata::detach(byte pin)
 {
+  if (! IS_PIN_SERVO(pin)) {return;}
   // Servo not available for this pin?
   if (PIN_TO_SERVO(pin) >= sizeof(servos) / sizeof(servos[0])) {
     return;
