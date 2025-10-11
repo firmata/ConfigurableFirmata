@@ -12,7 +12,11 @@ void ArduinoSleep::reset()
 #if defined(ESP32)
 void ArduinoSleep::EnterSleepMode()
 {
+#if defined(CONFIG_IDF_TARGET_ESP32C3) // https://github.com/espressif/arduino-esp32/issues/7005
+	esp_deep_sleep_enable_gpio_wakeup(1 << 9, ESP_GPIO_WAKEUP_GPIO_HIGH);
+#else
 	esp_sleep_enable_ext0_wakeup((gpio_num_t)_wakeupPin, _triggerValue); //1 = High, 0 = Low
+#endif
 	// If you were to use ext1, you would use it like
 	// esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
 
