@@ -21,8 +21,6 @@
 
 Frequency *FrequencyFirmataInstance;
 
-volatile int32_t Frequency::_ticks = 0;
-
 Frequency::Frequency()
 {
   FrequencyFirmataInstance = this;
@@ -30,12 +28,32 @@ Frequency::Frequency()
   _reportDelay = 0;
   _ticks = 0;
   _lastReport = millis();
+  _minTicksBetweenPulses = 0;
+  _lastTickTime = 0;
 }
 
 void Frequency::FrequencyIsr()
 {
+	FrequencyFirmataInstance->InstanceIsr();
+}
+
+void Frequency::InstanceIsr()
+{
 	// The ISR can't be interrupted by the main routine, therefore this is thread safe
-	_ticks++;
+	int32_t thisTickMicros = micros();
+	if (_lastTickTime == 0)
+	{
+	  _lastTickTime = thisTickMicros;
+	  _ticks++;
+	  return;
+	}
+	int32_t delta = thisTickMicros - _lastTickTime;
+	// Ticks wraps around rather quickly
+	if (delta >= _minTicksBetweenPulses || delta < 0)
+	{
+	  _ticks++;
+	  _lastTickTime = thisTickMicros;
+    }
 }
 
 boolean Frequency::handleSysex(byte command, byte argc, byte* argv)
@@ -52,7 +70,7 @@ boolean Frequency::handleSysex(byte command, byte argc, byte* argv)
 	  {
 		  if (_activePin == pin || (_activePin >= 0 && pin == 0x7F))
 		  {
-		  	// This cannot be -1 here
+		  	  // This cannot be -1 here
 			  uint8_t interrupt = (uint8_t)digitalPinToInterrupt(_activePin);
 			  detachInterrupt(interrupt);
 			  _activePin = -1;
@@ -64,16 +82,16 @@ boolean Frequency::handleSysex(byte command, byte argc, byte* argv)
 	  byte frequencyCommand = argv[0];
 	  byte pin = argv[1];
 	  int interrupt = digitalPinToInterrupt(pin);
-	  byte mode = argv[2]; // see below
-	  int32_t ms = (argv[4] << 7) | argv[3];
+	  if (pin >= TOTAL_PINS || interrupt < 0)
+	  {
+		  Firmata.sendString(F("Invalid pin number for frequency command"));
+	      return true;
+	  }
 	  // Set or query
 	  if (frequencyCommand == FREQUENCY_SUBCOMMAND_QUERY)
 	  {
-		  if (pin >= TOTAL_PINS || interrupt < 0)
-		  {
-			  Firmata.sendString(F("Invalid pin number for frequency command"));
-			  return true;
-		  }
+		  byte mode = argv[2]; // see below
+	  	  int32_t ms = (argv[4] << 7) | argv[3];
 		  
 		  if (ms > 0)
 		  {
@@ -119,6 +137,14 @@ boolean Frequency::handleSysex(byte command, byte argc, byte* argv)
 			  return true;
 		  }
 		  reportValue(pin);
+	  }
+	  else if (frequencyCommand == FREQUENCY_SUBCOMMAND_FILTER && argc >= 7)
+	  {
+		  int32_t suppressionTime = Firmata.decodePackedUInt32(argv + 2);
+		  noInterrupts();
+		  _minTicksBetweenPulses = suppressionTime;
+		  interrupts();
+		  Firmata.sendStringf(F("Filter: %ld us"), _minTicksBetweenPulses);
 	  }
   }
   return true;

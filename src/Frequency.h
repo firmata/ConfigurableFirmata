@@ -30,6 +30,7 @@
 #define FREQUENCY_SUBCOMMAND_CLEAR 0
 #define FREQUENCY_SUBCOMMAND_QUERY 1
 #define FREQUENCY_SUBCOMMAND_REPORT 2
+#define FREQUENCY_SUBCOMMAND_FILTER 3
 
 // This class tries to accurately measure the number of ticks per time on a specific pin.
 // All pins that have interrupt capability can be used, but only one at a time. 
@@ -44,11 +45,14 @@ class Frequency: public FirmataFeature
     void reset();
   private:
     static void FrequencyIsr();
+	void InstanceIsr();
     void reportValue(int pin);
     int _activePin;
 	int32_t _reportDelay;
 	int32_t _lastReport;
-	static volatile int32_t _ticks;
+	volatile int32_t _ticks;
+	volatile int32_t _minTicksBetweenPulses;
+	volatile int32_t _lastTickTime;
 };
 
 #endif
