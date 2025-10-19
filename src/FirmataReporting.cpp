@@ -44,6 +44,13 @@ boolean FirmataReporting::handleSysex(byte command, byte argc, byte* argv)
       return true;
     }
   }
+  if (command == SAMPLING_INTERVAL_QUERY) {
+    Firmata.startSysex();
+    Firmata.write(SAMPLING_INTERVAL);
+    Firmata.sendPackedUInt14(samplingInterval);
+    Firmata.endSysex();
+    return true;
+  }
   return false;
 }
 
