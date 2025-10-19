@@ -91,7 +91,7 @@
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware
 #define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop
 #define SCHEDULER_DATA          0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler
-#define ANALOG_CONFIG           0x7C // (reserved)
+#define SAMPLING_INTERVAL_QUERY 0x7C // request the current sampling interval
 #define FREQUENCY_COMMAND       0x7D // Command for the Frequency module
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
