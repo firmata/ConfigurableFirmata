@@ -41,8 +41,6 @@ It's no longer necessary to call `update()` for every module that requires polli
 
 ConfigurableFirmata is a version of Firmata that breaks features such as Digital Input, Digital Output, Analog Input, Analog Output, I2C, etc into [individual classes](https://github.com/firmata/ConfigurableFirmata/tree/master/src) making it easier to mix and match standard features with custom features. To start, open the "ConfigurableFirmata.ino" file found in the examples subfolder (or the examples menu of the Arduino IDE). A bunch of `#define` statements at the beginning of the file let you select the modules to include. 
 
-If you are using ConfigurableFirmata 2.x, an alternative way to generate the list of included features with ConfigurableFirmata is with [firmatabuilder](http://firmatabuilder.com) which is a simple web application that generates an Arduino sketch based on a selection of Firmata features. Download the generated sketch, compile and upload it to your board. **firmatabuilder is not currently compatible with ConfigurableFirmata 3.x; use the method below instead, as [recommended here](https://github.com/firmata/firmata-builder/issues/26)**.
-
 Another way to use ConfigurableFirmata is by adding or removing various include statements in the [ConfigurableFirmata.ino](https://github.com/firmata/ConfigurableFirmata/blob/master/examples/ConfigurableFirmata/ConfigurableFirmata.ino) example file.
 
 ## Supported boards
