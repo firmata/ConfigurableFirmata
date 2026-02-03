@@ -53,17 +53,24 @@ Pinout diagrams differ by vendor. The ESP32 module is almost always sold with a 
 | I2C, Bus 0 | Pins 21 and 22|
 | SPI, Bus 0 | Pins 18, 19 and 23 |
 
-## RP2040 / Raspberry Pi Pico
+## [RP2040](https://www.raspberrypi.com/products/rp2040/) / Raspberry Pi [Pico, PicoW](https://www.raspberrypi.com/products/raspberry-pi-pico/), [RP2350](https://www.raspberrypi.com/products/rp2350/) / [Pico2 + Pico2W](https://www.raspberrypi.com/products/raspberry-pi-pico-2/) and compatible boards
 
-First of all add support for RP2040 boards in the Arduino IDE by going to Boards Manager within the Tools menu.
-Enter "RP2040" in the search box, select "Arduino Mbed OS RP2040 Boards" and install the latest version (2.3.1 at the time of writing).
+First of all add support for RP2040 boards in the Arduino IDE 2, by going to Boards Manager within the Tools menu.
+Enter "RP2040" in the search box, 
+ - Select "Rasberryi Pi Pico/RP2040/RP2350 by Earle F. Philhower" (See 110+ [supported boards here...](https://github.com/earlephilhower/arduino-pico?tab=readme-ov-file#supported-boards) ) 
+    **More documentation** about EarlyPh. library + VSCode + PlatformIO: [here...](https://arduino-pico.readthedocs.io/en/latest/)
+ - You can also select old "Arduino Mbed OS RP2040 Boards" and install the latest version (4.2.4 at the time of writing 2025-04-16), but it will only support RP2040 = Pico1(W), and no temperature reading. Also it compiles slower, and many advanced features are not available. So it's not recommended any more.
 
-The RP2040 is supported by ConfigurableFirmata v2.11 or later. 
+> **! Note:** that version < 3.4 has a [bug in SERVO part](https://github.com/firmata/ConfigurableFirmata/pull/184), so it had to be disabled. You may manually download fixed code if you need SERVO, until v3.4+ is released.
+> To disable it, put "//" before the line: `// #define ENABLE_SERVO`
+
+### The RP2040 is supported by ConfigurableFirmata v2.11 or later. 
 
 | Property  | Value (Logical pin numbers) |
 | ----------- | ------------------------------------ |
-| Number of Pins  | 30 |
-| Number of analog inputs | 4 |
+| Number of Pins  | 30+1* |
+| Number of analog inputs | 4+1* |
+| *Built in [temperature sensor](https://github.com/earlephilhower/arduino-pico/discussions/2897#discussioncomment-12816194) | A4 |
 | Flash Memory | 2Mb |
 | RAM | 264kb |
 | PWM capable pins | 16 |
@@ -73,47 +80,23 @@ The RP2040 is supported by ConfigurableFirmata v2.11 or later.
 | SPI, Bus 0 | Pin 16 MISO, Pin 17 CS, Pin 18 SCK, Pin 19 MOSI |
 | SPI, Bus 1 | Not currently supported by ConfigurableFirmata |
 
-ConfigurableFirmata v2.10.1 requires a minor modification to the `Boards.h` file in the `src/utility` folder for the Pico to work with the Firmata libraries.
-On macOS by default this file can be found here: `~/Documents/Arduino/libraries/ConfigurableFirmata/src/utility/Boards.h`.
+### The [RP2350](https://www.raspberrypi.com/products/rp2350/) is supported by ConfigurableFirmata v3.4 or later. 2025-04-16+ (Pico2 + Pico2W)
+| Property  | Value (Logical pin numbers) |
+| ----------- | ------------------------------------ |
+| Number of Pins  | 48+1* |
+| Number of analog inputs | 8+1* |
+| *Built in [temperature sensor](https://github.com/earlephilhower/arduino-pico/discussions/2897#discussioncomment-12816194) | A8 |
+| Flash Memory | 4Mb? |
+| RAM | 520kb |
+| PWM capable pins | 24 |
+| Built-in LED | Yes, pin 25 |
 
-Add the following prior to the `#else` instruction towards the end of this file to enable support for the Raspberry Pi Pico:
 
-```
-// Raspberry Pi Pico
-// https://datasheets.raspberrypi.org/pico/Pico-R3-A4-Pinout.pdf
-#elif defined(TARGET_RP2040) || defined(TARGET_RASPBERRY_PI_PICO)
+You can always download the latest version of `Boards.h` file in the `src/utility` folder and overwrite at you PC before compiling.
+On Windows, (if you are using Arduino IDE,) it is tipically at: `C:\Users\{username}\Documents\Arduino\libraries\ConfigurableFirmata\src\utility\Boards.h`.
+On macOS, this file can be found here by default: `~/Documents/Arduino/libraries/ConfigurableFirmata/src/utility/Boards.h`.
 
-#include <stdarg.h>
-
-static inline void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callback, int mode)
-{
-   attachInterrupt(interruptNumber, callback, (PinStatus) mode);
-}
-
-#define TOTAL_ANALOG_PINS       4
-#define TOTAL_PINS              30
-#define VERSION_BLINK_PIN       LED_BUILTIN
-#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) < 23) || (p) == LED_BUILTIN)
-#define IS_PIN_ANALOG(p)        ((p) >= 26 && (p) < 26 + TOTAL_ANALOG_PINS)
-#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
-#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) != LED_BUILTIN)
-// From the data sheet I2C-0 defaults to GP 4 (SDA) & 5 (SCL) (physical pins 6 & 7)
-// However, v2.3.1 of mbed_rp2040 defines WIRE_HOWMANY to 1 and uses the non-default GPs 6 & 7:
-//#define WIRE_HOWMANY  (1)
-//#define PIN_WIRE_SDA            (6u)
-//#define PIN_WIRE_SCL            (7u)
-#define IS_PIN_I2C(p)           ((p) == PIN_WIRE_SDA || (p) == PIN_WIRE_SCL)
-// SPI-0 defaults to GP 16 (RX / MISO), 17 (CSn), 18 (SCK) & 19 (TX / MOSI) (physical pins 21, 22, 24, 25)
-#define IS_PIN_SPI(p)           ((p) == PIN_SPI_SCK || (p) == PIN_SPI_MOSI || (p) == PIN_SPI_MISO || (p) == PIN_SPI_SS)
-// UART-0 defaults to GP 0 (TX) & 1 (RX)
-#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1 || (p) == 4 || (p) == 5 || (p) == 8 || (p) == 9 || (p) == 12 || (p) == 13 || (p) == 16 || (p) == 17)
-#define PIN_TO_DIGITAL(p)       (p)
-#define PIN_TO_ANALOG(p)        ((p) - 26)
-#define PIN_TO_PWM(p)           (p)
-#define PIN_TO_SERVO(p)         (p)
-```
-
-### I2C
+### I2C limitation, if using the old "Arduino Mbed OS RP2040 Boards" library
 
 The Raspberry Pi Pico [datasheet](https://datasheets.raspberrypi.org/pico/Pico-R3-A4-Pinout.pdf) states that the
 default GPIOs for I2C-0 are GP 4 (SDA-0) and GP 5 (SCL-0) (physical pins 6 & 7 respectively).

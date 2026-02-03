@@ -2,7 +2,7 @@
   Boards.h - Hardware Abstraction Layer for Firmata library
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (c) 2013 Norbert Truchsess. All rights reserved.
-  Copyright (c) 2013-2016 Jeff Hoefs. All rights reserved.
+  Copyright (c) 2013-2025 Jeff Hoefs. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -11,7 +11,12 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated June 2nd, 2018
+  Change: 
+	2025-04-16 
+		- Raspberry Pi Pico + Pico2 (+ all RP2040 + RP2350 chip boards)
+		- Added MAX_SERVOS 0
+		
+  Last updated 2025-04-16 by PizzaProgram
 */
 
 #ifndef Firmata_Boards_h
@@ -20,11 +25,18 @@
 #include <inttypes.h>
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"  // for digitalRead, digitalWrite, etc
+  #include "Arduino.h"  // for digitalRead, digitalWrite, etc
 #else
-#include "WProgram.h"
+  #include "WProgram.h"
 #endif
 
+// Normally Servo.h must be included before Firmata.h (which then includes
+// this file).  If Servo.h wasn't included, this allows the code to still
+// compile, but without support for any Servos.  Hopefully that's what the
+// user intended by not including Servo.h
+#ifndef MAX_SERVOS
+  #define MAX_SERVOS 0
+#endif
 /*
     Firmata Hardware Abstraction Layer
 
@@ -131,29 +143,28 @@ writePort(port, value, bitmask):  Write an 8 bit port.
  *============================================================================*/
 
 #ifndef digitalPinHasPWM
-#define digitalPinHasPWM(p)     IS_PIN_DIGITAL(p)
-#endif
-
-#ifndef NOT_AN_INTERRUPT
-#define NOT_AN_INTERRUPT        (-1)
+  #define digitalPinHasPWM(p)     IS_PIN_DIGITAL(p)
 #endif
 
 #undef IS_PIN_INTERRUPT
-#if (defined(digitalPinToInterrupt) || defined(ARDUINO_ARCH_RENESAS)) && defined(NOT_AN_INTERRUPT)
-#define IS_PIN_INTERRUPT(p)     (digitalPinToInterrupt(p) > NOT_AN_INTERRUPT)
+#if defined(digitalPinToInterrupt) && defined(NOT_AN_INTERRUPT)
+  #define IS_PIN_INTERRUPT(p)     (digitalPinToInterrupt(p) > NOT_AN_INTERRUPT)
 #else
-#define IS_PIN_INTERRUPT(p)     (0)
+  #define IS_PIN_INTERRUPT(p)     (0)
 #endif
 
+
 // Arduino Duemilanove, Diecimila, Uno, Nano, etc.
+// ***********************************************
 #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__)
 #if defined(NUM_ANALOG_INPUTS) && NUM_ANALOG_INPUTS == 6
-#define TOTAL_ANALOG_PINS       6
-#define TOTAL_PINS              20 // 14 digital + 6 analog
+  #define TOTAL_ANALOG_PINS       6
+  #define TOTAL_PINS              20 // 14 digital + 6 analog
 #else
-#define TOTAL_ANALOG_PINS       8
-#define TOTAL_PINS              22 // 14 digital + 8 analog
+  #define TOTAL_ANALOG_PINS       8
+  #define TOTAL_PINS              22 // 14 digital + 8 analog
 #endif
+
 #define VERSION_BLINK_PIN       13
 #define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) <= 19)
 #define FIRMATA_IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 14 + TOTAL_ANALOG_PINS)
@@ -167,6 +178,10 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 #define ARDUINO_PINOUT_OPTIMIZE 1
 
+
+
+// Arduino Nano Every
+// ******************
 #elif defined(AVR_NANO_EVERY) || defined(ARDUINO_NANO_EVERY) || defined(ARDUINO_AVR_NANO_EVERY)
 #define TOTAL_ANALOG_PINS 8
 #define TOTAL_PINS 24 // 14 digital + 8 analog + 2 i2c
@@ -182,7 +197,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p) (p) // deprecated since v2.4
 
 
+
 // Wiring (and board)
+// ******************
 #elif defined(WIRING)
 #define VERSION_BLINK_PIN       WLED
 #define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < TOTAL_PINS)
@@ -197,7 +214,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 
+
 // old Arduinos
+// ************
 #elif defined(__AVR_ATmega8__)
 #define TOTAL_ANALOG_PINS       6
 #define TOTAL_PINS              20 // 14 digital + 6 analog
@@ -214,7 +233,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define ARDUINO_PINOUT_OPTIMIZE 1
 
 
+
 // Arduino Mega
+// ************
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 #define TOTAL_ANALOG_PINS       16
 #define TOTAL_PINS              70 // 54 digital + 16 analog
@@ -238,7 +259,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
+
 // Arduino DUE
+// ***********
 #elif defined(__SAM3X8E__)
 #define TOTAL_ANALOG_PINS       12
 #define TOTAL_PINS              77 // Includes some special pins, which are normally outside the counting on these boards
@@ -265,7 +288,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define LARGE_MEM_DEVICE        96
 
 
+
 // Arduino/Genuino MKR1000
+// ***********************
 #elif defined(ARDUINO_SAMD_MKR1000)
 #define TOTAL_ANALOG_PINS       7
 #define TOTAL_PINS              22 // 8 digital + 3 spi + 2 i2c + 2 uart + 7 analog
@@ -282,7 +307,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
 
 
+
 // Arduino MKRZero
+// ***************
 #elif defined(ARDUINO_SAMD_MKRZERO)
 #define TOTAL_ANALOG_PINS       7
 #define TOTAL_PINS              34 // 8 digital + 3 spi + 2 i2c + 2 uart + 7 analog + 3 usb + 1 aref + 5 sd + 1 bottom pad + 1 led + 1 battery adc
@@ -299,7 +326,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
 
 
+
 // Arduino MKRFox1200
+// ******************
 #elif defined(ARDUINO_SAMD_MKRFox1200)
 #define TOTAL_ANALOG_PINS       7
 #define TOTAL_PINS              33 // 8 digital + 3 spi + 2 i2c + 2 uart + 7 analog + 3 usb + 1 aref + 5 sd + 1 bottom pad + 1 battery adc
@@ -316,7 +345,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
 
 
+
 // Arduino MKR WAN 1300
+// ********************
 #elif defined(ARDUINO_SAMD_MKRWAN1300)
 #define TOTAL_ANALOG_PINS       7
 #define TOTAL_PINS              33
@@ -332,7 +363,10 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
 
+
+
 // Arduino MKR GSM 1400
+// ********************
 #elif defined(ARDUINO_SAMD_MKRGSM1400)
 #define TOTAL_ANALOG_PINS       7
 #define TOTAL_PINS              33
@@ -349,9 +383,11 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
 
 
+
 // Arduino Zero
-// Note this will work with an Arduino Zero Pro, but not with an Arduino M0 Pro
-// Arduino M0 Pro does not properly map pins to the board labeled pin numbers
+// ************
+// Note: this will work with an Arduino Zero Pro, but not with an Arduino M0 Pro
+// Arduino M0 Pro does not properly map pins to the board labelled pin numbers
 #elif defined(_VARIANT_ARDUINO_ZERO_)
 #define TOTAL_ANALOG_PINS       6
 #define TOTAL_PINS              25 // 14 digital + 6 analog + 2 i2c + 3 spi
@@ -372,7 +408,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
 
 
+
 // Arduino Primo
+// *************
 #elif defined(ARDUINO_PRIMO)
 #define TOTAL_ANALOG_PINS       6
 #define TOTAL_PINS              22 //14 digital + 6 analog + 2 i2c
@@ -389,7 +427,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 
+
 // Arduino 101
+// ***********
 #elif defined(_VARIANT_ARDUINO_101_X_)
 #define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
 #define TOTAL_PINS              NUM_DIGITAL_PINS // 15 digital (including ATN pin) + 6 analog
@@ -409,7 +449,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
 
 
+
 // Teensy 1.0
+// **********
 #elif defined(__AVR_AT90USB162__)
 #define TOTAL_ANALOG_PINS       0
 #define TOTAL_PINS              21 // 21 digital + no analog
@@ -429,7 +471,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 
+
 // Teensy 2.0
+// **********
 #elif defined(__AVR_ATmega32U4__) && defined(CORE_TEENSY)
 #define TOTAL_ANALOG_PINS       12
 #define TOTAL_PINS              25 // 11 digital + 12 analog
@@ -449,7 +493,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 
+
 // Teensy 3.5 and 3.6
+// ******************
 // reference: https://github.com/PaulStoffregen/cores/blob/master/teensy3/pins_arduino.h
 #elif defined(__MK64FX512__) || defined(__MK66FX1M0__)
 #define TOTAL_ANALOG_PINS       27 // 3.5 has 27 and 3.6 has 25
@@ -480,7 +526,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 
+
 // Teensy 3.0, 3.1 and 3.2
+// ***********************
 #elif defined(__MK20DX128__) || defined(__MK20DX256__)
 #define TOTAL_ANALOG_PINS       14
 #define TOTAL_PINS              38 // 24 digital + 10 analog-digital + 4 analog
@@ -504,7 +552,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 
+
 // Teensy-LC
+// *********
 #elif defined(__MKL26Z64__)
 #define TOTAL_ANALOG_PINS       13
 #define TOTAL_PINS              27 // 27 digital + 13 analog-digital
@@ -528,7 +578,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 
+
 // Teensy++ 1.0 and 2.0
+// ********************
 #elif defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__)
 #define TOTAL_ANALOG_PINS       8
 #define TOTAL_PINS              46 // 38 digital + 8 analog
@@ -548,7 +600,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 
+
 // Leonardo
+// ********
 #elif defined(__AVR_ATmega32U4__)
 #define TOTAL_ANALOG_PINS       12
 #define TOTAL_PINS              30 // 14 digital + 12 analog + 4 SPI (D14-D17 on ISP header)
@@ -568,7 +622,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 
+
 // Intel Galileo Board (gen 1 and 2) and Intel Edison
+// **************************************************
 #elif defined(ARDUINO_LINUX)
 #define TOTAL_ANALOG_PINS       6
 #define TOTAL_PINS              20 // 14 digital + 6 analog
@@ -588,7 +644,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
+
 // RedBearLab BLE Nano with factory switch settings (S1 - S10)
+// ***********************************************************
 #elif defined(BLE_NANO)
 #define TOTAL_ANALOG_PINS       6
 #define TOTAL_PINS              15 // 9 digital + 3 analog
@@ -604,7 +662,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 
+
 // Pinoccio Scout
+// **************
 // Note: digital pins 9-16 are usable but not labeled on the board numerically.
 // SS=9, MOSI=10, MISO=11, SCK=12, RX1=13, TX1=14, SCL=15, SDA=16
 #elif defined(ARDUINO_PINOCCIO)
@@ -626,7 +686,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
+
 // Sanguino
+// ********
 #elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__)
 #define TOTAL_ANALOG_PINS       8
 #define TOTAL_PINS              32 // 24 digital + 8 analog
@@ -642,7 +704,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
+
 // Illuminato
+// **********
 #elif defined(__AVR_ATmega645__)
 #define TOTAL_ANALOG_PINS       6
 #define TOTAL_PINS              42 // 36 digital + 6 analog
@@ -658,7 +722,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
+
 // ESP8266
+// *******
 // note: boot mode GPIOs 0, 2 and 15 can be used as outputs, GPIOs 6-11 are in use for flash IO
 #elif defined(ESP8266)
 #define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
@@ -680,15 +746,19 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define DEFAULT_PWM_RESOLUTION  10
 
 
+
 // STM32 based boards
+// ******************
 #elif defined(ARDUINO_ARCH_STM32)
 #define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
 #define TOTAL_PINS              NUM_DIGITAL_PINS
 #define TOTAL_PORTS             MAX_NB_PORT
+#ifdef LED_BUILTIN
 #define VERSION_BLINK_PIN       LED_BUILTIN
+#endif
 // PIN_SERIALY_RX/TX defined in the variant.h
 #define IS_PIN_DIGITAL(p)       (digitalPinIsValid(p) && !pinIsSerial(p))
-#define FIRMATA_IS_PIN_ANALOG(p)        ((p >= A0) && (p < (A0 + TOTAL_ANALOG_PINS)) && !pinIsSerial(p))
+#define IS_PIN_ANALOG(p)        ((p >= A0) && (p < (A0 + TOTAL_ANALOG_PINS)) && !pinIsSerial(p))
 #define FIRMATA_IS_PIN_PWM(p)           (IS_PIN_DIGITAL(p) && digitalPinHasPWM(p))
 #define IS_PIN_SERVO(p)         IS_PIN_DIGITAL(p)
 #define IS_PIN_I2C(p)           (IS_PIN_DIGITAL(p) && digitalPinHasI2C(p))
@@ -701,12 +771,15 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 #define DEFAULT_PWM_RESOLUTION  PWM_RESOLUTION
 
+
+
 // ESP32
-// GPIO 6-11 are used for FLASH I/O, therefore they're unavailable here
+// *****
+//       GPIO 6-11 are used for FLASH I/O, therefore they're unavailable here
 #elif defined(ESP32)
 #define TOTAL_ANALOG_PINS       20 /* Must be the largest Axx number, not NUM_ANALOG_INPUTS*/
 #define TOTAL_PINS              NUM_DIGITAL_PINS
-#if defined (ARDUINO_M5STACK_Core2) || defined (ARDUINO_M5STACK_TOUGH)
+#ifdef ARDUINO_M5STACK_Core2
 // Use an external pin - pin 2 is connected to the speaker
 #define VERSION_BLINK_PIN       27
 #else
@@ -736,7 +809,10 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define DEFAULT_ADC_RESOLUTION  12
 #define LARGE_MEM_DEVICE        320
 
+
+
 // Adafruit Bluefruit nRF52 boards
+// *******************************
 #elif defined(ARDUINO_NRF52_ADAFRUIT)
 #define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
 #define TOTAL_PINS              32
@@ -754,9 +830,77 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           (p)
 #define PIN_TO_SERVO(p)         (p)
 
-// Raspberry Pi Pico
+
+
+// SPRESENSE
+#elif defined(ARDUINO_ARCH_SPRESENSE)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
+#define TOTAL_PINS              NUM_DIGITAL_PINS + 4 + NUM_ANALOG_INPUTS // + 4 built-in led
+#define VERSION_BLINK_PIN       LED_BUILTIN
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < (NUM_DIGITAL_PINS + 4))
+#define IS_PIN_ANALOG(p)        ((p) >= (TOTAL_PINS - NUM_ANALOG_INPUTS) && (p) < TOTAL_PINS)
+#define IS_PIN_PWM(p)           ((p) == 6 || (p) == 5 || (p) == 9 || (p) == 3)
+#define IS_PIN_SERVO(p)         ((p) < NUM_DIGITAL_PINS)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) == 10 || (p) == 11 || (p) == 12 || (p) == 13)
+#define PIN_TO_DIGITAL(p)       (((p) < NUM_DIGITAL_PINS) ? (p) : (_LED_PIN((p) - NUM_DIGITAL_PINS)))
+#define PIN_TO_ANALOG(p)        ((p) - (TOTAL_PINS - NUM_ANALOG_INPUTS))
+#define PIN_TO_PWM(p)           (p)
+#define PIN_TO_SERVO(p)         (p)
+#define analogRead(p)           analogRead(_ANALOG_PIN(p)) // wrap function for analogRead()
+
+// Robo HAT MM1
+#elif defined(ROBOTICSMASTERS_ROBOHATMM1_M4)
+#define TOTAL_ANALOG_PINS       7
+#define TOTAL_PINS              46 // 14 digital + 7 analog + 4 i2c + 6 spi + 4 serial
+#define TOTAL_PORTS             3  // set when TOTAL_PINS > num digitial I/O pins
+#define VERSION_BLINK_PIN       LED_BUILTIN
+//#define PIN_SERIAL1_RX          0 // already defined in zero core variant.h
+//#define PIN_SERIAL1_TX          1 // already defined in zero core variant.h
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 13)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 14 + TOTAL_ANALOG_PINS)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
+#define IS_PIN_I2C(p)           ((p) == 21 || (p) == 22) // SDA = 21, SCL = 21
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK) // SS = A2
+#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
+
+//Arduino Uno Wifi Rev2
+#elif defined(__AVR_ATmega4809__)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS //6
+#define TOTAL_PINS              41 // 14 digital + 6 analog + 6 reserved + 10 internal used + 2 I2C + 3 SPI
+#define TOTAL_PORTS             3
+#define VERSION_BLINK_PIN       LED_BUILTIN //25
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
+#define PIN_SERIAL2_RX          23
+#define PIN_SERIAL2_TX          24
+#define PIN_SERIAL0_RX          26
+#define PIN_SERIAL0_TX          27
+#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) < 20) || (p) == 25)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 19)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_SERIAL(p)        ((p) == 23 || (p) == 24 || (p) == 26 || (p) == 27)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
+
+
+
+// Raspberry Pi Pico + Pico2 (+ all RP2040 + RP2350 chips compatible boards)
+// *************************************************************************
 // https://datasheets.raspberrypi.org/pico/Pico-R3-A4-Pinout.pdf
-#elif defined(TARGET_RP2040) || defined(TARGET_RASPBERRY_PI_PICO)
+// 
+// 2025-04-16 : Added Pico2 + Pico2W + RP2350A + RP2350B chips
+#elif defined(TARGET_RP2040) || defined(TARGET_RASPBERRY_PI_PICO) || defined(PICO_RP2350)
 
 #include <stdarg.h>
 
@@ -767,29 +911,37 @@ static inline void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callb
 
 // Newer versions of the RP2040 SDK don't define the "standard" PIN_SPI_xxx macros, so reintroduce them here
 #ifndef PIN_SPI_SCK
-#define PIN_SPI_SCK PIN_SPI0_SCK
-#define PIN_SPI_MISO PIN_SPI0_MISO
-#define PIN_SPI_MOSI PIN_SPI0_MOSI
-#define PIN_SPI_SS PIN_SPI0_SS
+  #define PIN_SPI_SCK PIN_SPI0_SCK
+  #define PIN_SPI_MISO PIN_SPI0_MISO
+  #define PIN_SPI_MOSI PIN_SPI0_MOSI
+  #define PIN_SPI_SS PIN_SPI0_SS
 #endif
 
-#define TOTAL_ANALOG_PINS       4
-#define TOTAL_PINS              30
-#define VERSION_BLINK_PIN       LED_BUILTIN
-#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) < 23) || (p) == LED_BUILTIN)
-#define FIRMATA_IS_PIN_ANALOG(p)        ((p) >= 26 && (p) < 26 + TOTAL_ANALOG_PINS)
-#define FIRMATA_IS_PIN_PWM(p)           digitalPinHasPWM(p)
-#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) != LED_BUILTIN)
+#if defined(PICO_RP2350A) && !PICO_RP2350A
+  // for RP2350B chips (!PICO_RP2350A  is the official definition for it. There is no "B" def.)
+  #define TOTAL_ANALOG_PINS       9
+  #define TOTAL_PINS              49
+#else
+  #define TOTAL_ANALOG_PINS       5
+  #define TOTAL_PINS              31
+#endif
+
+#define FIRMATA_FIRST_ANALOG     (TOTAL_PINS - TOTAL_ANALOG_PINS)
+#define IS_PIN_DIGITAL(p)        (((p) >= 0 && (p) < (FIRMATA_FIRST_ANALOG)) || (p) == LED_BUILTIN)
+#define VERSION_BLINK_PIN        LED_BUILTIN
+#define FIRMATA_IS_PIN_ANALOG(p) ((p) >= FIRMATA_FIRST_ANALOG && (p) < TOTAL_PINS)
+#define FIRMATA_IS_PIN_PWM(p)    digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)          (IS_PIN_DIGITAL(p) && (p) != LED_BUILTIN)
 // From the data sheet I2C-0 defaults to GP 4 (SDA) & 5 (SCL) (physical pins 6 & 7)
 // However, v2.3.1 of mbed_rp2040 defines WIRE_HOWMANY to 1 and uses the non-default GPs 6 & 7:
 //#define WIRE_HOWMANY	(1)
-//#define PIN_WIRE_SDA            (6u)
-//#define PIN_WIRE_SCL            (7u)
+//#define PIN_WIRE_SDA           (6u)
+//#define PIN_WIRE_SCL           (7u)
 
 // Newer SDKs don't define these at all
 #ifndef PIN_WIRE_SDA
-#define PIN_WIRE_SDA PIN_WIRE0_SDA
-#define PIN_WIRE_SCL PIN_WIRE0_SCL
+  #define PIN_WIRE_SDA PIN_WIRE0_SDA
+  #define PIN_WIRE_SCL PIN_WIRE0_SCL
 #endif
 
 #define IS_PIN_I2C(p)           ((p) == PIN_WIRE_SDA || (p) == PIN_WIRE_SCL)
@@ -798,11 +950,16 @@ static inline void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callb
 // UART-0 defaults to GP 0 (TX) & 1 (RX)
 #define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1 || (p) == 4 || (p) == 5 || (p) == 8 || (p) == 9 || (p) == 12 || (p) == 13 || (p) == 16 || (p) == 17)
 #define PIN_TO_DIGITAL(p)       (p)
-#define PIN_TO_ANALOG(p)        ((p) - 26)
+#define PIN_TO_ANALOG(p)        ((p) - FIRMATA_FIRST_ANALOG)
 #define PIN_TO_PWM(p)           (p)
 #define PIN_TO_SERVO(p)         (p)
+#define DEFAULT_ADC_RESOLUTION  12
+#define LARGE_MEM_DEVICE
+
+
 
 // Arduino UNO R4 Minima and Wifi
+// ******************************
 // The pinout is the same as for the classical UNO R3
 #elif defined(ARDUINO_UNOR4_MINIMA) || defined(ARDUINO_UNOR4_WIFI)
 #if defined(NUM_ANALOG_INPUTS) && NUM_ANALOG_INPUTS == 6
@@ -824,7 +981,10 @@ static inline void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callb
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
+
+
 // anything else
+// *************
 #else
 #error "Please edit Boards.h with a hardware abstraction for this board"
 #endif
@@ -927,7 +1087,7 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
 #endif
 
 #ifndef ONLOW
-#define ONLOW                   LOW
-#define ONHIGH                  HIGH
+  #define ONLOW                   LOW
+  #define ONHIGH                  HIGH
 #endif
 #endif /* Firmata_Boards_h */
