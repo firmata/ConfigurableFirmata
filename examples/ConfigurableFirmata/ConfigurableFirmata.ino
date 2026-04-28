@@ -16,9 +16,10 @@ const int NETWORK_PORT = 27016;
 
 // #define ENABLE_ONE_WIRE
 
-// Note that the SERVO module currently is not supported on ESP32. So either disable this or patch the library
-#ifndef ESP32
-#define ENABLE_SERVO 
+// Note that the SERVO module currently is not supported on ESP32 or on the Zephyr-based Arduino cores
+// (e.g. Arduino UNO Q), which do not ship a Servo library. So either disable this or patch the library.
+#if !defined(ESP32) && !defined(ARDUINO_ARCH_ZEPHYR)
+#define ENABLE_SERVO
 #endif
 
 // #define ENABLE_ACCELSTEPPER
@@ -166,7 +167,12 @@ void initTransport()
 	}
 	Firmata.begin(serverStream);
 	Firmata.blinkVersion(); // Because the above doesn't do it.
-#else 
+#elif defined(ARDUINO_UNO_Q)
+	// On the Arduino UNO Q, the STM32's Serial1 is bridged to /dev/ttyHS1 on the
+	// Linux side. The default `Serial` is USB-CDC and is not reachable from Linux.
+	Serial1.begin(115200);
+	Firmata.begin(Serial1);
+#else
 	Firmata.begin(115200);
 #endif
 }

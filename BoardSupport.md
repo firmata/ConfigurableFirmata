@@ -113,6 +113,24 @@ static inline void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callb
 #define PIN_TO_SERVO(p)         (p)
 ```
 
+## Arduino UNO Q
+
+The Arduino UNO Q is a Zephyr RTOS-based board built on the STMicroelectronics STM32U585AI (Cortex-M33). It uses the [arduino/ArduinoCore-zephyr](https://github.com/arduino/ArduinoCore-zephyr) core (FQBN `arduino:zephyr:unoq`), which is installed through the Arduino IDE Boards Manager after adding the package index `https://downloads.arduino.cc/packages/package_zephyr_index.json`.
+
+Unlike the classic Uno, sketches on the UNO Q are compiled to a freestanding ELF that is loaded dynamically by a precompiled Zephyr firmware. Any pin that does not appear in the variant's `pwm-pin-gpios`, `adc-pin-gpios`, `i2cs`, or `spis` devicetree properties will not be driven by the corresponding peripheral, so Firmata only exposes the Arduino R3 header pins plus the onboard RGB LED.
+
+| Property | Value |
+| ----------- | ------------------------------------ |
+| Number of Pins  | 22 user-addressable (14 digital D0-D13 + 6 analog A0-A5 as D14-D19 + 2 dedicated I2C D20/D21), plus the onboard RGB LED at `LED_BUILTIN` (pin 51) |
+| Number of analog inputs | 6 (14-bit ADC) |
+| Flash Memory | 2 MB |
+| RAM | 786 KB |
+| PWM capable pins | D2, D3, D5-D13, D20, D21, `LED_BUILTIN` (D0/D1 are reserved for USART1 and not PWM-enabled in the default variant) |
+| Built-in LED | Yes, the `led3_green` RGB channel exposed as `LED_BUILTIN`; no LED is wired to D13 |
+| I2C, Bus 0 | D20 SDA (PB11), D21 SCL (PB10) on I2C2 |
+| SPI, Bus 0 | D10 SS (PB9), D11 MOSI (PB15), D12 MISO (PB14), D13 SCK (PB13) on SPI2 |
+| Serial1 | D0 RX (PB7), D1 TX (PB6) on USART1 |
+
 ### I2C
 
 The Raspberry Pi Pico [datasheet](https://datasheets.raspberrypi.org/pico/Pico-R3-A4-Pinout.pdf) states that the
