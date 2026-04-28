@@ -802,6 +802,37 @@ static inline void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callb
 #define PIN_TO_PWM(p)           (p)
 #define PIN_TO_SERVO(p)         (p)
 
+// Arduino UNO Q (Zephyr-based, STM32U585AI, Arduino R3 pinout)
+// FQBN: arduino:zephyr:unoq (arduino/ArduinoCore-zephyr)
+#elif defined(ARDUINO_UNO_Q)
+#define TOTAL_ANALOG_PINS       6
+// LED_BUILTIN (led3_green on PH11) is index 51 in the variant's digital-pin-gpios list,
+// so TOTAL_PINS is sized to cover it even though only a subset are user-addressable.
+#define TOTAL_PINS              52
+#define TOTAL_DEFAULT_PINS      22 // 14 digital (D0-D13) + 6 analog (A0-A5 as D14-D19) + 2 I2C (D20 SDA, D21 SCL)
+#define VERSION_BLINK_PIN       LED_BUILTIN
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
+#define IS_PIN_DIGITAL(p)       (((p) >= 2 && (p) < TOTAL_DEFAULT_PINS) || (p) == LED_BUILTIN)
+#define FIRMATA_IS_PIN_ANALOG(p) ((p) >= 14 && (p) < 14 + TOTAL_ANALOG_PINS)
+// PWM-capable pins per the variant overlay's pwm-pin-gpios; D0/D1 are disabled due to the USART1 conflict.
+#define FIRMATA_IS_PIN_PWM(p)   ((p) == 2 || (p) == 3 || ((p) >= 5 && (p) <= 13) || (p) == 20 || (p) == 21 || (p) == LED_BUILTIN)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) - 2 < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21) // SDA = D20 (PB11), SCL = D21 (PB10) on I2C2
+// The Zephyr Arduino core does not expose the standard PIN_SPI_* / SS / MOSI / MISO / SCK symbols,
+// so provide them here pointing at SPI2 (the bus exposed on the R3 header).
+#define PIN_SPI_SS              10
+#define PIN_SPI_MOSI            11
+#define PIN_SPI_MISO            12
+#define PIN_SPI_SCK             13
+#define IS_PIN_SPI(p)           ((p) == PIN_SPI_SS || (p) == PIN_SPI_MOSI || (p) == PIN_SPI_MISO || (p) == PIN_SPI_SCK)
+#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1) // USART1 on D0 (RX) / D1 (TX)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         ((p) - 2)
+#define DEFAULT_ADC_RESOLUTION  14 // STM32U5 ADC runs at 14 bits per the variant devicetree
+
 // Arduino UNO R4 Minima and Wifi
 // The pinout is the same as for the classical UNO R3
 #elif defined(ARDUINO_UNOR4_MINIMA) || defined(ARDUINO_UNOR4_WIFI)

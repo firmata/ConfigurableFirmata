@@ -24,6 +24,40 @@ extern "C" {
 #include <stdlib.h>
 }
 
+#if defined(ARDUINO_ARCH_ZEPHYR)
+// The Zephyr Arduino core builds sketches as LLEXTs against picolibc. libc's vsnprintf
+// is not reliably resolvable by the LLEXT loader, but Zephyr's cbvprintf is exported
+// (see ArduinoCore-zephyr loader/llext_exports.c). Wrap it to provide a drop-in
+// vsnprintf with matching semantics.
+#include <zephyr/sys/cbprintf.h>
+
+static int firmata_zephyr_vsnprintf_cb(int c, void *ctx_raw)
+{
+  struct { char *buf; size_t size; size_t pos; } *ctx =
+    (decltype(ctx))ctx_raw;
+  if (ctx->pos + 1 < ctx->size) {
+    ctx->buf[ctx->pos] = (char)c;
+  }
+  ctx->pos++;
+  return c;
+}
+
+static int firmata_zephyr_vsnprintf(char *str, size_t size, const char *fmt, va_list ap)
+{
+  struct { char *buf; size_t size; size_t pos; } ctx = { str, size, 0 };
+  // Older Zephyr headers shipped with the Arduino core declare cbprintf_cb as a
+  // K&R-style (untyped) function pointer, so cast explicitly to satisfy C++.
+  int written = cbvprintf((cbprintf_cb)firmata_zephyr_vsnprintf_cb, &ctx, fmt, ap);
+  if (size > 0) {
+    size_t term = ctx.pos < size ? ctx.pos : size - 1;
+    str[term] = '\0';
+  }
+  return written;
+}
+
+#define vsnprintf firmata_zephyr_vsnprintf
+#endif
+
 //******************************************************************************
 //* Support Functions
 //******************************************************************************
