@@ -753,6 +753,8 @@ void FirmataClass::delayTask(long delay)
  */
 byte FirmataClass::getPinMode(byte pin)
 {
+  if (pin >= TOTAL_PINS)
+    return PIN_MODE_IGNORE;
   return pinConfig[pin];
 }
 
@@ -765,6 +767,8 @@ byte FirmataClass::getPinMode(byte pin)
  */
 void FirmataClass::setPinMode(byte pin, byte config)
 {
+  if (pin >= TOTAL_PINS)
+    return;
   if (pinConfig[pin] == PIN_MODE_IGNORE)
     return;
   pinState[pin] = 0;
@@ -779,6 +783,8 @@ void FirmataClass::setPinMode(byte pin, byte config)
  */
 int FirmataClass::getPinState(byte pin)
 {
+  if (pin >= TOTAL_PINS)
+    return 0;
   return pinState[pin];
 }
 
@@ -845,6 +851,8 @@ void FirmataClass::sendPackedUInt14(uint16_t value)
  */
 void FirmataClass::setPinState(byte pin, byte state)
 {
+  if (pin >= TOTAL_PINS)
+    return;
   pinState[pin] = state;
 }
 
