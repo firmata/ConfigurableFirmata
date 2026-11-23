@@ -684,7 +684,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #elif defined(ARDUINO_ARCH_STM32)
 #define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
 #define TOTAL_PINS              NUM_DIGITAL_PINS
-#define TOTAL_PORTS             MAX_NB_PORT
 #define VERSION_BLINK_PIN       LED_BUILTIN
 // PIN_SERIALY_RX/TX defined in the variant.h
 #define IS_PIN_DIGITAL(p)       (digitalPinIsValid(p) && !pinIsSerial(p))

@@ -110,7 +110,7 @@ void DigitalInputFirmata::reportDigital(byte port, int value)
 
 boolean DigitalInputFirmata::handlePinMode(byte pin, int mode)
 {
-  if (IS_PIN_DIGITAL(pin)) {
+  if (IS_PIN_DIGITAL(pin) && (pin / 8) < TOTAL_PORTS) {
     if (mode == PIN_MODE_INPUT || mode == PIN_MODE_PULLUP) {
       portConfigInputs[pin / 8] |= (1 << (pin & 7));
       if (mode == PIN_MODE_INPUT) {
